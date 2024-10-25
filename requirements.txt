@@ -1,0 +1,4 @@
+setuptools
+pytest
+redis
+pytest-asyncio
