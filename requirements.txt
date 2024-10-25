@@ -1,4 +1,5 @@
 setuptools
 pytest
 redis
+aiokafka
 pytest-asyncio

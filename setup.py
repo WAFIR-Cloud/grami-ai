@@ -27,8 +27,8 @@ setup(
         "setuptools",
         "pytest",
         "redis",
-        "pytest-asyncio"
-
+        "pytest-asyncio",
+        "aiokafka"
     ],
     python_requires=">=3.12",
 )
