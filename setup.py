@@ -28,7 +28,8 @@ setup(
         "pytest",
         "redis",
         "pytest-asyncio",
-        "aiokafka"
+        "aiokafka",
+        " google-generativeai"
     ],
     python_requires=">=3.12",
 )

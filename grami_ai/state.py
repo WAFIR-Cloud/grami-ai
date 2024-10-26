@@ -1,7 +1,7 @@
 import asyncio
 import json
 import os
-from typing import Any, Optional
+from typing import Any, Optional, List
 import redis.asyncio as aioredis
 from redis.exceptions import RedisError  # Import RedisError from redis.exceptions
 
@@ -27,7 +27,7 @@ class RedisState:
         self._redis: Optional[aioredis.Redis] = None
 
     async def connect(self):
-        """Establishes a connection to the Redis server."""
+        """Establishes a connection to the Redis server if not already connected."""
         try:
             if self._redis is None:
                 self._redis = await aioredis.from_url(self.redis_url)
@@ -124,10 +124,24 @@ class RedisState:
         """
         try:
             await self.connect()
-            return await self._redis.exists(key)
+            return await self._redis.exists(key) > 0
         except RedisError as e:
             raise RedisError(f"Failed to check existence of key '{key}': {e}")
 
+    async def lpush(self, key: str, value: Any) -> None:
+        """Pushes a value to the beginning of a list in Redis."""
+        await self.connect()
+        await self._redis.lpush(key, value)
+
+    async def lrange(self, key: str, start: int, end: int) -> List[Any]:
+        """Retrieves a range of items from a list in Redis."""
+        await self.connect()
+        return await self._redis.lrange(key, start, end)
+
+    async def ltrim(self, key: str, start: int, end: int) -> None:
+        """Trims a list to only include items within a specified range."""
+        await self.connect()
+        await self._redis.ltrim(key, start, end)
 
 # Create a global instance of RedisState
 state = RedisState()
