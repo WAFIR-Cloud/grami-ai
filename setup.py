@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="grami-ai",
-    version="0.1.0",  # Start with an initial version
+    version="0.1.101",
     author="WAFIR CLOUD",
     author_email="adming@wafir.cloud",
     description="Open-source Python library for building AI-powered Instagram marketing tools with Gemini.",
