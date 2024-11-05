@@ -1,6 +1,5 @@
 import json
 import redis.asyncio as aioredis
-from redis.exceptions import RedisError
 from typing import Any, Dict, List, Optional
 
 from grami_ai.memory.memory import AbstractMemory
