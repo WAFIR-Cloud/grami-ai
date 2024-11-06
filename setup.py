@@ -5,9 +5,9 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="grami-ai",
-    version="0.1.104",
+    version="0.1.105",
     author="WAFIR CLOUD",
-    author_email="adming@wafir.cloud",
+    author_email="support@grami.social",
     description="Open-source Python library for building AI-powered Instagram marketing tools with Gemini.",
     # More specific description
     long_description=long_description,
@@ -29,7 +29,7 @@ setup(
         "redis",
         "pytest-asyncio",
         "aiokafka",
-        " google-generativeai"
+        "google-generativeai"
     ],
     python_requires=">=3.12",
 )

@@ -1,4 +1,3 @@
-import logging
 import uuid
 from abc import ABC
 from collections.abc import Iterable
@@ -9,15 +8,16 @@ from google.api_core import retry
 from google.generativeai.types import content_types
 
 from grami_ai.events import KafkaEvents
+from grami_ai.loggers.Logger import Logger
 from grami_ai.memory.memory import AbstractMemory
-from grami_ai.tools.api_tools import publish_task_sync
+from grami_ai.tools.api_tools import publish_task_sync, select_agent_type, select_task_topic_name
 
-# Set up logging configuration
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Usage
+logger = Logger()
 
 # Default model and configuration for Gemini
-DEFAULT_MODEL_NAME = "models/gemini-1.5-pro"  # Latest Gemini Pro model
+# DEFAULT_MODEL_NAME = "models/gemini-1.5-pro"  # Latest Gemini Pro model
+DEFAULT_MODEL_NAME = "models/gemini-1.5-flash"  # Latest Gemini Pro model
 DEFAULT_SYSTEM_INSTRUCTION = "You are Grami, an Expert Digital Media agent."
 
 default_generation_config = genai.types.GenerationConfig(
@@ -86,7 +86,8 @@ class BaseAgent(ABC):
             self.safety_settings = safety_settings
         self.generation_config = generation_config
         self.tools = tools or []  # Initialize with provided tools or an empty list
-        self.built_in_tools = [publish_task_sync]  # Add more built-in tools as needed
+        self.built_in_tools = [publish_task_sync, select_agent_type,
+                               select_task_topic_name]  # Add more built-in tools as needed
         self.tools.extend(self.built_in_tools)  # Extend the list with built-in tools
         self.chat_id = str(uuid.uuid4())  # Generate a unique ID for this chat session
         self.convo = None  # Initialize conversation object to None
@@ -134,11 +135,9 @@ class BaseAgent(ABC):
             message,
             request_options={'retry': retry.AsyncRetry()}  # Add retry logic for robustness
         )
-        print(response.usage_metadata)  # Print usage metadata (token consumption, etc.)
-        print(response)
-
+        logger.info(response.usage_metadata)  # Print usage metadata (token consumption, etc.)
         if self.memory and response.text is not None:
-            print(f'[*] to memory')
+            logger.info(f'[*] to memory')
             await self._store_interaction(message, response.text)  # Store the interaction in memory
 
         return response.text  # Return the model's response text
@@ -148,11 +147,6 @@ class BaseAgent(ABC):
         return content_types.to_tool_config(
             {"function_calling_config": {"mode": mode, "allowed_function_names": fns}}
         )
-
-    def call_function(self, function_call, functions):
-        function_name = function_call.name
-        function_args = function_call.args
-        return functions[function_name](**function_args)
 
     async def _load_memory(self) -> List[Dict[str, Any]]:
         """
