@@ -4,7 +4,7 @@ import os
 from grami_ai.agents.BaseAgent import BaseAgent
 from grami_ai.memory.redis_memory import RedisMemory
 
-os.environ['GEMINI_API_KEY'] = 'token'
+os.environ['GEMINI_API_KEY'] = 'AIzaSyA8eJ-7EwfDO600spBqpK8xSFrYxxp-u_E'
 
 memory = RedisMemory()
 prompt = """

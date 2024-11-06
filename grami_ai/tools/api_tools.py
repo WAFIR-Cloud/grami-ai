@@ -1,6 +1,4 @@
 import asyncio
-import uuid
-from typing import Dict, Any
 
 from grami_ai.events.KafkaEvents import KafkaEvents
 
@@ -17,12 +15,11 @@ from grami_ai.events.KafkaEvents import KafkaEvents
 #     await self.kafka.publish("task_updates", {"task_id": task_id, "status": status})
 
 event_publisher = KafkaEvents()
-
 import asyncio
 import uuid
 
 
-def publish_task(agent_type: str, task_description: str, target_topic: str) -> str:
+async def publish_task(agent_type: str, task_description: str, target_topic: str) -> str:
     """
     A tool function used to publish a task to the target Kafka topic.
     :param agent_type: The type of the Agent to send to.
@@ -33,14 +30,20 @@ def publish_task(agent_type: str, task_description: str, target_topic: str) -> s
     print(f'[*] publishing Task: {agent_type} {task_description} {target_topic}')
     task_id = str(uuid.uuid4())
 
-    # Create a new event loop to run the async function
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    # Run the asynchronous publish method
-    loop.run_until_complete(event_publisher.publish(f"tasks_{agent_type}", {
+    # Use the awaitable publish method directly
+    await event_publisher.publish(f"tasks_{agent_type}", {
         "task_id": task_id,
         "payload": {'task_description': task_description}
-    }))
+    })
 
     return "Task published, waiting for agent to finish the task"
+
+
+def publish_task_sync(agent_type: str, task_description: str, target_topic: str) -> str:
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        task = asyncio.create_task(publish_task(agent_type, task_description, target_topic))
+        print(task)
+        return "Task scheduled, waiting for agent to finish the task"
+    else:
+        return loop.run_until_complete(publish_task(agent_type, task_description, target_topic))
