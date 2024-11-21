@@ -45,8 +45,8 @@ prometheus-client>=0.17.0
 opentelemetry-instrumentation>=0.40b0
 
 [storage]
-sqlalchemy>=2.0.0
-motor>=3.1.1
-asyncpg>=0.28.0
-pymongo>=4.3.3
 alembic>=1.11.1
+motor>=3.1.1
+sqlalchemy>=2.0.0
+pymongo>=4.3.3
+asyncpg>=0.28.0

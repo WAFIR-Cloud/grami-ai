@@ -9,6 +9,8 @@ examples/anthropic_agent.py
 examples/basic_agent.py
 examples/basic_gemini_agent.py
 examples/custom_llm_provider.py
+examples/digital_marketing_agency.py
+examples/instagram_content_agent.py
 examples/ollama_agent.py
 examples/openai_agent.py
 grami_ai/__init__.py
@@ -32,6 +34,7 @@ grami_ai/llms/gemini_llm.py
 grami_ai/llms/ollama_llm.py
 grami_ai/llms/openai_llm.py
 grami_ai/llms/prompts.py
+grami_ai/llms/role.py
 grami_ai/loggers/Logger.py
 grami_ai/loggers/__init__.py
 grami_ai/memory/__init__.py
