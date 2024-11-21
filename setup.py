@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="grami-ai",
-    version="0.2.3",
+    version="0.2.301",
     author="Grami AI Team",
     author_email="support@grami.ai",
     description="Async AI Agent Framework",
