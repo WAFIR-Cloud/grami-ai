@@ -1,262 +1,177 @@
-# 🤖 Grami AI: Async AI Agent Framework
+# Grami AI: The Modern Async AI Agent Framework
 
-## 🌟 Overview
+[![Documentation Status](https://readthedocs.org/projects/grami-ai/badge/?version=latest)](https://grami-ai.readthedocs.io/en/latest/?badge=latest)
+[![PyPI version](https://badge.fury.io/py/grami-ai.svg)](https://badge.fury.io/py/grami-ai)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Grami AI is a cutting-edge, flexible Python framework for building intelligent, asynchronous AI agents with comprehensive Language Model (LLM) integration.
+## Vision
 
-## 🚀 Key Features
+Grami AI is designed to revolutionize how developers build AI agents by providing a modern, async-first framework that emphasizes:
 
-- 🔄 Fully Asynchronous Design
-- 🧩 Modular Architecture
-- 🔒 Thread-Safe Operations
-- 📦 Multiple Backend Support
-- 🛠 Extensible Tool Ecosystem
+- **Asynchronous by Default**: Built from the ground up for high-performance, non-blocking operations
+- **Modular Architecture**: Plug-and-play components for tools, memory, and LLM providers
+- **Type Safety**: Comprehensive type hints and protocol-based interfaces
+- **Production Ready**: Built for reliability and scalability in real-world applications
 
-## 📦 Installation
+## Quick Start
 
 ```bash
+# Install the base package
 pip install grami-ai
+
+# Install with optional features
+pip install grami-ai[gemini]    # For Google Gemini support
+pip install grami-ai[ollama]    # For Ollama support
+pip install grami-ai[dev]       # For development tools
 ```
 
-## 🛠 Tools Ecosystem
-
-### Base Tools
-
-Grami AI provides a robust set of async tools for various operations:
-
-#### Calculator Tool
-```python
-from grami_ai.tools import CalculatorTool
-
-async def calculate():
-    calculator = CalculatorTool()
-    result = await calculator.execute('2 + 3 * 4')  # Returns 14.0
-```
-
-#### JSON Parser Tool
-```python
-from grami_ai.tools import JSONParserTool
-
-async def parse_json():
-    json_tool = JSONParserTool()
-    parsed = await json_tool.execute('{"name": "John"}')
-    filtered = await json_tool.execute(
-        '{"name": "John", "age": 30}', 
-        operation='transform', 
-        filter_keys=['name']
-    )
-```
-
-#### String Manipulation Tool
-```python
-from grami_ai.tools import StringManipulationTool
-
-async def manipulate_string():
-    string_tool = StringManipulationTool()
-    
-    # Clean text
-    cleaned = await string_tool.execute("  Hello   World!  ")
-    
-    # Count words
-    word_count = await string_tool.execute("Text", operation='count_words')
-    
-    # Reverse text
-    reversed_text = await string_tool.execute("Hello", operation='reverse')
-    
-    # Capitalize text
-    capitalized = await string_tool.execute(
-        "hello world", 
-        operation='capitalize', 
-        mode='all'
-    )
-```
-
-#### Web Scraper Tool
-```python
-from grami_ai.tools import WebScraperTool
-
-async def scrape_web():
-    web_tool = WebScraperTool()
-    
-    # Fetch content
-    content = await web_tool.execute('https://example.com')
-    
-    # Parse text
-    parsed_text = await web_tool.execute(
-        'https://example.com', 
-        operation='parse'
-    )
-```
-
-### Memory Providers
-
-#### In-Memory Memory
-```python
-from grami_ai.memory import AsyncInMemoryMemory
-
-async def use_memory():
-    memory = AsyncInMemoryMemory(max_size=100)
-    await memory.add_item('conversation_1', {'role': 'user', 'content': 'Hello'})
-    items = await memory.get_items('conversation_1')
-```
-
-#### Redis Memory
-```python
-from grami_ai.memory import AsyncRedisMemory
-
-async def use_redis_memory():
-    memory = AsyncRedisMemory(redis_url='redis://localhost:6379')
-    await memory.add_item('conversation_1', {'role': 'user', 'content': 'Hello'})
-    items = await memory.get_items('conversation_1')
-```
-
-## 🚀 Comprehensive Examples
-
-Grami AI provides rich, real-world example scripts to demonstrate the framework's capabilities:
-
-### 1. 🔬 AI Research Assistant
-`examples/ai_research_assistant.py`
-
-A sophisticated research workflow that showcases:
-- Async tool composition
-- Web scraping
-- Text processing
-- Memory management
-- Complex research automation
+### Basic Usage
 
 ```python
+from grami_ai.agent import AsyncAgent
+from grami_ai.tools import CalculatorTool, WebScraperTool
+from grami_ai.memory import InMemoryAbstractMemory
+
 async def main():
-    research_assistant = AIResearchAssistant()
-    research_results = await research_assistant.research_topic(
-        "Artificial Intelligence in Scientific Research"
+    # Initialize agent with tools and memory
+    agent = AsyncAgent(
+        tools=[CalculatorTool(), WebScraperTool()],
+        memory=InMemoryAbstractMemory(),
+        model="gemini-pro"  # or "gpt-3.5-turbo", "ollama/llama2", etc.
     )
+    
+    # Execute tasks asynchronously
+    result = await agent.execute(
+        "Calculate the square root of the number of words on example.com"
+    )
+    print(result)
+
+# Run the async function
+import asyncio
+asyncio.run(main())
 ```
 
-### 2. 📊 Data Analysis Pipeline
-`examples/data_analysis_pipeline.py`
+## Architecture
 
-An advanced data analysis tool demonstrating:
-- Stock data retrieval
-- Web scraping
-- JSON parsing
-- Statistical calculations
-- Async data processing
+Grami AI is built on three core pillars:
+
+### 1. Tools System
+- Protocol-based tool definition
+- Async execution
+- Built-in validation and error handling
+- Extensive tool library (web scraping, calculations, file operations, etc.)
 
 ```python
-async def main():
-    pipeline = DataAnalysisPipeline()
-    analysis_results = await pipeline.analyze_stock_data('AAPL')
+from grami_ai.core.interfaces import AsyncTool
+from typing import Any, Dict
+
+class MyCustomTool(AsyncTool):
+    async def run(self, input_data: str, **kwargs) -> Dict[str, Any]:
+        # Your async tool implementation
+        return {"result": processed_data}
 ```
 
-### 3. 🌐 Multi-Tool Global Trend Analysis
-`examples/multi_tool_workflow.py`
-
-A complex workflow showcasing:
-- Parallel topic research
-- Async data gathering
-- Comprehensive trend analysis
-- Tool interaction and synthesis
+### 2. Memory Management
+- Flexible memory backends (In-Memory, Redis, Custom)
+- Automatic context management
+- Memory size limits and pruning strategies
 
 ```python
-async def main():
-    workflow = MultiToolWorkflow()
-    global_trends = await workflow.analyze_global_trends([
-        "Artificial Intelligence",
-        "Climate Change",
-        "Renewable Energy"
+from grami_ai.memory import RedisMemory
+
+memory = RedisMemory(
+    redis_url="redis://localhost:6379",
+    max_items=1000,
+    ttl=3600  # 1 hour
+)
+```
+
+### 3. LLM Integration
+- Support for multiple LLM providers
+- Streaming responses
+- Token management
+- Retry mechanisms
+
+```python
+from grami_ai.llm import GeminiProvider
+
+llm = GeminiProvider(
+    api_key="your-api-key",
+    model="gemini-pro",
+    max_tokens=1000
+)
+```
+
+## Advanced Features
+
+### Parallel Tool Execution
+```python
+async def parallel_execution():
+    tools = [WebScraperTool(), CalculatorTool(), StringTool()]
+    results = await asyncio.gather(*[
+        tool.execute(input_data) 
+        for tool in tools
     ])
 ```
 
-### 🖥️ Running Examples
+### Custom Memory Backend
+```python
+from grami_ai.core.interfaces import AsyncMemoryProvider
 
-To run the example scripts, ensure you have the necessary dependencies:
+class MyCustomMemory(AsyncMemoryProvider):
+    async def add_item(self, key: str, value: dict) -> None:
+        # Implementation
+        pass
 
-```bash
-# Install optional dependencies for web scraping
-pip install aiohttp beautifulsoup4
-
-# Run specific example scripts
-python examples/ai_research_assistant.py
-python examples/data_analysis_pipeline.py
-python examples/multi_tool_workflow.py
+    async def get_items(self, key: str) -> list:
+        # Implementation
+        pass
 ```
 
-**Note**: Some examples involve web scraping and may require:
-- Active internet connection
-- Handling potential network-related exceptions
-- Respecting website terms of service
+### Error Handling
+```python
+from grami_ai.exceptions import ToolExecutionError
 
-### 🎓 Learning Paths
-
-These examples demonstrate different aspects of the Grami AI framework:
-- **Beginners**: Start with individual tool usage
-- **Intermediate**: Explore tool composition
-- **Advanced**: Study complex async workflows
-
-### 🚀 Quick Start
-
-1. Clone the repository
-2. Install dependencies
-3. Explore and run example scripts
-4. Modify and adapt to your use cases
-
-```bash
-git clone https://github.com/grami-ai/framework.git
-cd grami-ai
-pip install -e .
-python examples/ai_research_assistant.py
+try:
+    result = await agent.execute("complex task")
+except ToolExecutionError as e:
+    print(f"Tool execution failed: {e}")
 ```
 
-## 💡 Example Highlights
+## Documentation
 
-- **Async-First Design**: Non-blocking, high-performance operations
-- **Modular Architecture**: Easily extensible and customizable
-- **Tool Composition**: Seamless integration of multiple tools
-- **Memory Management**: Efficient context tracking
-- **Error Handling**: Robust and informative error management
+Comprehensive documentation is available at [grami-ai.readthedocs.io](https://grami-ai.readthedocs.io/), including:
 
-## 📋 Requirements
+- Getting Started Guide
+- API Reference
+- Advanced Usage Examples
+- Contributing Guidelines
 
-- Python 3.8+
-- asyncio
-- aioredis (optional)
-- aiohttp (optional)
-- beautifulsoup4 (optional)
+## Contributing
 
-## 🔧 Development
+We welcome contributions! Here's how you can help:
 
-### Setup
+1. Fork the repository
+2. Create a feature branch
+3. Write your changes
+4. Write tests for your changes
+5. Submit a pull request
+
 ```bash
+# Development setup
 git clone https://github.com/grami-ai/framework.git
-cd grami-ai
+cd framework
 pip install -e .[dev]
-```
-
-### Running Tests
-```bash
 pytest
 ```
 
-## 🤝 Contributing
+## License
 
-We welcome contributions! Please see our contribution guidelines.
+MIT License - feel free to use this in your projects!
 
-## 📄 License
+## Links
 
-MIT License
-
-## 🌐 Project Links
-
-- Documentation: [GitHub README](https://github.com/grami-ai/framework/blob/main/README.md)
-- Source Code: [GitHub Repository](https://github.com/grami-ai/framework)
-- Issue Tracker: [GitHub Issues](https://github.com/grami-ai/framework/issues)
-
-## 💡 Future Roadmap
-
-- Expand LLM provider implementations
-- Enhance tool ecosystem
-- Develop more memory backends
-- Improve documentation
-- Add comprehensive testing
-- Performance optimization
-- More example use cases
+- [Documentation](https://grami-ai.readthedocs.io/)
+- [GitHub Repository](https://github.com/grami-ai/framework)
+- [Issue Tracker](https://github.com/grami-ai/framework/issues)
+- [PyPI Package](https://pypi.org/project/grami-ai/)
