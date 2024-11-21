@@ -1,81 +1,113 @@
-# grami-ai
+# Grami AI: Flexible AI Agent Framework
 
-Open-source Python library for building AI-powered Instagram marketing tools with Google Gemini.
+**grami-ai** is an advanced, modular Python library for building intelligent AI agents with unprecedented flexibility and extensibility.
 
-**grami-ai** provides a set of tools and abstractions to simplify the development of intelligent Instagram bots and marketing applications. It leverages the power of Google Gemini for advanced AI capabilities and integrates seamlessly with other essential services like Redis and Amazon S3.
+## 🌟 Key Features
 
-## Features
+### 🤖 Flexible LLM Integration
+- **LLM-Agnostic Architecture**: Easily integrate any Language Model provider
+- **Plug-and-Play Design**: Create custom LLM providers with minimal effort
+- **Built-in Gemini Support**: Seamless integration with Google's Gemini AI
 
-* **Shared Memory Wrapper:** A convenient interface for managing shared state in Redis, enabling efficient communication and data sharing between different components of your application.
-* **Event Publisher/Consumer (Coming Soon):**  Asynchronous communication between AI agents using Kafka. (This will be added when you implement `events.py`)
-* **Gemini API Wrapper (Coming Soon):**  Simplified interactions with the Gemini API for tasks like content generation, image analysis, and more. (This will be added when you implement `gemini.py`)
-* **S3 Wrapper (Coming Soon):**  Easy-to-use functions for media upload, storage, and retrieval with Amazon S3. (This will be added when you implement `s3.py`)
+### 🧠 Intelligent Agent Framework
+- **Abstract Base Agent**: Standardized interface for AI agent interactions
+- **Conversation Memory**: Persistent conversation tracking
+- **Dynamic Tool Integration**: Extend agent capabilities with custom tools
 
-## Installation
+### 🔧 Core Components
+- **BaseLLMProvider**: Abstract base class for Language Model providers
+- **BaseAgent**: Flexible agent implementation supporting multiple LLM backends
+- **Memory Abstraction**: Pluggable memory systems (Redis, In-Memory)
+
+## 📦 Installation
 
 ```bash
 pip install grami-ai
 ```
-## example
 
+## 🚀 Quick Start
+
+### Basic Gemini LLM Usage
 ```python
 import asyncio
-import os
 from grami_ai.agents.BaseAgent import BaseAgent
-from grami_ai.memory.redis_memory import RedisMemory
+from grami_ai.memory.memory import InMemoryAbstractMemory
 
-# Set your Gemini API key
-os.environ['GEMINI_API_KEY'] = 'YOUR_GEMINI_API_KEY'
-
-# Initialize memory and set up your agent's prompt
-memory = RedisMemory()
-prompt = """
-You are Grami, a Digital Agency Growth Manager. Your role is to:
-
-Understand the client's needs: Gather information about their business, goals, budget, and existing marketing efforts.
-Delegate tasks to your team: Based on the client's needs, create and assign tasks to the appropriate team members.
-Oversee project progress: Monitor task completion and ensure timely delivery of the final plan to the client.
-
-Your team includes:
-- Copywriter
-- Content creator & Planner
-- Social media manager
-- Photographer/Designer
-- Content scheduler
-- Hashtags & market researcher
-
-Available tools:
-- publish_task: Assign tasks to your team members.
-- check_task_status: Monitor the progress of ongoing tasks.
-
-Important Notes:
-- You are not responsible for creating the growth plan itself. Your role is to manage client communication and delegate tasks to your team.
-- Always acknowledge receipt of a client request and inform them that you'll update them when the plan is ready.
-- Use the check_task_status tool to stay informed about task progress.
-"""
-
-# Example tool function
-def sum(a: int, b: int) -> int:
-    print(f'sum numbers: a: {a} + b: {b}')
-    return a + b
-
-# Initialize the agent with API key, memory, and tools
-gemini_api = BaseAgent(api_key=os.getenv('GEMINI_API_KEY'), memory=memory, tools=[sum], system_instruction=prompt)
-
-# Run the agent
 async def main():
-    while True:
-        message = input("Enter your message (or 'exit' to quit): ")
-        if message.lower() == 'exit':
-            break
-        response = await gemini_api.send_message(message)
-        print(response)
+    # Create an agent with Gemini LLM
+    agent = BaseAgent(
+        llm_provider={
+            'api_key': 'YOUR_GOOGLE_AI_API_KEY',
+            'model_name': 'models/gemini-1.5-flash',
+            'system_instruction': 'You are a helpful AI assistant.'
+        },
+        memory=InMemoryAbstractMemory()
+    )
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    # Send a message and get a response
+    response = await agent.send_message("Tell me a joke about programming")
+    print(response)
+
+asyncio.run(main())
 ```
 
-## Licence
+### Custom LLM Provider
+```python
+from grami_ai.llms.base_llm import BaseLLMProvider
+from grami_ai.agents.BaseAgent import BaseAgent
+
+class CustomLLMProvider(BaseLLMProvider):
+    # Implement abstract methods for your specific LLM
+    ...
+
+# Use your custom LLM provider
+agent = BaseAgent(llm_provider=CustomLLMProvider(...))
+```
+
+## 🎯 Project Goals
+
+Grami AI aims to revolutionize AI agent development by providing:
+- Unparalleled flexibility in LLM integration
+- Robust, extensible agent architecture
+- Easy-to-use tools for building intelligent applications
+
+## 📚 Documentation
+
+### LLM Provider Interface
+- Implement `BaseLLMProvider` to create custom LLM integrations
+- Required methods:
+  - `__init__`: Initialize LLM configuration
+  - `start_chat`: Begin a new conversation
+  - `send_message`: Process messages
+  - `format_history`: Convert conversation history
+
+### BaseAgent Features
+- Supports multiple memory backends
+- Extensible with custom tools
+- Asynchronous message handling
+- Conversation context preservation
+
+## 🛠 Advanced Usage
+
+Check out the [Examples](Examples/) directory for more detailed use cases:
+- Basic Gemini LLM usage
+- Custom LLM provider implementation
+- Advanced agent configuration with tools
+
+## 🤝 Contributing
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📋 Roadmap
+- [ ] Add more LLM provider integrations
+- [ ] Enhance tool integration capabilities
+- [ ] Develop comprehensive documentation
+- [ ] Create more advanced example use cases
+
+## 📄 License
 MIT License
 
 Copyright (c) 2024 WAFIR Cloud LLC

@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: grami-ai
+Version: 0.1.0
+Summary: Open-source Python library for building AI-powered Instagram marketing tools with Gemini.
+Home-page: https://github.com/WAFIR-Cloud/grami-ai
+Author: WAFIR CLOUD
+Author-email: adming@wafir.cloud
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: setuptools
+Requires-Dist: pytest
+Requires-Dist: redis
+Requires-Dist: pytest-asyncio
