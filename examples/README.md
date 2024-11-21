@@ -6,7 +6,11 @@ These examples demonstrate the flexibility of the Grami AI Agent system, showcas
 ## Prerequisites
 - Python 3.8+
 - Install required dependencies: `pip install grami-ai`
-- For Gemini LLM examples, set the `GOOGLE_AI_API_KEY` environment variable
+- For Gemini LLM examples: Set the `GOOGLE_AI_API_KEY` environment variable
+- For OLLAMA LLM examples: 
+  - Install [OLLAMA](https://ollama.ai/)
+  - Pull desired LLAMA models (e.g., `ollama pull llama2`)
+  - Ensure OLLAMA server is running locally
 
 ## Example Scripts
 
@@ -27,19 +31,29 @@ These examples demonstrate the flexibility of the Grami AI Agent system, showcas
   - Maintaining conversation context
 - Includes a simple calculator tool example
 
+### 4. `ollama_agent.py`
+- Demonstrates usage of BaseAgent with OLLAMA LLAMA models
+- Shows how to configure OLLAMA LLM provider
+- Illustrates interaction with local LLAMA models
+- Highlights the LLM-agnostic design of the framework
+
 ## Running the Examples
 ```bash
-# Set your Google AI API key (for Gemini examples)
+# For Gemini examples
 export GOOGLE_AI_API_KEY='your_api_key_here'
+
+# Ensure OLLAMA is running and desired models are pulled
+ollama pull llama2
 
 # Run each example
 python basic_gemini_agent.py
 python custom_llm_provider.py
 python advanced_agent_usage.py
+python ollama_agent.py
 ```
 
 ## Notes
-- Replace `'your_api_key_here'` with your actual Google AI API key
+- Replace API keys and model names as appropriate
 - Ensure you have the latest version of the `grami-ai` package installed
 - These examples are meant to demonstrate usage and may require adaptation to your specific use case
 
