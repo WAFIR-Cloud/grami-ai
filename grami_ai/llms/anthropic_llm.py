@@ -5,7 +5,6 @@ Anthropic (Claude) LLM provider implementation for GRAMI AI.
 from typing import Dict, Any, Optional, List
 import os
 import json
-import logging
 import asyncio
 from anthropic import AsyncAnthropic
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -14,8 +13,7 @@ from grami_ai.llms.base_llm import BaseLLMProvider
 from grami_ai.core.config import settings
 from grami_ai.core.constants import Role
 from grami_ai.llms.prompts import Message, MessageRole, FORMATTERS
-
-logger = logging.getLogger(__name__)
+from grami_ai.core.logging import logger
 
 class AnthropicLLMProvider(BaseLLMProvider):
     """Anthropic (Claude) LLM provider implementation."""

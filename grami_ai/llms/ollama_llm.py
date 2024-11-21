@@ -14,13 +14,13 @@ class OllamaLLMProvider(BaseLLMProvider):
     """
 
     def __init__(
-        self, 
-        api_key: Optional[str] = None,  # Optional for local OLLAMA 
-        model_name: str = "llama2",  # Default LLAMA model
-        system_instruction: Optional[str] = "You are a helpful AI assistant.",
-        generation_config: Optional[Dict[str, Any]] = None,
-        safety_settings: Optional[List[Dict[str, str]]] = None,
-        base_url: str = "http://localhost:11434"  # Default OLLAMA API endpoint
+            self,
+            api_key: Optional[str] = None,  # Optional for local OLLAMA
+            model_name: str = "llama3.2",  # Default LLAMA model
+            system_instruction: Optional[str] = "You are a helpful AI assistant.",
+            generation_config: Optional[Dict[str, Any]] = None,
+            safety_settings: Optional[List[Dict[str, str]]] = None,
+            base_url: str = "http://localhost:11434"  # Default OLLAMA API endpoint
     ):
         """
         Initialize the OLLAMA LLM provider.
@@ -36,13 +36,13 @@ class OllamaLLMProvider(BaseLLMProvider):
         self.model_name = model_name
         self.system_instruction = system_instruction
         self.base_url = base_url
-        
+
         # Default generation config if not provided
         self.generation_config = generation_config or {
             "temperature": 0.7,
             "max_tokens": 4096
         }
-        
+
         # Validate model exists
         self._validate_model()
 
@@ -57,13 +57,13 @@ class OllamaLLMProvider(BaseLLMProvider):
             response = requests.get(f"{self.base_url}/api/tags")
             response.raise_for_status()
             models = response.json().get('models', [])
-            
+
             # Check if model exists
             model_exists = any(
-                model['name'].startswith(self.model_name) 
+                model['name'].startswith(self.model_name)
                 for model in models
             )
-            
+
             if not model_exists:
                 raise ValueError(f"Model {self.model_name} not found in OLLAMA. Available models: {models}")
         except requests.RequestException as e:
@@ -101,21 +101,21 @@ class OllamaLLMProvider(BaseLLMProvider):
         """
         # Add the new user message to the conversation
         conversation['messages'].append({"role": "user", "content": message})
-        
+
         # Prepare the request payload
         payload = {
             "model": self.model_name,
             "messages": conversation['messages'],
             **self.generation_config
         }
-        
+
         # Make the API call
         try:
             response = await self._async_chat_request(payload)
-            
+
             # Add the model's response to the conversation
             conversation['messages'].append({"role": "assistant", "content": response})
-            
+
             return response
         except Exception as e:
             raise RuntimeError(f"Error communicating with OLLAMA: {e}")
@@ -131,13 +131,19 @@ class OllamaLLMProvider(BaseLLMProvider):
             str: Model's response
         """
         def sync_request():
-            response = requests.post(
-                f"{self.base_url}/api/chat", 
-                json=payload,
-                headers={'Content-Type': 'application/json'}
-            )
-            response.raise_for_status()
-            return response.json()['message']['content']
+            try:
+                response = requests.post(
+                    f"{self.base_url}/api/chat",
+                    json=payload,
+                    headers={'Content-Type': 'application/json'}
+                )
+                response.raise_for_status()
+                
+                # Parse the response directly
+                response_data = response.json()
+                return response_data.get('message', {}).get('content', '')
+            except requests.RequestException as e:
+                raise ConnectionError(f"Unable to connect to OLLAMA API: {e}")
         
         # Use asyncio to run the sync request in a thread pool
         return await asyncio.to_thread(sync_request)
@@ -153,6 +159,6 @@ class OllamaLLMProvider(BaseLLMProvider):
             List[Dict[str, Any]]: Formatted conversation history
         """
         return [
-            {"role": msg["role"], "content": msg["content"]} 
+            {"role": msg["role"], "content": msg["content"]}
             for msg in history
         ]

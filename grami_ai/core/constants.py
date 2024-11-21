@@ -143,3 +143,11 @@ QUEUE_MAX_LENGTH: Final[int] = 10000
 HTTP_TIMEOUT: Final[float] = 30.0  # seconds
 MAX_REDIRECTS: Final[int] = 5
 USER_AGENT: Final[str] = "grami-ai/1.0"
+
+# Role constants
+class Role(str, Enum):
+    """Conversation role types."""
+    SYSTEM = "system"
+    USER = "user"
+    ASSISTANT = "assistant"
+    TOOL = "tool"

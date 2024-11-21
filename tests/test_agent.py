@@ -4,7 +4,7 @@ import pytest
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, patch
 
-from grami_ai.agent import BaseAgent, Tool
+from grami_ai.agents.base_agent import BaseAgent, Tool
 from grami_ai.core.exceptions import ValidationError, ExecutionError
 from grami_ai.memory import InMemoryAbstractMemory
 

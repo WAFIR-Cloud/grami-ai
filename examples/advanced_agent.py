@@ -10,7 +10,7 @@ import asyncio
 from typing import Dict, Any, List
 from dataclasses import dataclass
 
-from grami_ai.agent import BaseAgent
+from grami_ai.agents.base_agent import BaseAgent
 from grami_ai.memory import RedisMemory
 from grami_ai.tools import BaseTool
 from grami_ai.events import EventBus, Event

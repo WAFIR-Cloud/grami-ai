@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Optional
 from ..core.interfaces import AsyncTool, AsyncMemoryProvider, AsyncKafkaIntegration
 from ..memory import InMemoryAbstractMemory
-from ..events import KafkaEvents
+from ..events.KafkaEvents import KafkaEvents
 
 class BaseAgent:
     """Base agent class for GRAMI's AI crew members.
@@ -36,7 +36,12 @@ class BaseAgent:
         """
         self.tools = tools or []
         self.memory = memory or InMemoryAbstractMemory()
-        self.kafka = kafka or KafkaEvents()
+        
+        # Instantiate KafkaEvents if not provided
+        if kafka is None:
+            kafka = KafkaEvents()
+        
+        self.kafka = kafka
         self.model = model
         self.config = kwargs
         

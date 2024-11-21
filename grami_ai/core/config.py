@@ -1,20 +1,16 @@
 """
-Grami AI Core Configuration Module
+Configuration management for GRAMI AI.
 
-This module provides centralized configuration management for the Grami AI framework.
-It handles:
-- Environment variables
-- Framework settings
-- Security configurations
-- Integration settings
-- Resource limits
+This module handles configuration settings for the GRAMI AI framework,
+including API keys, model settings, and environment variables.
 """
 
-from typing import Any, Dict, List, Optional, Union
-from pathlib import Path
 import os
-from pydantic import BaseSettings, Field, validator
-from pydantic.networks import PostgresDsn, RedisDsn, AmqpDsn
+from typing import Optional, Dict, Any
+from pathlib import Path
+
+from pydantic import Field, validator
+from pydantic_settings import BaseSettings
 
 class SecuritySettings(BaseSettings):
     """Security-related settings."""
@@ -41,14 +37,7 @@ class DatabaseSettings(BaseSettings):
     def assemble_db_url(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if v:
             return v
-        return PostgresDsn.build(
-            scheme="postgresql+asyncpg",
-            user=values["POSTGRES_USER"],
-            password=values["POSTGRES_PASSWORD"],
-            host=values["POSTGRES_HOST"],
-            port=values["POSTGRES_PORT"],
-            path=f"/{values['POSTGRES_DB']}",
-        )
+        return f"postgresql+asyncpg://{values['POSTGRES_USER']}:{values['POSTGRES_PASSWORD']}@{values['POSTGRES_HOST']}:{values['POSTGRES_PORT']}/{values['POSTGRES_DB']}"
     
     class Config:
         env_prefix = "GRAMI_DB_"
@@ -65,12 +54,7 @@ class CacheSettings(BaseSettings):
     def assemble_redis_url(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         if v:
             return v
-        return RedisDsn.build(
-            scheme="redis",
-            host=values["REDIS_HOST"],
-            port=str(values["REDIS_PORT"]),
-            path=f"/{values['REDIS_DB']}",
-        )
+        return f"redis://{values['REDIS_HOST']}:{values['REDIS_PORT']}/{values['REDIS_DB']}"
     
     class Config:
         env_prefix = "GRAMI_CACHE_"
@@ -86,13 +70,7 @@ class MessageQueueSettings(BaseSettings):
     def assemble_rabbitmq_url(cls, v: Optional[str]) -> str:
         if v:
             return v
-        return AmqpDsn.build(
-            scheme="amqp",
-            host="localhost",
-            port="5672",
-            user="guest",
-            password="guest",
-        )
+        return f"amqp://guest:guest@localhost:5672"
     
     class Config:
         env_prefix = "GRAMI_MQ_"
@@ -133,7 +111,14 @@ class LoggingSettings(BaseSettings):
         env_prefix = "GRAMI_LOG_"
 
 class Settings(BaseSettings):
-    """Main configuration class combining all settings."""
+    """
+    Configuration settings for GRAMI AI.
+    
+    Handles:
+    - API keys for different providers
+    - Model configurations
+    - Environment settings
+    """
     
     # Basic settings
     ENV: str = "development"
@@ -151,11 +136,56 @@ class Settings(BaseSettings):
     limits: ResourceLimits = ResourceLimits()
     logging: LoggingSettings = LoggingSettings()
     
+    # API Keys
+    openai_api_key: Optional[str] = Field(None, env='OPENAI_API_KEY')
+    google_api_key: Optional[str] = Field(None, env='GOOGLE_API_KEY')
+    anthropic_api_key: Optional[str] = Field(None, env='ANTHROPIC_API_KEY')
+    
+    # Ollama Settings
+    ollama_base_url: str = Field("http://localhost:11434", env='OLLAMA_BASE_URL')
+    
+    # Logging
+    log_level: str = Field("INFO", env='LOG_LEVEL')
+    
+    # Model Defaults
+    default_model: str = Field("gpt-3.5-turbo", env='DEFAULT_MODEL')
+    
+    # Generation Config
+    generation_config: Dict[str, Any] = Field(
+        default={
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "max_tokens": 2000
+        }
+    )
+    
+    @validator('log_level')
+    def validate_log_level(cls, v: str) -> str:
+        """Validate log level."""
+        valid_levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+        upper_v = v.upper()
+        if upper_v not in valid_levels:
+            raise ValueError(f"Log level must be one of {valid_levels}")
+        return upper_v
+    
+    def configure(self, **kwargs: Any) -> None:
+        """
+        Update configuration settings.
+        
+        Args:
+            **kwargs: Configuration key-value pairs
+        """
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise ValueError(f"Unknown configuration key: {key}")
+
     class Config:
         env_prefix = "GRAMI_"
         case_sensitive = True
 
-# Create global settings instance
+# Global settings instance
 settings = Settings()
 
 # Environment-specific settings

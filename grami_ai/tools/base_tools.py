@@ -18,82 +18,55 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
-class BaseTool(ABC):
+class AbstractTool(ABC):
     """
-    Abstract base class for all Grami AI tools.
-
-    Provides a standardized interface for async tool implementation,
-    ensuring consistent behavior across different tool types.
-
+    Abstract base class for all async tools.
+    
+    Provides the foundational structure and interface that all tools must implement.
+    Ensures consistent behavior across different tool implementations.
+    
     Attributes:
-        name (str): Unique identifier for the tool.
-        description (str): Human-readable description of the tool's purpose.
-        logger (logging.Logger): Logging instance for the tool.
+        name (str): Unique identifier for the tool
+        description (str): Human-readable description of the tool's purpose
     """
-
-    def __init__(
-        self, 
-        name: str, 
-        description: str, 
-        logger: Optional[logging.Logger] = None
-    ):
+    
+    def __init__(self, name: str, description: str) -> None:
         """
-        Initialize a base tool with name, description, and optional logger.
-
+        Initialize the base tool.
+        
         Args:
-            name (str): Unique name for the tool.
-            description (str): Detailed description of the tool's functionality.
-            logger (Optional[logging.Logger], optional): Custom logger. 
-                Defaults to None, which creates a default logger.
+            name: Unique identifier for the tool
+            description: Human-readable description
         """
         self.name = name
         self.description = description
-        self.logger = logger or logging.getLogger(f"grami_ai.tools.{name}")
-
+        self.logger = logging.getLogger(__name__)
+    
     @abstractmethod
     async def run(self, *args: Any, **kwargs: Any) -> Any:
         """
-        Abstract method to execute the tool's primary functionality.
-
-        Must be implemented by all subclasses to define the tool's core logic.
-
+        Execute the tool's main functionality.
+        
+        This method must be implemented by all concrete tool classes.
+        
         Args:
-            *args: Variable positional arguments.
-            **kwargs: Variable keyword arguments.
-
+            *args: Positional arguments
+            **kwargs: Keyword arguments
+            
         Returns:
-            Any: Result of the tool's execution.
-
-        Raises:
-            NotImplementedError: If not implemented by subclass.
+            Tool execution result
         """
-        raise NotImplementedError(f"Tool {self.name} must implement run() method")
-
-    async def validate_input(self, *args: Any, **kwargs: Any) -> bool:
-        """
-        Validate input parameters before tool execution.
-
-        Provides a hook for input validation and preprocessing.
-
-        Args:
-            *args: Variable positional arguments to validate.
-            **kwargs: Variable keyword arguments to validate.
-
-        Returns:
-            bool: True if input is valid, False otherwise.
-        """
-        return True
-
+        pass
+    
     def __str__(self) -> str:
-        """
-        String representation of the tool.
+        """String representation of the tool."""
+        return f"{self.name}: {self.description}"
+    
+    def __repr__(self) -> str:
+        """Detailed string representation of the tool."""
+        return f"Tool(name='{self.name}', description='{self.description}')"
 
-        Returns:
-            str: Tool's name and description.
-        """
-        return f"Tool: {self.name} - {self.description}"
-
-class CalculatorTool(BaseTool):
+class CalculatorTool(AbstractTool):
     """
     A specialized async calculator tool for mathematical operations.
 
@@ -101,7 +74,7 @@ class CalculatorTool(BaseTool):
     and logging.
 
     Attributes:
-        Inherits all attributes from BaseTool.
+        Inherits all attributes from AbstractTool.
     """
 
     def __init__(self):
@@ -135,9 +108,6 @@ class CalculatorTool(BaseTool):
             ValueError: For invalid operations or division by zero.
         """
         await asyncio.sleep(0.1)  # Simulate async operation
-
-        if not await self.validate_input(operation, a, b):
-            raise ValueError("Invalid input parameters")
 
         try:
             if operation == 'add':
@@ -185,7 +155,7 @@ class CalculatorTool(BaseTool):
         
         return True
 
-class JSONParserTool(BaseTool):
+class JSONParserTool(AbstractTool):
     """
     Async JSON parsing and manipulation tool
     
@@ -261,7 +231,7 @@ class JSONParserTool(BaseTool):
         
         return data
 
-class StringManipulationTool(BaseTool):
+class StringManipulationTool(AbstractTool):
     """
     Async string manipulation tool
     
@@ -349,7 +319,7 @@ class StringManipulationTool(BaseTool):
         else:
             raise ValueError(f"Invalid capitalization mode: {mode}")
 
-class WebScraperTool(BaseTool):
+class WebScraperTool(AbstractTool):
     """
     Async web scraping tool
     

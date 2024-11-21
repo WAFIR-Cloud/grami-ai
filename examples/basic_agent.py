@@ -5,7 +5,7 @@ Basic example of creating and using a GRAMI AI agent.
 import asyncio
 from typing import Dict, Any, List
 
-from grami_ai.agent import BaseAgent
+from grami_ai.agents.base_agent import BaseAgent
 from grami_ai.memory import InMemoryAbstractMemory
 from grami_ai.tools import CalculatorTool, WebSearchTool
 from grami_ai.core.config import settings

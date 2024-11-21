@@ -5,6 +5,7 @@ This example demonstrates how to use GRAMI with Gemini for enterprise-grade
 AI deployment with strong privacy controls and performance.
 """
 
+import os
 import asyncio
 import logging
 from typing import Dict, Any, List
@@ -17,6 +18,9 @@ from grami_ai.core.config import settings
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Set Google API Key - REPLACE WITH YOUR ACTUAL API KEY
+os.environ['GOOGLE_API_KEY'] = 'YOUR_ACTUAL_GEMINI_API_KEY'
 
 class EnterpriseAgent:
     """Enterprise agent with privacy controls and monitoring."""
@@ -131,7 +135,6 @@ async def main():
 if __name__ == "__main__":
     # Configure settings
     settings.configure(
-        google_api_key="your-api-key-here",
         log_level="INFO"
     )
     
