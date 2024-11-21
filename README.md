@@ -318,7 +318,55 @@ Grami AI is designed to revolutionize how developers build AI agents by providin
 - **Type Safety**: Comprehensive type hints and protocol-based interfaces
 - **Production Ready**: Built for reliability and scalability in real-world applications
 
-## 🌟 Advanced Use Cases
+## 🚀 Advanced Example: Digital Marketing Agency AI
+
+### 🌐 Multi-Agent Digital Marketing System
+
+GRAMI introduces a cutting-edge Digital Marketing Agency AI that demonstrates:
+- Real-time client interaction
+- Distributed task management
+- AI-powered strategy generation
+- Kafka-based inter-agent communication
+- Redis-backed global state management
+
+#### Key Components
+- **Growth Manager**: Client interaction and task delegation
+- **Market Researcher**: Trend and market analysis
+- **Content Creator**: Strategic content generation
+- **Social Media Manager**: Platform-specific content planning
+
+#### Example Usage
+
+```python
+from examples.digital_marketing_agency import DigitalMarketingAgency
+
+async def main():
+    agency = DigitalMarketingAgency()
+    await agency.start_agency_interaction()
+```
+
+#### Features
+- Asynchronous agent communication
+- Intelligent task distribution
+- Gemini-powered natural language processing
+- Scalable microservice architecture
+
+### 🔧 Prerequisites
+- Redis server running
+- Kafka broker configured
+- Google Gemini API key
+
+### 📦 Dependencies
+```bash
+pip install grami-ai[kafka,redis]
+```
+
+### 🛡️ Security & Privacy
+- Environment-based configuration
+- Secure API key management
+- Minimal data persistence
+
+## 🚀 Advanced Use Cases
 
 ### 🎨 Instagram Content Creation Agent
 
@@ -344,13 +392,6 @@ content = await agent.create_instagram_content(content_brief)
 - Platform-specific content variations
 - Comprehensive hashtag ecosystem
 - Interactive content strategies
-
-### 🔍 Content Generation Capabilities
-- Dynamic trend analysis
-- Multi-format content creation
-- Real-time web search integration
-- Adaptive content variations
-- Engagement-focused strategies
 
 ## 🛠 Supported Platforms
 - Instagram
