@@ -1,44 +1,94 @@
+"""
+Example of using GRAMI AI with Ollama for private AI deployment.
+
+This example demonstrates how to use GRAMI with Ollama for fully private AI deployment,
+ensuring all data processing happens locally within your infrastructure.
+"""
+
 import asyncio
-import os
+import logging
+from typing import Dict, Any
 
-from grami_ai.agents.BaseAgent import BaseAgent
-from grami_ai.llms.ollama_llm import OllamaLLMProvider
-from grami_ai.memory.memory import InMemoryAbstractMemory
+from grami_ai.agent import AsyncAgent
+from grami_ai.memory import InMemoryAbstractMemory
+from grami_ai.tools import CalculatorTool, WebScraperTool
+from grami_ai.core.config import settings
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+async def process_sensitive_data(agent: AsyncAgent, data: Dict[str, Any]) -> str:
+    """Process sensitive data privately using Ollama.
+    
+    Args:
+        agent: Configured GRAMI agent
+        data: Sensitive data to process
+    
+    Returns:
+        Processed result
+    """
+    try:
+        result = await agent.execute_task({
+            "objective": "Process sensitive data",
+            "input": f"Analyze this private data: {data}",
+            "constraints": [
+                "Keep all processing local",
+                "Do not share or store data externally",
+                "Follow data privacy guidelines"
+            ]
+        })
+        return result
+    except Exception as e:
+        logger.error(f"Error processing data: {str(e)}")
+        raise
 
 async def main():
-    # Create an in-memory abstract memory for conversation history
-    memory = InMemoryAbstractMemory()
-
-    # Create an OLLAMA LLM provider
-    ollama_provider = OllamaLLMProvider(
-        model_name="llama2",  # Make sure this model is pulled in OLLAMA
-        system_instruction="You are a helpful AI assistant specialized in coding and technical topics.",
-        base_url="http://localhost:11434",  # Default OLLAMA API endpoint
-        generation_config={
-            "temperature": 0.7,
-            "max_tokens": 2048
+    # Initialize agent with Ollama
+    agent = AsyncAgent(
+        tools=[
+            CalculatorTool(),  # For data calculations
+            WebScraperTool()   # For public data enrichment
+        ],
+        memory=InMemoryAbstractMemory(),  # Keep memory local
+        model="ollama/llama2",  # Local Llama 2 model
+        provider_config={
+            "base_url": "http://localhost:11434",  # Local Ollama server
+            "generation_config": {
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "max_tokens": 2000
+            }
         }
     )
+    
+    # Example sensitive data
+    sensitive_data = {
+        "company_financials": {
+            "revenue": 1500000,
+            "expenses": 1200000,
+            "employees": 50
+        },
+        "strategic_plans": [
+            "Expand to new markets",
+            "Develop proprietary technology",
+            "Increase R&D investment"
+        ]
+    }
+    
+    # Process data privately
+    logger.info("Processing sensitive data locally with Ollama...")
+    result = await process_sensitive_data(agent, sensitive_data)
+    logger.info("Analysis complete, all processing done locally")
+    print("\nAnalysis Result:")
+    print(result)
 
-    # Create a BaseAgent using the OLLAMA LLM provider
-    agent = BaseAgent(
-        llm_provider=ollama_provider,
-        memory=memory
+if __name__ == "__main__":
+    # Configure settings
+    settings.configure(
+        ollama_base_url="http://localhost:11434",
+        log_level="INFO"
     )
-
-    # Demonstrate interaction with OLLAMA LLAMA model
-    conversations = [
-        "Explain how dependency injection works in Python",
-        "Can you provide an example of implementing dependency injection?",
-        "What are the benefits of using dependency injection?"
-    ]
-
-    for message in conversations:
-        response = await agent.send_message(message)
-        print(f"Message: {message}")
-        print(f"Response: {response}\n")
-
-
-if __name__ == '__main__':
+    
+    # Run the example
     asyncio.run(main())

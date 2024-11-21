@@ -6,21 +6,119 @@
 
 # 🤖 GRAMI AI Framework
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+GRAMI is an advanced, privacy-focused async AI agent framework designed for enterprise applications. It provides a flexible, modular architecture for building AI agents with support for both private and cloud-based LLM providers.
 
-GRAMI AI is an open-source, async-first Python framework for building intelligent, modular AI agents. It provides a robust foundation for creating, managing, and orchestrating AI agents with a focus on flexibility, performance, and extensibility.
+## 🔐 Privacy-First Design
 
-## 🌟 Features
+GRAMI prioritizes data privacy and security:
+- **Local LLM Support**: First-class support for Ollama, enabling fully private AI deployments
+- **Hybrid Options**: Use Google's Gemini for a balance of privacy and performance
+- **Flexible Architecture**: Easy integration of any LLM provider, cloud or local
 
-- **Async-First Architecture**: Built from the ground up for high-performance async operations
-- **Modular Design**: Easily extend and customize components
-- **Multi-Provider Support**: Works with OpenAI, Anthropic, Cohere, and more
-- **Robust Memory Management**: Multiple backend options (Redis, PostgreSQL, MongoDB)
-- **Event-Driven**: Real-time updates and communication between agents
-- **Type-Safe**: Comprehensive type hints for better IDE support
-- **Production-Ready**: Built-in monitoring, logging, and error handling
+## 🚀 Quick Start
+
+1. Install GRAMI:
+```bash
+pip install grami-ai
+```
+
+2. Choose your LLM provider:
+
+```python
+from grami_ai.agent import AsyncAgent
+from grami_ai.memory import InMemoryAbstractMemory
+from grami_ai.tools import CalculatorTool
+
+# For private deployment with Ollama
+agent = AsyncAgent(
+    tools=[CalculatorTool()],
+    memory=InMemoryAbstractMemory(),
+    model="ollama/llama2",  # or other Ollama models
+    provider_config={
+        "base_url": "http://localhost:11434"
+    }
+)
+
+# For Google's Gemini
+agent = AsyncAgent(
+    tools=[CalculatorTool()],
+    memory=InMemoryAbstractMemory(),
+    model="gemini-pro",
+    provider_config={
+        "api_key": "your-google-api-key"
+    }
+)
+
+# Execute tasks
+result = await agent.execute_task({
+    "objective": "Calculate compound interest",
+    "input": "What is 5% interest compounded annually on $1000 for 3 years?"
+})
+```
+
+## 🛠️ Features
+
+- **Async-First**: Built for high-performance async operations
+- **Provider Agnostic**: Support for multiple LLM providers:
+  - 🏠 **Ollama**: Local deployment with models like Llama 2
+  - 🌐 **Google Gemini**: Enterprise-grade cloud provider
+  - ☁️ **OpenAI**: GPT-3.5/4 integration (optional)
+  - 🤖 **Anthropic**: Claude models (optional)
+- **Memory Systems**: Flexible memory backends
+- **Tool Integration**: Extensible tool system
+- **Type Safety**: Full type hints and validation
+- **Enterprise Ready**: Built for production workloads
+
+## 📚 Examples
+
+See the [examples](examples/) directory for:
+- Private AI deployment with Ollama
+- Hybrid deployment with Google Gemini
+- Advanced agent configurations
+- Custom tool integration
+- Memory system usage
+
+## 🔧 Installation Options
+
+```bash
+# Core installation
+pip install grami-ai
+
+# With Gemini support
+pip install grami-ai[gemini]
+
+# With Ollama support (recommended for private deployment)
+pip install grami-ai[ollama]
+
+# With all providers
+pip install grami-ai[all]
+```
+
+## 🔒 Security
+
+GRAMI is designed with security in mind:
+- No data leaves your infrastructure with local LLM deployment
+- Secure API key handling
+- Configurable safety settings
+- Rate limiting and retry mechanisms
+
+## 📖 Documentation
+
+- [Full Documentation](https://docs.grami-ai.org)
+- [API Reference](https://docs.grami-ai.org/api)
+- [Security Guide](https://docs.grami-ai.org/security)
+- [Provider Setup](https://docs.grami-ai.org/providers)
+
+## 🤝 Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 📄 License
+
+GRAMI is licensed under MIT - see [LICENSE](LICENSE) for details.
+
+---
+Made with ❤️ by YAFATEK Solutions
 
 ## 🏗️ Architecture
 
@@ -51,28 +149,38 @@ GRAMI AI is an open-source, async-first Python framework for building intelligen
 1. Install GRAMI AI:
 ```bash
 pip install grami-ai
+
+# Optional features
+pip install grami-ai[gemini]    # For Google Gemini support
+pip install grami-ai[ollama]    # For Ollama support
+pip install grami-ai[dev]       # For development tools
 ```
 
 2. Create your first agent:
 ```python
-from grami_ai import BaseAgent, Tool, Memory
-from grami_ai.core.config import settings
+from grami_ai.agent import AsyncAgent
+from grami_ai.tools import CalculatorTool, WebScraperTool
+from grami_ai.memory import InMemoryAbstractMemory
 
-class MyAgent(BaseAgent):
-    async def initialize(self):
-        # Set up agent-specific configuration
-        self.memory = Memory(backend=settings.memory.backend)
-        self.tools = [Tool1(), Tool2()]
+async def main():
+    # Initialize agent with tools and memory
+    agent = AsyncAgent(
+        tools=[CalculatorTool(), WebScraperTool()],
+        memory=InMemoryAbstractMemory(),
+        model="gemini-pro"  # or "gpt-3.5-turbo", "ollama/llama2", etc.
+    )
     
-    async def execute_task(self, task):
-        # Implement task execution logic
-        result = await self.process_task(task)
-        await self.memory.store(result)
-        return result
+    # Execute a task
+    result = await agent.execute_task({
+        "objective": "Calculate and explain",
+        "input": "What is 25 * 48?"
+    })
+    
+    print(result)
 
-# Create and run agent
-agent = MyAgent()
-await agent.start()
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
 ```
 
 3. Assign tasks to your agent:
