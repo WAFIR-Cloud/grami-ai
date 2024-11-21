@@ -11,101 +11,105 @@ Key Features:
 - Async operations
 - Conversation management
 - Type-safe storage
-
-Example:
-    ```python
-    memory = InMemoryAbstractMemory()
-    await memory.add_item("conv1", {"role": "user", "content": "Hello"})
-    items = await memory.get_items("conv1")
-    ```
+- Filtering and querying
+- Unique ID generation
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TypeVar, Generic
 import asyncio
+import uuid
+import time
 
+T = TypeVar('T')
 
-class AbstractMemory(ABC):
+class AbstractMemory(ABC, Generic[T]):
     """
     Abstract base class for memory management in AI agents.
     
-    Defines the core interface for storing and retrieving conversation history
-    and other persistent data in the Grami AI framework. This class ensures
-    consistent memory management across different implementations.
+    Defines the core interface for storing and retrieving data in the Grami AI framework.
+    This class ensures consistent memory management across different implementations.
     
-    All memory implementations must provide:
-    - Async operations
-    - Conversation-based storage
-    - Clear memory management
-    
-    Example:
-        ```python
-        class CustomMemory(AbstractMemory):
-            async def add_item(self, conversation_id, item):
-                # Custom implementation
-                pass
-        ```
+    Type Parameters:
+        T: The type of values stored in memory
     """
 
     @abstractmethod
-    async def add_item(self, conversation_id: str, item: Dict[str, Any]) -> None:
+    async def add_item(self, key: str, value: T) -> str:
         """
-        Add an item to the memory for a specific conversation.
-        
-        This method should be implemented to store conversation items
-        in a way that maintains order and allows for efficient retrieval.
+        Add an item to memory and return its unique ID.
         
         Args:
-            conversation_id (str): Unique identifier for the conversation.
-                Should be consistent across related operations.
-            item (Dict[str, Any]): Item to be stored in memory.
-                Typically contains 'role' and 'content' keys.
-                
-        Raises:
-            ValueError: If the item format is invalid.
-            RuntimeError: If storage operation fails.
-        """
-        pass
-
-    @abstractmethod
-    async def get_items(self, conversation_id: str) -> List[Dict[str, Any]]:
-        """
-        Retrieve all items for a specific conversation.
-        
-        Returns items in chronological order (oldest first).
-        If no items exist for the conversation, returns an empty list.
-        
-        Args:
-            conversation_id (str): Unique identifier for the conversation.
-        
+            key (str): Collection or namespace for the item
+            value (T): Value to store
+            
         Returns:
-            List[Dict[str, Any]]: List of conversation items.
-                Each item is a dictionary containing at least:
-                - role: str (e.g., "user", "assistant")
-                - content: str
-                
+            str: Unique ID for the stored item
+            
         Raises:
-            RuntimeError: If retrieval operation fails.
+            ValueError: If value format is invalid
+            RuntimeError: If storage operation fails
         """
         pass
 
     @abstractmethod
-    async def clear_conversation(self, conversation_id: str) -> None:
+    async def get_items(
+        self,
+        key: str,
+        filter_params: Optional[Dict[str, Any]] = None
+    ) -> List[T]:
         """
-        Clear all items for a specific conversation.
-        
-        This operation is irreversible. Use with caution.
+        Retrieve items from memory with optional filtering.
         
         Args:
-            conversation_id (str): Unique identifier for the conversation.
-                
+            key (str): Collection or namespace to query
+            filter_params: Optional filtering parameters
+            
+        Returns:
+            List[T]: List of matching items
+            
         Raises:
-            RuntimeError: If clear operation fails.
+            RuntimeError: If retrieval operation fails
         """
         pass
 
+    @abstractmethod
+    async def update_item(self, key: str, item_id: str, value: T) -> None:
+        """
+        Update an existing item in memory.
+        
+        Args:
+            key (str): Collection or namespace
+            item_id (str): Unique ID of the item
+            value (T): New value
+            
+        Raises:
+            KeyError: If item_id doesn't exist
+            RuntimeError: If update operation fails
+        """
+        pass
 
-class InMemoryAbstractMemory(AbstractMemory):
+    @abstractmethod
+    async def delete_item(self, key: str, item_id: str) -> None:
+        """
+        Delete an item from memory.
+        
+        Args:
+            key (str): Collection or namespace
+            item_id (str): Unique ID of the item to delete
+            
+        Raises:
+            KeyError: If item_id doesn't exist
+            RuntimeError: If deletion operation fails
+        """
+        pass
+
+    def generate_id(self) -> str:
+        """Generate a unique ID for a new item."""
+        return f"{int(time.time())}_{uuid.uuid4().hex[:8]}"
+
+
+class InMemoryAbstractMemory(AbstractMemory[Dict[str, Any]]):
     """
     In-memory implementation of AbstractMemory.
     
@@ -120,8 +124,8 @@ class InMemoryAbstractMemory(AbstractMemory):
         requirements, consider using a database-backed implementation.
     
     Attributes:
-        _memory (Dict[str, List[Dict[str, Any]]]): Internal storage dictionary.
-            Keys are conversation IDs, values are lists of conversation items.
+        _memory (Dict[str, Dict[str, Dict[str, Any]]]): Internal storage dictionary.
+            Keys are conversation IDs, values are dictionaries of conversation items.
     """
 
     def __init__(self):
@@ -131,9 +135,9 @@ class InMemoryAbstractMemory(AbstractMemory):
         Creates an empty dictionary to store conversation histories.
         Thread-safe for async operations.
         """
-        self._memory: Dict[str, List[Dict[str, Any]]] = {}
+        self._memory: Dict[str, Dict[str, Dict[str, Any]]] = {}
 
-    async def add_item(self, conversation_id: str, item: Dict[str, Any]) -> None:
+    async def add_item(self, key: str, value: Dict[str, Any]) -> str:
         """
         Add an item to the memory for a specific conversation.
         
@@ -141,47 +145,81 @@ class InMemoryAbstractMemory(AbstractMemory):
         Thread-safe for concurrent access.
         
         Args:
-            conversation_id (str): Unique identifier for the conversation.
-            item (Dict[str, Any]): Item to be stored in memory.
-                Must contain 'role' and 'content' keys.
-                
-        Raises:
-            ValueError: If item lacks required keys.
-        """
-        if not isinstance(item, dict) or not all(k in item for k in ['role', 'content']):
-            raise ValueError("Item must be a dict with 'role' and 'content' keys")
+            key (str): Collection or namespace for the item
+            value (Dict[str, Any]): Value to store
             
-        if conversation_id not in self._memory:
-            self._memory[conversation_id] = []
-        
-        self._memory[conversation_id].append(item)
-
-    async def get_items(self, conversation_id: str) -> List[Dict[str, Any]]:
-        """
-        Retrieve all items for a specific conversation.
-        
-        Returns a shallow copy of the items list to prevent
-        external modifications to internal storage.
-        
-        Args:
-            conversation_id (str): Unique identifier for the conversation.
-        
         Returns:
-            List[Dict[str, Any]]: List of conversation items in chronological order.
+            str: Unique ID for the stored item
+            
+        Raises:
+            ValueError: If value format is invalid
         """
-        return self._memory.get(conversation_id, [])[:]
-
-    async def clear_conversation(self, conversation_id: str) -> None:
-        """
-        Clear all items for a specific conversation.
+        if not isinstance(value, dict):
+            raise ValueError("Value must be a dictionary")
+            
+        item_id = self.generate_id()
+        if key not in self._memory:
+            self._memory[key] = {}
         
-        Silently ignores non-existent conversation IDs.
+        self._memory[key][item_id] = value
+        return item_id
+
+    async def get_items(
+        self,
+        key: str,
+        filter_params: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Retrieve items from memory with optional filtering.
         
         Args:
-            conversation_id (str): Unique identifier for the conversation.
+            key (str): Collection or namespace to query
+            filter_params: Optional filtering parameters
+            
+        Returns:
+            List[Dict[str, Any]]: List of matching items
         """
-        if conversation_id in self._memory:
-            del self._memory[conversation_id]
+        if key not in self._memory:
+            return []
+        
+        items = list(self._memory[key].values())
+        if filter_params:
+            items = [item for item in items if all(item.get(k) == v for k, v in filter_params.items())]
+        
+        return items
+
+    async def update_item(self, key: str, item_id: str, value: Dict[str, Any]) -> None:
+        """
+        Update an existing item in memory.
+        
+        Args:
+            key (str): Collection or namespace
+            item_id (str): Unique ID of the item
+            value (Dict[str, Any]): New value
+            
+        Raises:
+            KeyError: If item_id doesn't exist
+        """
+        if key not in self._memory or item_id not in self._memory[key]:
+            raise KeyError(f"Item {item_id} not found in {key}")
+        
+        self._memory[key][item_id] = value
+
+    async def delete_item(self, key: str, item_id: str) -> None:
+        """
+        Delete an item from memory.
+        
+        Args:
+            key (str): Collection or namespace
+            item_id (str): Unique ID of the item to delete
+            
+        Raises:
+            KeyError: If item_id doesn't exist
+        """
+        if key not in self._memory or item_id not in self._memory[key]:
+            raise KeyError(f"Item {item_id} not found in {key}")
+        
+        del self._memory[key][item_id]
 
     def __len__(self) -> int:
         """
@@ -190,7 +228,7 @@ class InMemoryAbstractMemory(AbstractMemory):
         Returns:
             int: Number of unique conversations in memory.
         """
-        return len(self._memory)
+        return sum(len(items) for items in self._memory.values())
 
     def __repr__(self) -> str:
         """
@@ -207,6 +245,6 @@ class InMemoryAbstractMemory(AbstractMemory):
         total_items = sum(len(items) for items in self._memory.values())
         return (
             f"InMemoryAbstractMemory("
-            f"conversations={len(self)}, "
+            f"conversations={len(self._memory)}, "
             f"total_items={total_items})"
         )

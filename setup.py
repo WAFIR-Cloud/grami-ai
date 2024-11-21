@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="grami-ai",
-    version="0.2.0",
+    version="0.2.1",
     author="Grami AI Team",
     author_email="support@grami.ai",
     description="Async AI Agent Framework",
@@ -21,6 +21,8 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
@@ -32,22 +34,55 @@ setup(
         'aiohttp>=3.8.4',
         'beautifulsoup4>=4.12.2',
         'typing-extensions>=4.5.0',
+        'pydantic>=2.0.0',
+        'fastapi>=0.100.0',
+        'uvicorn>=0.22.0',
+        'python-jose[cryptography]>=3.3.0',
+        'passlib[bcrypt]>=1.7.4',
+        'python-multipart>=0.0.6',
+        'tenacity>=8.2.2',
+        'aiofiles>=23.1.0',
+        'jinja2>=3.1.2',
+        'pillow>=10.0.0',
+        'python-dotenv>=1.0.0',
     ],
     extras_require={
-        'gemini': ['google-generativeai'],
-        'ollama': ['requests'],
+        'llm': {
+            'google-generativeai>=0.3.0',
+            'openai>=1.0.0',
+            'anthropic>=0.5.0',
+            'ollama>=0.1.0',
+        },
+        'storage': {
+            'motor>=3.1.1',
+            'pymongo>=4.3.3',
+            'sqlalchemy>=2.0.0',
+            'alembic>=1.11.1',
+            'asyncpg>=0.28.0',
+        },
+        'monitoring': {
+            'prometheus-client>=0.17.0',
+            'opentelemetry-api>=1.19.0',
+            'opentelemetry-sdk>=1.19.0',
+            'opentelemetry-instrumentation>=0.40b0',
+        },
         'dev': [
             'pytest>=7.3.1',
             'pytest-asyncio>=0.21.0',
+            'pytest-cov>=4.1.0',
             'mypy>=1.3.0',
-            'black',
-            'flake8'
+            'black>=23.3.0',
+            'flake8>=6.0.0',
+            'isort>=5.12.0',
+            'pre-commit>=3.3.3',
         ],
         'docs': [
             'sphinx>=4.5.0',
             'sphinx-rtd-theme>=1.0.0',
             'sphinx-autodoc-typehints>=1.18.3',
-            'sphinxcontrib-napoleon>=0.7'
+            'sphinxcontrib-napoleon>=0.7',
+            'mkdocs-material>=9.1.18',
+            'mkdocstrings[python]>=0.22.0',
         ]
     },
     keywords=[

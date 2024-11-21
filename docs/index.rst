@@ -7,6 +7,7 @@ Welcome to Grami AI's Documentation
 
    installation
    quickstart
+   testing
    api_reference
 
 Indices and tables

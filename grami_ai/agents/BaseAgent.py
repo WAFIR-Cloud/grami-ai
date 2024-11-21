@@ -1,139 +1,163 @@
-import uuid
-from abc import ABC
-from collections.abc import Iterable
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import List, Dict, Any, Optional
+from ..core.interfaces import AsyncTool, AsyncMemoryProvider, AsyncKafkaIntegration
+from ..memory import InMemoryAbstractMemory
+from ..events import KafkaEvents
 
-from grami_ai.events import KafkaEvents
-from grami_ai.llms.base_llm import BaseLLMProvider
-from grami_ai.llms.gemini_llm import GeminiLLMProvider
-from grami_ai.loggers.Logger import Logger
-from grami_ai.memory.memory import AbstractMemory
-from grami_ai.tools.api_tools import publish_task_sync, select_agent_type, select_task_topic_name
-
-# Usage
-logger = Logger()
-
-class BaseAgent(ABC):
-    """
-    Abstract base class for all agents.
-    Provides core functionalities for interacting with LLM providers,
-    including chat initialization, message sending, and memory management.
+class BaseAgent:
+    """Base agent class for GRAMI's AI crew members.
     
-    Attributes:
-        llm_provider (BaseLLMProvider): Language Model provider for the agent
-        memory (Optional[AbstractMemory]): Memory object for storing conversation history
-        kafka (Optional[KafkaEvents]): Kafka event producer for logging events
-        tools (List[Any]): List of tools available to the agent
-        built_in_tools (List[Any]): List of built-in tools
-        chat_id (str): Unique identifier for the chat session
-        convo (Any): Conversation object from the LLM provider
+    This class provides the foundation for all specialized agents in the GRAMI ecosystem,
+    including memory management, event handling, and tool execution capabilities.
+    
+    Key Features:
+    - Async-first design for high performance
+    - Integrated Redis-based memory management
+    - Kafka event publishing and subscription
+    - Modular tool system
+    - Error handling and logging
     """
-
+    
     def __init__(
-            self,
-            llm_provider: Union[BaseLLMProvider, Dict[str, Any]],
-            memory: Optional[AbstractMemory] = None,
-            kafka: Optional[KafkaEvents] = None,
-            tools: Optional[List[Any]] = None
+        self,
+        tools: Optional[List[AsyncTool]] = None,
+        memory: Optional[AsyncMemoryProvider] = None,
+        kafka: Optional[AsyncKafkaIntegration] = None,
+        model: str = "gemini-pro",
+        **kwargs: Dict[str, Any]
     ):
-        """
-        Initializes a new agent instance.
+        """Initialize a new agent.
         
         Args:
-            llm_provider (Union[BaseLLMProvider, Dict[str, Any]]): 
-                Either a pre-configured LLM provider or a dictionary of configuration 
-                to create a default Gemini LLM provider
-            memory (Optional[AbstractMemory], optional): Memory object. Defaults to None.
-            kafka (Optional[KafkaEvents], optional): Kafka event producer. Defaults to None.
-            tools (Optional[List[Any]], optional): List of tools. Defaults to None.
+            tools: List of async tools available to this agent
+            memory: Memory provider for context management (defaults to Redis)
+            kafka: Kafka integration for event handling
+            model: LLM model to use (default: gemini-pro)
+            **kwargs: Additional configuration options
         """
-        # Handle different input types for LLM provider
-        if isinstance(llm_provider, dict):
-            # If a dictionary is provided, create a default Gemini LLM provider
-            llm_provider = GeminiLLMProvider(
-                api_key=llm_provider.get('api_key'),
-                model_name=llm_provider.get('model_name', "models/gemini-1.5-flash"),
-                system_instruction=llm_provider.get('system_instruction'),
-                generation_config=llm_provider.get('generation_config'),
-                safety_settings=llm_provider.get('safety_settings')
+        self.tools = tools or []
+        self.memory = memory or InMemoryAbstractMemory()
+        self.kafka = kafka or KafkaEvents()
+        self.model = model
+        self.config = kwargs
+        
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Execute a task using available tools and memory.
+        
+        Args:
+            task: Task description or command
+            context: Additional context for task execution
+            
+        Returns:
+            Dict containing task results and any relevant metadata
+        """
+        # Store task in memory
+        task_id = await self._store_task(task, context)
+        
+        try:
+            # Publish task started event
+            await self.kafka.publish(
+                "task_events",
+                {
+                    "task_id": task_id,
+                    "agent": self.__class__.__name__,
+                    "status": "started",
+                    "task": task
+                }
             )
-        
-        self.llm_provider = llm_provider
-        self.memory = memory
-        self.kafka = kafka
-        self.tools = tools or []  # Initialize with provided tools or an empty list
-        self.built_in_tools = [publish_task_sync, select_agent_type, select_task_topic_name]
-        self.tools.extend(self.built_in_tools)  # Extend the list with built-in tools
-        self.chat_id = str(uuid.uuid4())  # Generate a unique ID for this chat session
-        self.convo = None  # Initialize conversation object to None
-
-    async def initialize_chat(self) -> None:
-        """
-        Initializes a new chat session with the LLM provider.
-        """
-        if not self.convo:
-            self.convo = await self.llm_provider.start_chat(tools=self.tools)
-            logger.info(f"Initialized chat for {self.__class__.__name__}, chat ID: {self.chat_id}")
-
-    async def send_message(self, message: str) -> str:
-        """
-        Sends a message to the LLM provider and receives a response.
-        Handles loading and storing conversation history in memory if a memory object is provided.
+            
+            # Execute task using appropriate tools
+            results = {}
+            for tool in self.tools:
+                if tool.can_handle(task):
+                    result = await tool.execute(task, context=context)
+                    results[tool.__class__.__name__] = result
+            
+            # Store results in memory
+            await self._store_results(task_id, results)
+            
+            # Publish task completed event
+            await self.kafka.publish(
+                "task_events",
+                {
+                    "task_id": task_id,
+                    "agent": self.__class__.__name__,
+                    "status": "completed",
+                    "results": results
+                }
+            )
+            
+            return {
+                "task_id": task_id,
+                "status": "success",
+                "results": results,
+                "model": self.model
+            }
+            
+        except Exception as e:
+            # Handle errors and publish error event
+            error_data = {
+                "task_id": task_id,
+                "agent": self.__class__.__name__,
+                "status": "failed",
+                "error": str(e)
+            }
+            await self._store_error(task_id, error_data)
+            await self.kafka.publish("error_events", error_data)
+            raise
+    
+    async def _store_task(self, task: str, context: Optional[Dict[str, Any]] = None) -> str:
+        """Store task details in memory and return task ID."""
+        task_data = {
+            "task": task,
+            "status": "started",
+            "context": context or {},
+            "agent": self.__class__.__name__
+        }
+        task_id = await self.memory.add_item("tasks", task_data)
+        return task_id
+    
+    async def _store_results(self, task_id: str, results: Dict[str, Any]) -> None:
+        """Store task results in memory."""
+        await self.memory.add_item(
+            f"results:{task_id}",
+            {
+                "status": "completed",
+                "results": results,
+                "timestamp": "utc_timestamp_here"
+            }
+        )
+    
+    async def _store_error(self, task_id: str, error_data: Dict[str, Any]) -> None:
+        """Store error information in memory."""
+        await self.memory.add_item(
+            f"errors:{task_id}",
+            error_data
+        )
+    
+    async def get_history(
+        self,
+        key: str = "tasks",
+        filter_params: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
+        """Retrieve agent's task history with optional filtering.
         
         Args:
-            message (str): The message to send to the model.
-        
+            key: Memory key to retrieve (default: "tasks")
+            filter_params: Optional parameters to filter results
+            
         Returns:
-            str: The model's response.
+            List of historical tasks and their results
         """
-        if not self.convo:
-            await self.initialize_chat()
-
-        if self.memory:
-            # Load history from memory and format it for the specific LLM provider
-            history = await self._load_memory()
-            self.convo.history = self.llm_provider.format_history(history)
-
-        response = await self.llm_provider.send_message(self.convo, message, tools=self.tools)
-        
-        if self.memory and response is not None:
-            logger.info(f'[*] Storing interaction to memory')
-            await self._store_interaction(message, response)
-
-        return response
-
-    async def _load_memory(self) -> List[Dict[str, Any]]:
-        """
-        Loads conversation history from the memory object.
-        
-        Returns:
-            List[Dict[str, Any]]: List of conversation turns
-        """
-        return await self.memory.get_items(self.chat_id)
-
-    async def _store_interaction(self, user_message: str, model_response: str) -> None:
-        """
-        Stores a user message and the model's response in memory.
-        
-        Args:
-            user_message (str): The user's message.
-            model_response (str): The model's response.
-        """
-        await self.memory.add_item(self.chat_id, {"role": "user", "content": user_message})
-        await self.memory.add_item(self.chat_id, {"role": "model", "content": model_response})
-
-
-def create_agent(agent_class: Type[BaseAgent], llm_provider: Union[BaseLLMProvider, Dict[str, Any]], **kwargs) -> BaseAgent:
-    """
-    Factory function to create an agent instance.
-    Simplifies agent creation by handling instantiation and argument passing.
+        return await self.memory.get_items(key, filter_params)
     
-    Args:
-        agent_class (Type[BaseAgent]): The class of the agent to create.
-        llm_provider (Union[BaseLLMProvider, Dict[str, Any]]): LLM provider configuration
-        **kwargs: Additional keyword arguments
+    def add_tool(self, tool: AsyncTool) -> None:
+        """Add a new tool to the agent's toolkit."""
+        self.tools.append(tool)
     
-    Returns:
-        BaseAgent: An instance of the specified agent class
-    """
-    return agent_class(llm_provider=llm_provider, **kwargs)
+    def remove_tool(self, tool_name: str) -> None:
+        """Remove a tool from the agent's toolkit."""
+        self.tools = [t for t in self.tools if t.__class__.__name__ != tool_name]
+    
+    async def subscribe_to_events(self, topic: str, callback: callable) -> None:
+        """Subscribe to Kafka events on a specific topic."""
+        await self.kafka.subscribe(topic, callback)

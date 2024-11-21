@@ -1,8 +1,167 @@
-# Grami AI: The Modern Async AI Agent Framework
+# GRAMI AI: The Modern Async AI Agent Framework
 
 [![Documentation Status](https://readthedocs.org/projects/grami-ai/badge/?version=latest)](https://grami-ai.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/grami-ai.svg)](https://badge.fury.io/py/grami-ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+# 🤖 GRAMI AI Framework
+
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+GRAMI AI is an open-source, async-first Python framework for building intelligent, modular AI agents. It provides a robust foundation for creating, managing, and orchestrating AI agents with a focus on flexibility, performance, and extensibility.
+
+## 🌟 Features
+
+- **Async-First Architecture**: Built from the ground up for high-performance async operations
+- **Modular Design**: Easily extend and customize components
+- **Multi-Provider Support**: Works with OpenAI, Anthropic, Cohere, and more
+- **Robust Memory Management**: Multiple backend options (Redis, PostgreSQL, MongoDB)
+- **Event-Driven**: Real-time updates and communication between agents
+- **Type-Safe**: Comprehensive type hints for better IDE support
+- **Production-Ready**: Built-in monitoring, logging, and error handling
+
+## 🏗️ Architecture
+
+```
+                                GRAMI AI Architecture
+                                
+┌─────────────────────────────────────────────────────────────────────┐
+│                           Client Applications                        │
+└───────────────────────────────────┬─────────────────────────────────┘
+                                    │
+┌───────────────────────────────────▼─────────────────────────────────┐
+│                              API Layer                              │
+└───────────────────────────────────┬─────────────────────────────────┘
+                                    │
+┌───────────────────────────────────▼─────────────────────────────────┐
+│                           Agent Orchestrator                         │
+├─────────────┬─────────────┬─────────────┬─────────────┬────────────┤
+│  Agent 1    │   Agent 2   │   Agent 3   │   Agent 4   │  Agent N   │
+└─────┬───────┴──────┬──────┴──────┬──────┴──────┬──────┴─────┬──────┘
+      │              │              │             │            │
+┌─────▼──────┬──────▼──────┬───────▼─────┬──────▼─────┬─────▼──────┐
+│   Memory   │   Events    │    Tools    │  Providers │  Security  │
+└────────────┴────────────┴─────────────┴────────────┴────────────┘
+```
+
+## 🚀 Quick Start
+
+1. Install GRAMI AI:
+```bash
+pip install grami-ai
+```
+
+2. Create your first agent:
+```python
+from grami_ai import BaseAgent, Tool, Memory
+from grami_ai.core.config import settings
+
+class MyAgent(BaseAgent):
+    async def initialize(self):
+        # Set up agent-specific configuration
+        self.memory = Memory(backend=settings.memory.backend)
+        self.tools = [Tool1(), Tool2()]
+    
+    async def execute_task(self, task):
+        # Implement task execution logic
+        result = await self.process_task(task)
+        await self.memory.store(result)
+        return result
+
+# Create and run agent
+agent = MyAgent()
+await agent.start()
+```
+
+3. Assign tasks to your agent:
+```python
+from grami_ai.core.constants import Priority
+
+# Create a task
+task = {
+    "objective": "Analyze this text document",
+    "input": "Sample text for analysis",
+    "priority": Priority.HIGH
+}
+
+# Assign and execute task
+result = await agent.execute_task(task)
+```
+
+## 📦 Core Components
+
+### 1. Agents
+- Base agent class with common functionality
+- Customizable behavior and capabilities
+- Built-in task queue and priority handling
+
+### 2. Memory
+- Multiple backend support (Redis, PostgreSQL, MongoDB)
+- Automatic data serialization/deserialization
+- Configurable retention and indexing
+
+### 3. Events
+- Real-time communication between agents
+- Kafka-based event streaming
+- Event filtering and routing
+
+### 4. Tools
+- Extensible tool interface
+- Built-in common tools
+- Custom tool development support
+
+### 5. Configuration
+- Environment-specific settings
+- Secure secrets management
+- Dynamic configuration updates
+
+## 🔧 Development
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/grami-ai.git
+cd grami-ai
+```
+
+2. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install development dependencies:
+```bash
+pip install -e ".[dev]"
+```
+
+4. Run tests:
+```bash
+pytest tests/
+```
+
+## 📖 Documentation
+
+Full documentation is available at [docs.grami-ai.org](https://docs.grami-ai.org)
+
+- [Getting Started Guide](https://docs.grami-ai.org/getting-started)
+- [API Reference](https://docs.grami-ai.org/api)
+- [Examples](https://docs.grami-ai.org/examples)
+- [Contributing Guide](https://docs.grami-ai.org/contributing)
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- The amazing open-source community
+- All our contributors and users
 
 ## Vision
 

@@ -102,6 +102,57 @@ class AsyncMemoryProvider(Protocol, Generic[T]):
             List[str]: List of all keys currently in memory.
         """
         ...
+    
+    async def add_item(self, key: str, value: T) -> str:
+        """
+        Add an item to memory and return its unique ID.
+        
+        Args:
+            key (str): Collection or namespace for the item.
+            value (T): Value to store.
+            
+        Returns:
+            str: Unique ID for the stored item.
+        """
+        ...
+    
+    async def get_items(
+        self,
+        key: str,
+        filter_params: Optional[Dict[str, Any]] = None
+    ) -> List[T]:
+        """
+        Retrieve items from memory with optional filtering.
+        
+        Args:
+            key (str): Collection or namespace to query.
+            filter_params: Optional filtering parameters.
+            
+        Returns:
+            List[T]: List of matching items.
+        """
+        ...
+    
+    async def update_item(self, key: str, item_id: str, value: T) -> None:
+        """
+        Update an existing item in memory.
+        
+        Args:
+            key (str): Collection or namespace.
+            item_id (str): Unique ID of the item.
+            value (T): New value.
+        """
+        ...
+    
+    async def delete_item(self, key: str, item_id: str) -> None:
+        """
+        Delete an item from memory.
+        
+        Args:
+            key (str): Collection or namespace.
+            item_id (str): Unique ID of the item to delete.
+        """
+        ...
 
 class AsyncKafkaIntegration(Protocol):
     """
@@ -130,6 +181,35 @@ class AsyncKafkaIntegration(Protocol):
             
         Returns:
             AsyncIterator[Any]: Iterator over consumed messages.
+        """
+        ...
+    
+    async def publish(self, topic: str, message: Any) -> None:
+        """
+        Publish a message to a Kafka topic asynchronously.
+        
+        Args:
+            topic (str): Target Kafka topic.
+            message (Any): Message to publish.
+        """
+        ...
+    
+    async def subscribe(self, topic: str, callback: Callable[[Any], Coroutine[Any, Any, None]]) -> None:
+        """
+        Subscribe to a Kafka topic with a callback function.
+        
+        Args:
+            topic (str): Topic to subscribe to.
+            callback: Async function to handle received messages.
+        """
+        ...
+    
+    async def unsubscribe(self, topic: str) -> None:
+        """
+        Unsubscribe from a Kafka topic.
+        
+        Args:
+            topic (str): Topic to unsubscribe from.
         """
         ...
 
