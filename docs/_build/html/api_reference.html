@@ -1,0 +1,1092 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; Grami AI 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Quickstart" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Grami AI
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#core-interfaces">Core Interfaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncKafkaIntegration"><code class="docutils literal notranslate"><span class="pre">AsyncKafkaIntegration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncKafkaIntegration.consume"><code class="docutils literal notranslate"><span class="pre">AsyncKafkaIntegration.consume()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncKafkaIntegration.produce"><code class="docutils literal notranslate"><span class="pre">AsyncKafkaIntegration.produce()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncMemoryProvider"><code class="docutils literal notranslate"><span class="pre">AsyncMemoryProvider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncMemoryProvider.delete"><code class="docutils literal notranslate"><span class="pre">AsyncMemoryProvider.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncMemoryProvider.list_keys"><code class="docutils literal notranslate"><span class="pre">AsyncMemoryProvider.list_keys()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncMemoryProvider.retrieve"><code class="docutils literal notranslate"><span class="pre">AsyncMemoryProvider.retrieve()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncMemoryProvider.store"><code class="docutils literal notranslate"><span class="pre">AsyncMemoryProvider.store()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncTool"><code class="docutils literal notranslate"><span class="pre">AsyncTool</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncTool.execute"><code class="docutils literal notranslate"><span class="pre">AsyncTool.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#grami_ai.core.interfaces.BaseAgent"><code class="docutils literal notranslate"><span class="pre">BaseAgent</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.BaseAgent.llm"><code class="docutils literal notranslate"><span class="pre">BaseAgent.llm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.BaseAgent.memory"><code class="docutils literal notranslate"><span class="pre">BaseAgent.memory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.BaseAgent.tools"><code class="docutils literal notranslate"><span class="pre">BaseAgent.tools</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.BaseAgent.kafka"><code class="docutils literal notranslate"><span class="pre">BaseAgent.kafka</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.BaseAgent.process"><code class="docutils literal notranslate"><span class="pre">BaseAgent.process()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#grami_ai.core.interfaces.BaseLLMProvider"><code class="docutils literal notranslate"><span class="pre">BaseLLMProvider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.BaseLLMProvider.generate"><code class="docutils literal notranslate"><span class="pre">BaseLLMProvider.generate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#grami_ai.core.interfaces.ContextualPromptTemplate"><code class="docutils literal notranslate"><span class="pre">ContextualPromptTemplate</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.ContextualPromptTemplate.format"><code class="docutils literal notranslate"><span class="pre">ContextualPromptTemplate.format()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#grami_ai.core.interfaces.PromptTemplate"><code class="docutils literal notranslate"><span class="pre">PromptTemplate</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.PromptTemplate.template"><code class="docutils literal notranslate"><span class="pre">PromptTemplate.template</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.core.interfaces.PromptTemplate.format"><code class="docutils literal notranslate"><span class="pre">PromptTemplate.format()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#memory-management">Memory Management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#grami_ai.memory.memory.AbstractMemory"><code class="docutils literal notranslate"><span class="pre">AbstractMemory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.memory.memory.AbstractMemory.add_item"><code class="docutils literal notranslate"><span class="pre">AbstractMemory.add_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.memory.memory.AbstractMemory.clear_conversation"><code class="docutils literal notranslate"><span class="pre">AbstractMemory.clear_conversation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.memory.memory.AbstractMemory.get_items"><code class="docutils literal notranslate"><span class="pre">AbstractMemory.get_items()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#grami_ai.memory.memory.InMemoryAbstractMemory"><code class="docutils literal notranslate"><span class="pre">InMemoryAbstractMemory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.memory.memory.InMemoryAbstractMemory._memory"><code class="docutils literal notranslate"><span class="pre">InMemoryAbstractMemory._memory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.memory.memory.InMemoryAbstractMemory.add_item"><code class="docutils literal notranslate"><span class="pre">InMemoryAbstractMemory.add_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.memory.memory.InMemoryAbstractMemory.clear_conversation"><code class="docutils literal notranslate"><span class="pre">InMemoryAbstractMemory.clear_conversation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.memory.memory.InMemoryAbstractMemory.get_items"><code class="docutils literal notranslate"><span class="pre">InMemoryAbstractMemory.get_items()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tools">Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#base-tools">Base Tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.tools.base_tools.BaseTool"><code class="docutils literal notranslate"><span class="pre">BaseTool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.tools.base_tools.CalculatorTool"><code class="docutils literal notranslate"><span class="pre">CalculatorTool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.tools.base_tools.JSONParserTool"><code class="docutils literal notranslate"><span class="pre">JSONParserTool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.tools.base_tools.StringManipulationTool"><code class="docutils literal notranslate"><span class="pre">StringManipulationTool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grami_ai.tools.base_tools.WebScraperTool"><code class="docutils literal notranslate"><span class="pre">WebScraperTool</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#calculator-tool">Calculator Tool</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">CalculatorTool</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#string-manipulation-tool">String Manipulation Tool</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">StringManipulationTool</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#web-scraper-tool">Web Scraper Tool</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">WebScraperTool</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Grami AI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api_reference.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<section id="core-interfaces">
+<h2>Core Interfaces<a class="headerlink" href="#core-interfaces" title="Link to this heading"></a></h2>
+<p id="module-grami_ai.core.interfaces">Grami AI Core Interfaces Module</p>
+<p>This module defines the core protocols and abstract base classes for the Grami AI framework.
+It provides the foundational interfaces for:
+- Async Tools
+- Memory Management
+- LLM Integration
+- Agent Implementation
+- Kafka Integration
+- Prompt Engineering</p>
+<p>These interfaces ensure consistent behavior and interoperability across the framework.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.AsyncKafkaIntegration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.core.interfaces.</span></span><span class="sig-name descname"><span class="pre">AsyncKafkaIntegration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#AsyncKafkaIntegration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.AsyncKafkaIntegration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Protocol for asynchronous Kafka message handling.</p>
+<p>Provides a standardized interface for producing and consuming
+messages with Apache Kafka, enabling event-driven architectures.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.AsyncKafkaIntegration.consume">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">consume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncIterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#AsyncKafkaIntegration.consume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.AsyncKafkaIntegration.consume" title="Link to this definition"></a></dt>
+<dd><p>Consume messages from a Kafka topic asynchronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>topic</strong> (<em>str</em>) – Source Kafka topic.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Iterator over consumed messages.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>AsyncIterator[Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.AsyncKafkaIntegration.produce">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">produce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#AsyncKafkaIntegration.produce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.AsyncKafkaIntegration.produce" title="Link to this definition"></a></dt>
+<dd><p>Produce a message to a Kafka topic asynchronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>str</em>) – Target Kafka topic.</p></li>
+<li><p><strong>message</strong> (<em>Any</em>) – Message to produce.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.AsyncMemoryProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.core.interfaces.</span></span><span class="sig-name descname"><span class="pre">AsyncMemoryProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#AsyncMemoryProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.AsyncMemoryProvider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
+<p>Protocol for asynchronous memory management.</p>
+<p>Provides a standardized interface for storing, retrieving, and managing
+data in memory systems. Supports generic type T for flexible data storage.</p>
+<dl class="simple">
+<dt>Type Parameters:</dt><dd><p>T: The type of values stored in memory.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.AsyncMemoryProvider.delete">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#AsyncMemoryProvider.delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.AsyncMemoryProvider.delete" title="Link to this definition"></a></dt>
+<dd><p>Delete a value from memory asynchronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – Key of the value to delete.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.AsyncMemoryProvider.list_keys">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">list_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#AsyncMemoryProvider.list_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.AsyncMemoryProvider.list_keys" title="Link to this definition"></a></dt>
+<dd><p>List all keys in memory asynchronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of all keys currently in memory.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.AsyncMemoryProvider.retrieve">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">T</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#AsyncMemoryProvider.retrieve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.AsyncMemoryProvider.retrieve" title="Link to this definition"></a></dt>
+<dd><p>Retrieve a value from memory asynchronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – Key of the value to retrieve.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Retrieved value if found, None otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[T]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.AsyncMemoryProvider.store">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">store</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#AsyncMemoryProvider.store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.AsyncMemoryProvider.store" title="Link to this definition"></a></dt>
+<dd><p>Store a value in memory asynchronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – Unique identifier for the stored value.</p></li>
+<li><p><strong>value</strong> (<em>T</em>) – Value to store.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.AsyncTool">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.core.interfaces.</span></span><span class="sig-name descname"><span class="pre">AsyncTool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#AsyncTool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.AsyncTool" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Protocol defining the interface for asynchronous tools usable by agents.</p>
+<p>All tools in the framework must implement this protocol to ensure
+consistent behavior and interoperability with agents.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.AsyncTool.execute">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#AsyncTool.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.AsyncTool.execute" title="Link to this definition"></a></dt>
+<dd><p>Execute the tool asynchronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Variable positional arguments for tool execution.</p></li>
+<li><p><strong>**kwargs</strong> – Variable keyword arguments for tool execution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result of tool execution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.BaseAgent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.core.interfaces.</span></span><span class="sig-name descname"><span class="pre">BaseAgent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grami_ai.core.interfaces.BaseLLMProvider" title="grami_ai.core.interfaces.BaseLLMProvider"><span class="pre">BaseLLMProvider</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncMemoryProvider" title="grami_ai.core.interfaces.AsyncMemoryProvider"><span class="pre">AsyncMemoryProvider</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">tools</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#grami_ai.core.interfaces.AsyncTool" title="grami_ai.core.interfaces.AsyncTool"><span class="pre">AsyncTool</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_integration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncKafkaIntegration" title="grami_ai.core.interfaces.AsyncKafkaIntegration"><span class="pre">AsyncKafkaIntegration</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#BaseAgent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.BaseAgent" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
+<p>Advanced abstract base class for async agents.</p>
+<p>Provides a comprehensive framework for building intelligent agents
+with support for LLMs, memory, tools, and messaging.</p>
+<dl class="simple">
+<dt>Type Parameters:</dt><dd><p>T: The type of agent processing output.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.BaseAgent.llm">
+<span class="sig-name descname"><span class="pre">llm</span></span><a class="headerlink" href="#grami_ai.core.interfaces.BaseAgent.llm" title="Link to this definition"></a></dt>
+<dd><p>Language model provider.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#grami_ai.core.interfaces.BaseLLMProvider" title="grami_ai.core.interfaces.BaseLLMProvider">BaseLLMProvider</a>[T]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.BaseAgent.memory">
+<span class="sig-name descname"><span class="pre">memory</span></span><a class="headerlink" href="#grami_ai.core.interfaces.BaseAgent.memory" title="Link to this definition"></a></dt>
+<dd><p>Memory management system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#grami_ai.core.interfaces.AsyncMemoryProvider" title="grami_ai.core.interfaces.AsyncMemoryProvider">AsyncMemoryProvider</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.BaseAgent.tools">
+<span class="sig-name descname"><span class="pre">tools</span></span><a class="headerlink" href="#grami_ai.core.interfaces.BaseAgent.tools" title="Link to this definition"></a></dt>
+<dd><p>Available tools.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="#grami_ai.core.interfaces.AsyncTool" title="grami_ai.core.interfaces.AsyncTool">AsyncTool</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.BaseAgent.kafka">
+<span class="sig-name descname"><span class="pre">kafka</span></span><a class="headerlink" href="#grami_ai.core.interfaces.BaseAgent.kafka" title="Link to this definition"></a></dt>
+<dd><p>Kafka integration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[<a class="reference internal" href="#grami_ai.core.interfaces.AsyncKafkaIntegration" title="grami_ai.core.interfaces.AsyncKafkaIntegration">AsyncKafkaIntegration</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.BaseAgent.process">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grami_ai.core.interfaces.PromptTemplate" title="grami_ai.core.interfaces.PromptTemplate"><span class="pre">PromptTemplate</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">T</span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#BaseAgent.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.BaseAgent.process" title="Link to this definition"></a></dt>
+<dd><p>Process input using the agent’s capabilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prompt_template</strong> (<a class="reference internal" href="#grami_ai.core.interfaces.PromptTemplate" title="grami_ai.core.interfaces.PromptTemplate"><em>PromptTemplate</em></a>) – Input prompt template.</p></li>
+<li><p><strong>**kwargs</strong> – Additional processing parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Processing result.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>T</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.BaseLLMProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.core.interfaces.</span></span><span class="sig-name descname"><span class="pre">BaseLLMProvider</span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#BaseLLMProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.BaseLLMProvider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
+<p>Enhanced abstract base class for LLM providers.</p>
+<p>Provides a comprehensive interface for language model integration
+with support for tools, memory, and messaging.</p>
+<dl class="simple">
+<dt>Type Parameters:</dt><dd><p>T: The type of generation output.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.BaseLLMProvider.generate">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grami_ai.core.interfaces.PromptTemplate" title="grami_ai.core.interfaces.PromptTemplate"><span class="pre">PromptTemplate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">tools</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#grami_ai.core.interfaces.AsyncTool" title="grami_ai.core.interfaces.AsyncTool"><span class="pre">AsyncTool</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncMemoryProvider" title="grami_ai.core.interfaces.AsyncMemoryProvider"><span class="pre">AsyncMemoryProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_integration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grami_ai.core.interfaces.AsyncKafkaIntegration" title="grami_ai.core.interfaces.AsyncKafkaIntegration"><span class="pre">AsyncKafkaIntegration</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">T</span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#BaseLLMProvider.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.BaseLLMProvider.generate" title="Link to this definition"></a></dt>
+<dd><p>Generate content using the language model.</p>
+<p>Comprehensive generation method supporting:
+- Customizable prompts
+- Tool integration
+- Memory management
+- Kafka messaging</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prompt</strong> (<a class="reference internal" href="#grami_ai.core.interfaces.PromptTemplate" title="grami_ai.core.interfaces.PromptTemplate"><em>PromptTemplate</em></a>) – Template for generation.</p></li>
+<li><p><strong>tools</strong> (<em>Optional</em><em>[</em><em>List</em><em>[</em><a class="reference internal" href="#grami_ai.core.interfaces.AsyncTool" title="grami_ai.core.interfaces.AsyncTool"><em>AsyncTool</em></a><em>]</em><em>]</em>) – Available tools.</p></li>
+<li><p><strong>memory</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#grami_ai.core.interfaces.AsyncMemoryProvider" title="grami_ai.core.interfaces.AsyncMemoryProvider"><em>AsyncMemoryProvider</em></a><em>]</em>) – Memory provider.</p></li>
+<li><p><strong>kafka_integration</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#grami_ai.core.interfaces.AsyncKafkaIntegration" title="grami_ai.core.interfaces.AsyncKafkaIntegration"><em>AsyncKafkaIntegration</em></a><em>]</em>) – Kafka integration.</p></li>
+<li><p><strong>**kwargs</strong> – Additional generation parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Generated content.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>T</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.ContextualPromptTemplate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.core.interfaces.</span></span><span class="sig-name descname"><span class="pre">ContextualPromptTemplate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#ContextualPromptTemplate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.ContextualPromptTemplate" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grami_ai.core.interfaces.PromptTemplate" title="grami_ai.core.interfaces.PromptTemplate"><code class="xref py py-class docutils literal notranslate"><span class="pre">PromptTemplate</span></code></a></p>
+<p>Advanced prompt template with context awareness.</p>
+<p>Extends PromptTemplate with intelligent context handling
+and dynamic content adaptation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.ContextualPromptTemplate.format">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#ContextualPromptTemplate.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.ContextualPromptTemplate.format" title="Link to this definition"></a></dt>
+<dd><p>Format prompt with intelligent context handling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>context</strong> (<em>Optional</em><em>[</em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>]</em>) – Additional context.</p></li>
+<li><p><strong>**kwargs</strong> – Additional formatting parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Formatted prompt string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.PromptTemplate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.core.interfaces.</span></span><span class="sig-name descname"><span class="pre">PromptTemplate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#PromptTemplate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.PromptTemplate" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Customizable prompt engineering template.</p>
+<p>Provides a flexible system for creating and formatting prompts
+with dynamic content and context-aware formatting.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.PromptTemplate.template">
+<span class="sig-name descname"><span class="pre">template</span></span><a class="headerlink" href="#grami_ai.core.interfaces.PromptTemplate.template" title="Link to this definition"></a></dt>
+<dd><p>The prompt template string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.core.interfaces.PromptTemplate.format">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/grami_ai/core/interfaces.html#PromptTemplate.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.core.interfaces.PromptTemplate.format" title="Link to this definition"></a></dt>
+<dd><p>Format the prompt template with given context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – Format parameters for template.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Formatted prompt string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="memory-management">
+<h2>Memory Management<a class="headerlink" href="#memory-management" title="Link to this heading"></a></h2>
+<p id="module-grami_ai.memory.memory">Grami AI Memory Management Module</p>
+<p>This module provides the core memory management functionality for the Grami AI framework.
+It includes abstract interfaces and concrete implementations for storing and managing
+conversation histories, agent states, and other persistent data.</p>
+<p>Key Features:
+- Abstract memory interface
+- In-memory implementation
+- Async operations
+- Conversation management
+- Type-safe storage</p>
+<p class="rubric">Example</p>
+<p><code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">memory</span> <span class="pre">=</span> <span class="pre">InMemoryAbstractMemory()</span>
+<span class="pre">await</span> <span class="pre">memory.add_item(&quot;conv1&quot;,</span> <span class="pre">{&quot;role&quot;:</span> <span class="pre">&quot;user&quot;,</span> <span class="pre">&quot;content&quot;:</span> <span class="pre">&quot;Hello&quot;})</span>
+<span class="pre">items</span> <span class="pre">=</span> <span class="pre">await</span> <span class="pre">memory.get_items(&quot;conv1&quot;)</span>
+<span class="pre">`</span></code></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.memory.memory.AbstractMemory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.memory.memory.</span></span><span class="sig-name descname"><span class="pre">AbstractMemory</span></span><a class="reference internal" href="_modules/grami_ai/memory/memory.html#AbstractMemory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.memory.memory.AbstractMemory" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for memory management in AI agents.</p>
+<p>Defines the core interface for storing and retrieving conversation history
+and other persistent data in the Grami AI framework. This class ensures
+consistent memory management across different implementations.</p>
+<p>All memory implementations must provide:
+- Async operations
+- Conversation-based storage
+- Clear memory management</p>
+<p class="rubric">Example</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
+class CustomMemory(AbstractMemory):</p>
+<blockquote>
+<div><dl class="simple">
+<dt>async def add_item(self, conversation_id, item):</dt><dd><p># Custom implementation
+pass</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.memory.memory.AbstractMemory.add_item">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conversation_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/grami_ai/memory/memory.html#AbstractMemory.add_item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.memory.memory.AbstractMemory.add_item" title="Link to this definition"></a></dt>
+<dd><p>Add an item to the memory for a specific conversation.</p>
+<p>This method should be implemented to store conversation items
+in a way that maintains order and allows for efficient retrieval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conversation_id</strong> (<em>str</em>) – Unique identifier for the conversation.
+Should be consistent across related operations.</p></li>
+<li><p><strong>item</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Item to be stored in memory.
+Typically contains ‘role’ and ‘content’ keys.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the item format is invalid.</p></li>
+<li><p><strong>RuntimeError</strong> – If storage operation fails.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.memory.memory.AbstractMemory.clear_conversation">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clear_conversation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conversation_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/grami_ai/memory/memory.html#AbstractMemory.clear_conversation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.memory.memory.AbstractMemory.clear_conversation" title="Link to this definition"></a></dt>
+<dd><p>Clear all items for a specific conversation.</p>
+<p>This operation is irreversible. Use with caution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conversation_id</strong> (<em>str</em>) – Unique identifier for the conversation.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – If clear operation fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.memory.memory.AbstractMemory.get_items">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conversation_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/grami_ai/memory/memory.html#AbstractMemory.get_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.memory.memory.AbstractMemory.get_items" title="Link to this definition"></a></dt>
+<dd><p>Retrieve all items for a specific conversation.</p>
+<p>Returns items in chronological order (oldest first).
+If no items exist for the conversation, returns an empty list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conversation_id</strong> (<em>str</em>) – Unique identifier for the conversation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>List of conversation items.</dt><dd><p>Each item is a dictionary containing at least:
+- role: str (e.g., “user”, “assistant”)
+- content: str</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Dict[str, Any]]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – If retrieval operation fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.memory.memory.InMemoryAbstractMemory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.memory.memory.</span></span><span class="sig-name descname"><span class="pre">InMemoryAbstractMemory</span></span><a class="reference internal" href="_modules/grami_ai/memory/memory.html#InMemoryAbstractMemory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.memory.memory.InMemoryAbstractMemory" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grami_ai.memory.memory.AbstractMemory" title="grami_ai.memory.memory.AbstractMemory"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractMemory</span></code></a></p>
+<p>In-memory implementation of AbstractMemory.</p>
+<p>Provides a lightweight, dictionary-based storage solution suitable for:
+- Development and testing
+- Short-lived applications
+- Prototype deployments</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This implementation stores all data in memory and is not persistent
+across application restarts. For production use with persistence
+requirements, consider using a database-backed implementation.</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grami_ai.memory.memory.InMemoryAbstractMemory._memory">
+<span class="sig-name descname"><span class="pre">_memory</span></span><a class="headerlink" href="#grami_ai.memory.memory.InMemoryAbstractMemory._memory" title="Link to this definition"></a></dt>
+<dd><p>Internal storage dictionary.
+Keys are conversation IDs, values are lists of conversation items.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, List[Dict[str, Any]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.memory.memory.InMemoryAbstractMemory.add_item">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conversation_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/grami_ai/memory/memory.html#InMemoryAbstractMemory.add_item"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.memory.memory.InMemoryAbstractMemory.add_item" title="Link to this definition"></a></dt>
+<dd><p>Add an item to the memory for a specific conversation.</p>
+<p>Creates a new conversation list if the ID doesn’t exist.
+Thread-safe for concurrent access.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conversation_id</strong> (<em>str</em>) – Unique identifier for the conversation.</p></li>
+<li><p><strong>item</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Item to be stored in memory.
+Must contain ‘role’ and ‘content’ keys.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If item lacks required keys.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.memory.memory.InMemoryAbstractMemory.clear_conversation">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clear_conversation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conversation_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/grami_ai/memory/memory.html#InMemoryAbstractMemory.clear_conversation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.memory.memory.InMemoryAbstractMemory.clear_conversation" title="Link to this definition"></a></dt>
+<dd><p>Clear all items for a specific conversation.</p>
+<p>Silently ignores non-existent conversation IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conversation_id</strong> (<em>str</em>) – Unique identifier for the conversation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.memory.memory.InMemoryAbstractMemory.get_items">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conversation_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/grami_ai/memory/memory.html#InMemoryAbstractMemory.get_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.memory.memory.InMemoryAbstractMemory.get_items" title="Link to this definition"></a></dt>
+<dd><p>Retrieve all items for a specific conversation.</p>
+<p>Returns a shallow copy of the items list to prevent
+external modifications to internal storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conversation_id</strong> (<em>str</em>) – Unique identifier for the conversation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of conversation items in chronological order.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Dict[str, Any]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="tools">
+<h2>Tools<a class="headerlink" href="#tools" title="Link to this heading"></a></h2>
+<section id="base-tools">
+<h3>Base Tools<a class="headerlink" href="#base-tools" title="Link to this heading"></a></h3>
+<p id="module-grami_ai.tools.base_tools">Grami AI Base Tools Module</p>
+<p>This module provides foundational async tools for the Grami AI framework,
+offering a comprehensive set of utility functions and base classes for
+building intelligent, asynchronous AI agents.</p>
+<p>Key Features:
+- Async tool base classes
+- Flexible tool design
+- Comprehensive error handling
+- Modular architecture</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.BaseTool">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.tools.base_tools.</span></span><span class="sig-name descname"><span class="pre">BaseTool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Logger</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#BaseTool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.BaseTool" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for all Grami AI tools.</p>
+<p>Provides a standardized interface for async tool implementation,
+ensuring consistent behavior across different tool types.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.BaseTool.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#grami_ai.tools.base_tools.BaseTool.name" title="Link to this definition"></a></dt>
+<dd><p>Unique identifier for the tool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.BaseTool.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#grami_ai.tools.base_tools.BaseTool.description" title="Link to this definition"></a></dt>
+<dd><p>Human-readable description of the tool’s purpose.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.BaseTool.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#grami_ai.tools.base_tools.BaseTool.logger" title="Link to this definition"></a></dt>
+<dd><p>Logging instance for the tool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>logging.Logger</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.BaseTool.run">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#BaseTool.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.BaseTool.run" title="Link to this definition"></a></dt>
+<dd><p>Abstract method to execute the tool’s primary functionality.</p>
+<p>Must be implemented by all subclasses to define the tool’s core logic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Variable positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Variable keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result of the tool’s execution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – If not implemented by subclass.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.BaseTool.validate_input">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#BaseTool.validate_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.BaseTool.validate_input" title="Link to this definition"></a></dt>
+<dd><p>Validate input parameters before tool execution.</p>
+<p>Provides a hook for input validation and preprocessing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Variable positional arguments to validate.</p></li>
+<li><p><strong>**kwargs</strong> – Variable keyword arguments to validate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if input is valid, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.CalculatorTool">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.tools.base_tools.</span></span><span class="sig-name descname"><span class="pre">CalculatorTool</span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#CalculatorTool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.CalculatorTool" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grami_ai.tools.base_tools.BaseTool" title="grami_ai.tools.base_tools.BaseTool"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTool</span></code></a></p>
+<p>A specialized async calculator tool for mathematical operations.</p>
+<p>Supports basic arithmetic operations with comprehensive error handling
+and logging.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">all</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">BaseTool.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.CalculatorTool.run">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#CalculatorTool.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.CalculatorTool.run" title="Link to this definition"></a></dt>
+<dd><p>Perform a mathematical operation asynchronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operation</strong> (<em>str</em>) – Mathematical operation to perform.
+Supported: ‘add’, ‘subtract’, ‘multiply’, ‘divide’</p></li>
+<li><p><strong>a</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>]</em>) – First operand.</p></li>
+<li><p><strong>b</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>]</em>) – Second operand.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result of the calculation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[int, float]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – For invalid operations or division by zero.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.CalculatorTool.validate_input">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#CalculatorTool.validate_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.CalculatorTool.validate_input" title="Link to this definition"></a></dt>
+<dd><p>Validate calculator input parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operation</strong> (<em>str</em>) – Mathematical operation.</p></li>
+<li><p><strong>a</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>]</em>) – First operand.</p></li>
+<li><p><strong>b</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>]</em>) – Second operand.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if inputs are valid, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.JSONParserTool">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.tools.base_tools.</span></span><span class="sig-name descname"><span class="pre">JSONParserTool</span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#JSONParserTool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.JSONParserTool" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grami_ai.tools.base_tools.BaseTool" title="grami_ai.tools.base_tools.BaseTool"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTool</span></code></a></p>
+<p>Async JSON parsing and manipulation tool</p>
+<p>Supports:
+- JSON parsing
+- JSON validation
+- JSON transformation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.JSONParserTool.run">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'parse'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#JSONParserTool.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.JSONParserTool.run" title="Link to this definition"></a></dt>
+<dd><p>Async JSON processing method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>json_data</strong> – JSON string to process</p></li>
+<li><p><strong>operation</strong> – Processing operation (parse, validate, transform)</p></li>
+<li><p><strong>**kwargs</strong> – Additional operation-specific parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Processed JSON data</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.StringManipulationTool">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.tools.base_tools.</span></span><span class="sig-name descname"><span class="pre">StringManipulationTool</span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#StringManipulationTool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.StringManipulationTool" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grami_ai.tools.base_tools.BaseTool" title="grami_ai.tools.base_tools.BaseTool"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTool</span></code></a></p>
+<p>Async string manipulation tool</p>
+<p>Supports:
+- Text transformations
+- String analysis
+- Text cleaning</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.StringManipulationTool.run">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'clean'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#StringManipulationTool.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.StringManipulationTool.run" title="Link to this definition"></a></dt>
+<dd><p>Async string processing method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> – Input text to process</p></li>
+<li><p><strong>operation</strong> – Processing operation</p></li>
+<li><p><strong>**kwargs</strong> – Additional operation-specific parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Processed text</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.WebScraperTool">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.tools.base_tools.</span></span><span class="sig-name descname"><span class="pre">WebScraperTool</span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#WebScraperTool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.WebScraperTool" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grami_ai.tools.base_tools.BaseTool" title="grami_ai.tools.base_tools.BaseTool"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTool</span></code></a></p>
+<p>Async web scraping tool</p>
+<p>Supports:
+- Fetching web content
+- Parsing HTML
+- Extracting specific elements</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grami_ai.tools.base_tools.WebScraperTool.run">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fetch'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#WebScraperTool.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grami_ai.tools.base_tools.WebScraperTool.run" title="Link to this definition"></a></dt>
+<dd><p>Async web scraping method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – URL to scrape</p></li>
+<li><p><strong>operation</strong> – Scraping operation</p></li>
+<li><p><strong>**kwargs</strong> – Additional operation-specific parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scraped content</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="calculator-tool">
+<h3>Calculator Tool<a class="headerlink" href="#calculator-tool" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.tools.base_tools.</span></span><span class="sig-name descname"><span class="pre">CalculatorTool</span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#CalculatorTool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grami_ai.tools.base_tools.BaseTool" title="grami_ai.tools.base_tools.BaseTool"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTool</span></code></a></p>
+<p>A specialized async calculator tool for mathematical operations.</p>
+<p>Supports basic arithmetic operations with comprehensive error handling
+and logging.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">all</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">BaseTool.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id9">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#CalculatorTool.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd><p>Perform a mathematical operation asynchronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operation</strong> (<em>str</em>) – Mathematical operation to perform.
+Supported: ‘add’, ‘subtract’, ‘multiply’, ‘divide’</p></li>
+<li><p><strong>a</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>]</em>) – First operand.</p></li>
+<li><p><strong>b</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>]</em>) – Second operand.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result of the calculation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[int, float]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – For invalid operations or division by zero.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#CalculatorTool.validate_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd><p>Validate calculator input parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operation</strong> (<em>str</em>) – Mathematical operation.</p></li>
+<li><p><strong>a</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>]</em>) – First operand.</p></li>
+<li><p><strong>b</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>float</em><em>]</em>) – Second operand.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if inputs are valid, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="string-manipulation-tool">
+<h3>String Manipulation Tool<a class="headerlink" href="#string-manipulation-tool" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="id11">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.tools.base_tools.</span></span><span class="sig-name descname"><span class="pre">StringManipulationTool</span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#StringManipulationTool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grami_ai.tools.base_tools.BaseTool" title="grami_ai.tools.base_tools.BaseTool"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTool</span></code></a></p>
+<p>Async string manipulation tool</p>
+<p>Supports:
+- Text transformations
+- String analysis
+- Text cleaning</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="id12">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'clean'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#StringManipulationTool.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
+<dd><p>Async string processing method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> – Input text to process</p></li>
+<li><p><strong>operation</strong> – Processing operation</p></li>
+<li><p><strong>**kwargs</strong> – Additional operation-specific parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Processed text</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="web-scraper-tool">
+<h3>Web Scraper Tool<a class="headerlink" href="#web-scraper-tool" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="id13">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grami_ai.tools.base_tools.</span></span><span class="sig-name descname"><span class="pre">WebScraperTool</span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#WebScraperTool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#grami_ai.tools.base_tools.BaseTool" title="grami_ai.tools.base_tools.BaseTool"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTool</span></code></a></p>
+<p>Async web scraping tool</p>
+<p>Supports:
+- Fetching web content
+- Parsing HTML
+- Extracting specific elements</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="id14">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fetch'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="_modules/grami_ai/tools/base_tools.html#WebScraperTool.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
+<dd><p>Async web scraping method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> – URL to scrape</p></li>
+<li><p><strong>operation</strong> – Scraping operation</p></li>
+<li><p><strong>**kwargs</strong> – Additional operation-specific parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scraped content</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Grami AI Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

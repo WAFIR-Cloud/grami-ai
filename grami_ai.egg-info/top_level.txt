@@ -1,0 +1,3 @@
+docs
+examples
+grami_ai
