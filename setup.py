@@ -5,31 +5,53 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="grami-ai",
-    version="0.1.105",
-    author="WAFIR CLOUD",
-    author_email="support@grami.social",
-    description="Open-source Python library for building AI-powered Instagram marketing tools with Gemini.",
-    # More specific description
+    version="0.1.0",
+    author="Feras Alawadi",
+    author_email="feras@wafircloud.com",
+    description="A flexible, LLM-agnostic AI agent framework",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/WAFIR-Cloud/grami-ai",
-    packages=find_packages(exclude=["tests"]),  # Exclude the tests directory
+    url="https://github.com/yourusername/grami-ai",
+    packages=find_packages(exclude=['tests*', 'Examples*']),
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.12",  # Add specific Python versions
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Development Status :: 3 - Alpha",  # Indicate development status
-        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
+    python_requires='>=3.8',
     install_requires=[
-        "setuptools",
-        "pytest",
-        "redis",
-        "pytest-asyncio",
-        "aiokafka",
-        "google-generativeai"
+        'asyncio',
     ],
-    python_requires=">=3.12",
+    extras_require={
+        'gemini': ['google-generativeai'],
+        'ollama': ['requests'],
+        'dev': [
+            'pytest',
+            'pytest-asyncio',
+            'mypy',
+            'black',
+            'flake8'
+        ]
+    },
+    keywords=[
+        'ai', 
+        'agent', 
+        'llm', 
+        'language-model', 
+        'generative-ai', 
+        'chatbot', 
+        'machine-learning'
+    ],
+    project_urls={
+        'Documentation': 'https://github.com/yourusername/grami-ai/blob/main/README.md',
+        'Source': 'https://github.com/yourusername/grami-ai',
+        'Tracker': 'https://github.com/yourusername/grami-ai/issues',
+    },
 )
