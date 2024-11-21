@@ -12,7 +12,6 @@ from grami_ai.agents.base_agent import BaseAgent
 from grami_ai.memory import AbstractMemory
 from grami_ai.tools.base_tools import AbstractTool
 from grami_ai.llms.base_llm import BaseLLMProvider
-from grami_ai.llms.ollama_llm import OllamaLLMProvider
 from grami_ai.core.logging import logger
 from grami_ai.llms.role import Role  # Import Role enum
 
@@ -30,8 +29,6 @@ class AsyncAgent(BaseAgent):
         self,
         tools: Optional[List[AbstractTool]] = None,
         memory: Optional[AbstractMemory] = None,
-        model: str = "llama2",  # Default to Ollama's llama2
-        provider_config: Optional[Dict[str, Any]] = None,
         llm_provider: Optional[BaseLLMProvider] = None,
         **kwargs: Any
     ) -> None:
@@ -41,29 +38,25 @@ class AsyncAgent(BaseAgent):
         Args:
             tools: List of tools available to the agent
             memory: Memory backend for conversation history
-            model: Model identifier to use
-            provider_config: Provider-specific configuration
-            llm_provider: Optional custom LLM provider
+            llm_provider: Required LLM provider for agent interactions
             **kwargs: Additional configuration options
+        
+        Raises:
+            ValueError: If no LLM provider is specified
         """
+        if llm_provider is None:
+            raise ValueError("An LLM provider must be explicitly specified during AsyncAgent initialization.")
+        
         # Initialize tools
         self.tools = tools or []
         
         # Initialize LLM provider
-        if llm_provider:
-            self.llm = llm_provider
-        else:
-            self.llm = OllamaLLMProvider(
-                model_name=model,
-                **(provider_config or {})
-            )
+        self.llm = llm_provider
         
         # Call parent initialization
         super().__init__(
             tools=self.tools,
             memory=memory,
-            model=model,
-            provider_config=provider_config,
             **kwargs
         )
     

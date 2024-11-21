@@ -1,142 +1,191 @@
-"""
-Example of using GRAMI AI with Google's Gemini for enterprise deployment.
-
-This example demonstrates how to use GRAMI with Gemini for enterprise-grade
-AI deployment with strong privacy controls and performance.
-"""
-
 import os
 import asyncio
 import logging
 from typing import Dict, Any, List
 
-from grami_ai.agent import AsyncAgent
+from grami_ai.agents import AsyncAgent
 from grami_ai.memory import InMemoryAbstractMemory
-from grami_ai.tools import WebScraperTool, CalculatorTool
-from grami_ai.core.config import settings
+from grami_ai.llms import GeminiLLMProvider
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Set Google API Key - REPLACE WITH YOUR ACTUAL API KEY
-os.environ['GOOGLE_API_KEY'] = 'YOUR_ACTUAL_GEMINI_API_KEY'
+# Set Google API Key
+os.environ['GOOGLE_API_KEY'] = 'api_key'
+
+# Pure Python function tools with clear, descriptive signatures
+def calculate(operation: str, a: str, b: str) -> str:
+    """
+    Perform mathematical calculations.
+    
+    Args:
+        operation (str): Type of mathematical operation
+        a (str): First numeric value
+        b (str): Second numeric value
+    
+    Returns:
+        str: Calculation result
+    """
+    try:
+        x, y = float(a), float(b)
+        
+        if operation == 'add':
+            return str(x + y)
+        elif operation == 'subtract':
+            return str(x - y)
+        elif operation == 'multiply':
+            return str(x * y)
+        elif operation == 'divide':
+            return str(x / y) if y != 0 else "Error: Division by zero"
+        else:
+            return f"Error: Unsupported operation {operation}"
+    except ValueError:
+        return "Error: Invalid numeric input"
+
+def analyze_market_potential(company_data: Dict[str, str]) -> str:
+    """
+    Analyze market potential based on company data.
+    
+    Args:
+        company_data (Dict[str, str]): Company financial and strategic information
+    
+    Returns:
+        str: Market potential analysis
+    """
+    try:
+        revenue = float(company_data.get('revenue', '0'))
+        employees = int(company_data.get('employees', '0'))
+        strategic_plans = company_data.get('strategic_plans', '')
+        
+        # Simple market potential scoring
+        market_score = 0
+        if revenue > 1000000:
+            market_score += 3
+        if employees > 50:
+            market_score += 2
+        if 'new markets' in strategic_plans.lower():
+            market_score += 2
+        
+        potential_categories = {
+            0: "Low Potential",
+            1: "Limited Potential",
+            2: "Moderate Potential",
+            3: "Good Potential",
+            4: "High Potential",
+            5: "Excellent Potential"
+        }
+        
+        return potential_categories.get(market_score, "Unknown Potential")
+    except Exception as e:
+        return f"Analysis Error: {str(e)}"
 
 class EnterpriseAgent:
-    """Enterprise agent with privacy controls and monitoring."""
+    """Enterprise agent with AI-driven analysis."""
     
     def __init__(self):
-        """Initialize enterprise agent."""
-        self.agent = AsyncAgent(
-            tools=[
-                WebScraperTool(),   # For market research
-                CalculatorTool()     # For financial analysis
-            ],
-            memory=InMemoryAbstractMemory(),
-            model="gemini-pro",
-            provider_config={
-                "api_key": settings.google_api_key,
-                "generation_config": {
-                    "temperature": 0.3,  # More deterministic for enterprise use
-                    "top_p": 0.9,
-                    "max_tokens": 2000
-                },
-                "safety_settings": [
-                    {
-                        "category": "HARM_CATEGORY_HATE_SPEECH",
-                        "threshold": "BLOCK_HIGH_AND_ABOVE"
-                    },
-                    {
-                        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                        "threshold": "BLOCK_HIGH_AND_ABOVE"
-                    }
-                ]
-            }
+        """Initialize enterprise agent with Gemini provider."""
+        # Create Gemini LLM provider
+        gemini_provider = GeminiLLMProvider(
+            api_key=os.environ['GOOGLE_API_KEY'],
+            model_name="models/gemini-1.5-flash",
+            system_instruction="You are an advanced enterprise AI analyst. "
+                               "Use the provided tools to analyze company data comprehensively. "
+                               "Break down complex problems and provide insightful recommendations."
         )
-        self.audit_log = []
+        
+        # Initialize agent with Gemini provider and tools
+        self.agent = AsyncAgent(
+            tools=[calculate, analyze_market_potential],  
+            memory=InMemoryAbstractMemory(),
+            llm_provider=gemini_provider
+        )
     
-    async def analyze_market_data(
-        self,
-        market_sectors: List[str],
-        timeframe: str
-    ) -> Dict[str, Any]:
-        """Analyze market data with privacy controls.
+    async def analyze_enterprise_data(self, sensitive_data: Dict[str, Any]) -> str:
+        """
+        Analyze enterprise data using AI-driven approach.
         
         Args:
-            market_sectors: List of sectors to analyze
-            timeframe: Time period for analysis
+            sensitive_data (Dict[str, Any]): Confidential enterprise data
         
         Returns:
-            Analysis results
+            str: Comprehensive enterprise analysis
         """
         try:
-            # Log operation for audit
-            self.audit_log.append({
-                "operation": "market_analysis",
-                "sectors": market_sectors,
-                "timeframe": timeframe,
-                "timestamp": asyncio.get_event_loop().time()
-            })
+            logger.info("Initiating enterprise data analysis...")
             
-            # Execute analysis
-            result = await self.agent.execute_task({
-                "objective": "Market Analysis",
-                "input": f"Analyze market trends for sectors {market_sectors} over {timeframe}",
-                "constraints": [
-                    "Only use publicly available data",
-                    "Follow data privacy regulations",
-                    "Maintain data residency requirements"
+            # Prepare task for AI analysis
+            task = {
+                'objective': 'Perform a comprehensive analysis of the company\'s financial and strategic position',
+                'context': 'You have access to financial data and strategic plans. Use the available tools to gain insights.',
+                'content': f"""
+Analyze the following company data:
+Financial Details:
+- Revenue: ${sensitive_data['company_financials']['revenue']}
+- Expenses: ${sensitive_data['company_financials']['expenses']}
+- Number of Employees: {sensitive_data['company_financials']['employees']}
+
+Strategic Plans:
+{', '.join(sensitive_data['strategic_plans'])}
+
+Use the available tools (calculate and analyze_market_potential) to:
+1. Perform financial calculations
+2. Assess market potential
+3. Provide strategic recommendations
+4. Explain your reasoning and tool usage
+""",
+                'data': sensitive_data,
+                'instructions': [
+                    'Analyze the financial performance',
+                    'Assess market potential',
+                    'Provide strategic recommendations',
+                    'Explain your reasoning and tool usage'
                 ]
-            })
-            
-            return {
-                "analysis": result,
-                "metadata": {
-                    "sectors": market_sectors,
-                    "timeframe": timeframe,
-                    "privacy_compliant": True
-                }
             }
             
+            # Execute task using AI agent
+            result = await self.agent.execute_task(task)
+            
+            logger.info("Enterprise data analysis completed successfully")
+            return result
+        
         except Exception as e:
-            logger.error(f"Analysis error: {str(e)}")
-            raise
+            logger.error(f"Error in enterprise data processing: {e}", exc_info=True)
+            return "Analysis failed due to processing error."
 
 async def main():
-    # Initialize enterprise agent
-    enterprise = EnterpriseAgent()
-    
-    # Example market analysis
-    sectors = ["AI/ML", "Cloud Computing", "Cybersecurity"]
-    timeframe = "last 6 months"
-    
-    logger.info(f"Analyzing {len(sectors)} sectors over {timeframe}...")
-    
+    """
+    Main async function to demonstrate AI-driven enterprise analysis.
+    """
     try:
-        result = await enterprise.analyze_market_data(sectors, timeframe)
+        # Simulated sensitive enterprise data
+        sensitive_data = {
+            'company_financials': {
+                'revenue': '1500000', 
+                'expenses': '1200000', 
+                'employees': '50'
+            },
+            'strategic_plans': [
+                'Expand to new markets',
+                'Develop proprietary technology', 
+                'Increase R&D investment'
+            ]
+        }
         
-        print("\nMarket Analysis Results:")
-        print(f"Sectors: {', '.join(sectors)}")
-        print(f"Timeframe: {timeframe}")
-        print("\nAnalysis:")
-        print(result["analysis"])
+        # Initialize enterprise agent
+        enterprise_agent = EnterpriseAgent()
         
-        # Show audit log
-        print("\nAudit Log:")
-        for entry in enterprise.audit_log:
-            print(f"Operation: {entry['operation']}")
-            print(f"Timestamp: {entry['timestamp']}")
-            print("---")
-            
+        # Analyze sensitive data
+        result = await enterprise_agent.analyze_enterprise_data(sensitive_data)
+        
+        print("\nEnterprise Analysis Result:")
+        print(result)
+        
+        logger.info("Enterprise analysis complete, AI-driven processing finished")
+    
     except Exception as e:
-        logger.error(f"Failed to complete analysis: {str(e)}")
-        raise
+        logger.error(f"Critical error in enterprise data processing: {e}", exc_info=True)
 
 if __name__ == "__main__":
-    # Configure settings
-    settings.configure(
-        log_level="INFO"
-    )
-    
     # Run the example
     asyncio.run(main())

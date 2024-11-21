@@ -225,6 +225,43 @@ result = await agent.execute_task(task)
 - Secure secrets management
 - Dynamic configuration updates
 
+## 🔐 API Configuration
+
+### Environment Variables
+
+To use GRAMI AI with external services, you'll need to set up environment variables:
+
+1. Copy `.env.example` to `.env`
+2. Fill in your API credentials
+
+```bash
+# Copy example environment file
+cp .env.example .env
+
+# Edit .env with your credentials
+nano .env
+```
+
+#### Required Environment Variables
+- `GOOGLE_SEARCH_API_KEY`: Google Custom Search API Key
+- `GOOGLE_GEMINI_API_KEY`: Google Gemini API Key
+- `GOOGLE_SEARCH_ENGINE_ID`: Google Custom Search Engine ID
+
+#### Security Best Practices
+- Never commit `.env` to version control
+- Use a `.gitignore` file to exclude sensitive files
+- Rotate API keys regularly
+- Use environment-specific configurations
+
+### API Key Management
+
+```python
+# Secure API key retrieval
+api_key = os.environ.get('YOUR_API_KEY')
+if not api_key:
+    raise ValueError("API key not found. Set the environment variable.")
+```
+
 ## 🔧 Development
 
 1. Clone the repository:
@@ -280,6 +317,50 @@ Grami AI is designed to revolutionize how developers build AI agents by providin
 - **Modular Architecture**: Plug-and-play components for tools, memory, and LLM providers
 - **Type Safety**: Comprehensive type hints and protocol-based interfaces
 - **Production Ready**: Built for reliability and scalability in real-world applications
+
+## 🌟 Advanced Use Cases
+
+### 🎨 Instagram Content Creation Agent
+
+GRAMI introduces a cutting-edge Instagram Content Creation Agent that leverages multi-stage web search and AI-driven content generation:
+
+```python
+from grami_ai.examples import InstagramContentAgent
+
+# Create content for sustainable fashion
+content_brief = {
+    'topic': 'Sustainable Fashion',
+    'target_audience': 'Millennials & Gen Z',
+    'tone': 'Inspirational and Authentic'
+}
+
+agent = InstagramContentAgent()
+content = await agent.create_instagram_content(content_brief)
+```
+
+**Key Features:**
+- Multi-stage web search for trend insights
+- AI-powered content generation
+- Platform-specific content variations
+- Comprehensive hashtag ecosystem
+- Interactive content strategies
+
+### 🔍 Content Generation Capabilities
+- Dynamic trend analysis
+- Multi-format content creation
+- Real-time web search integration
+- Adaptive content variations
+- Engagement-focused strategies
+
+## 🛠 Supported Platforms
+- Instagram
+- TikTok (Coming Soon)
+- YouTube Shorts (Coming Soon)
+
+## 📊 Analytics & Insights
+- Trend tracking
+- Engagement prediction
+- Content performance analysis
 
 ## Quick Start
 
