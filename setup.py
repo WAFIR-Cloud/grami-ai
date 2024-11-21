@@ -5,18 +5,17 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="grami-ai",
-    version="0.1.0",
-    author="Feras Alawadi",
-    author_email="feras@wafircloud.com",
-    description="A flexible, LLM-agnostic AI agent framework",
+    version="0.2.0",
+    author="Grami AI Team",
+    author_email="support@grami.ai",
+    description="Async AI Agent Framework",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/grami-ai",
+    url="https://github.com/grami-ai/framework",
     packages=find_packages(exclude=['tests*', 'Examples*']),
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.8",
@@ -27,15 +26,20 @@ setup(
     ],
     python_requires='>=3.8',
     install_requires=[
+        'aiokafka>=0.8.1',
+        'aioredis>=2.0.1',
         'asyncio',
+        'aiohttp>=3.8.4',
+        'beautifulsoup4>=4.12.2',
+        'typing-extensions>=4.5.0',
     ],
     extras_require={
         'gemini': ['google-generativeai'],
         'ollama': ['requests'],
         'dev': [
-            'pytest',
-            'pytest-asyncio',
-            'mypy',
+            'pytest>=7.3.1',
+            'pytest-asyncio>=0.21.0',
+            'mypy>=1.3.0',
             'black',
             'flake8'
         ]
@@ -47,7 +51,9 @@ setup(
         'language-model', 
         'generative-ai', 
         'chatbot', 
-        'machine-learning'
+        'machine-learning',
+        'async',
+        'tools'
     ],
     project_urls={
         'Documentation': 'https://github.com/yourusername/grami-ai/blob/main/README.md',

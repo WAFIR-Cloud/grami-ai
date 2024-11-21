@@ -1,184 +1,157 @@
-# 🚀 Grami AI: Flexible LLM Agent Framework
+# 🤖 Grami AI: Async AI Agent Framework
 
-## 🎯 Project Overview
-Grami AI is a cutting-edge Python library for building intelligent, flexible AI agents with seamless Language Model integration.
+## 🌟 Overview
 
-## ✨ Key Features
-- **LLM-Agnostic Design**: Easily switch between different Language Models
-- **Dynamic Agent Configuration**: Plug-and-play LLM providers
-- **Async Communication**: Non-blocking, high-performance interactions
-- **Modular Architecture**: Extensible and customizable
+Grami AI is a cutting-edge, flexible Python framework for building intelligent, asynchronous AI agents with comprehensive Language Model (LLM) integration.
 
-## 🔧 Installation
+## 🚀 Key Features
 
-### Prerequisites
-- Python 3.8+
-- pip
+- 🔄 Fully Asynchronous Design
+- 🧩 Modular Architecture
+- 🔒 Thread-Safe Operations
+- 📦 Multiple Backend Support
+- 🛠 Extensible Tool Ecosystem
 
-### Install via pip
+## 📦 Installation
+
 ```bash
 pip install grami-ai
 ```
 
-### Optional Dependencies
-- For Gemini Integration: `pip install grami-ai[gemini]`
-- For OLLAMA/LLAMA: `pip install grami-ai[ollama]`
+## 🛠 Tools Ecosystem
 
-## 🌐 Supported LLM Providers
-- Google Gemini
-- OLLAMA/LLAMA
-- Easy to add custom providers!
+### Base Tools
 
-## 💻 Comprehensive Usage Guide
+Grami AI provides a robust set of async tools for various operations:
 
-### 1. Basic Agent Creation
+#### Calculator Tool
 ```python
-import asyncio
-from grami_ai.agents.BaseAgent import BaseAgent
-from grami_ai.llms.gemini_llm import GeminiLLMProvider
-from grami_ai.memory.memory import InMemoryAbstractMemory
+from grami_ai.tools import CalculatorTool
 
-async def main():
-    # Create memory and LLM provider
-    memory = InMemoryAbstractMemory()
-    gemini_provider = GeminiLLMProvider(
-        api_key='YOUR_GOOGLE_AI_API_KEY',
-        model_name='gemini-pro'
+async def calculate():
+    calculator = CalculatorTool()
+    result = await calculator.execute('2 + 3 * 4')  # Returns 14.0
+```
+
+#### JSON Parser Tool
+```python
+from grami_ai.tools import JSONParserTool
+
+async def parse_json():
+    json_tool = JSONParserTool()
+    parsed = await json_tool.execute('{"name": "John"}')
+    filtered = await json_tool.execute(
+        '{"name": "John", "age": 30}', 
+        operation='transform', 
+        filter_keys=['name']
     )
+```
 
-    # Initialize agent
-    agent = BaseAgent(
-        llm_provider=gemini_provider,
-        memory=memory
+#### String Manipulation Tool
+```python
+from grami_ai.tools import StringManipulationTool
+
+async def manipulate_string():
+    string_tool = StringManipulationTool()
+    
+    # Clean text
+    cleaned = await string_tool.execute("  Hello   World!  ")
+    
+    # Count words
+    word_count = await string_tool.execute("Text", operation='count_words')
+    
+    # Reverse text
+    reversed_text = await string_tool.execute("Hello", operation='reverse')
+    
+    # Capitalize text
+    capitalized = await string_tool.execute(
+        "hello world", 
+        operation='capitalize', 
+        mode='all'
     )
-
-    # Send a message
-    response = await agent.send_message("Hello, how are you?")
-    print(response)
-
-asyncio.run(main())
 ```
 
-### 2. Advanced Agent Configuration
+#### Web Scraper Tool
 ```python
-# Custom configuration with generation parameters
-agent = BaseAgent(
-    llm_provider=gemini_provider,
-    memory=memory,
-    tools=[CustomTool1(), CustomTool2()],
-    generation_config={
-        'temperature': 0.7,
-        'max_tokens': 1024,
-        'top_p': 0.9
-    }
-)
+from grami_ai.tools import WebScraperTool
+
+async def scrape_web():
+    web_tool = WebScraperTool()
+    
+    # Fetch content
+    content = await web_tool.execute('https://example.com')
+    
+    # Parse text
+    parsed_text = await web_tool.execute(
+        'https://example.com', 
+        operation='parse'
+    )
 ```
 
-### 3. Creating a Custom LLM Provider
+### Memory Providers
+
+#### In-Memory Memory
 ```python
-from grami_ai.llms.base_llm import BaseLLMProvider
+from grami_ai.memory import AsyncInMemoryMemory
 
-class MyCustomLLMProvider(BaseLLMProvider):
-    async def start_chat(self, system_instruction=None):
-        # Initialize your custom LLM connection
-        pass
-
-    async def send_message(self, message):
-        # Implement message sending logic
-        pass
-
-    async def format_history(self, conversation_history):
-        # Custom history formatting
-        pass
+async def use_memory():
+    memory = AsyncInMemoryMemory(max_size=100)
+    await memory.add_item('conversation_1', {'role': 'user', 'content': 'Hello'})
+    items = await memory.get_items('conversation_1')
 ```
 
-## 🚀 Implementation Strategies
-
-### Dependency Injection
+#### Redis Memory
 ```python
-# Inject different components dynamically
-memory_strategy = RedisMemory() if use_redis else InMemoryAbstractMemory()
-llm_provider = select_llm_provider(provider_type)
+from grami_ai.memory import AsyncRedisMemory
 
-agent = BaseAgent(
-    llm_provider=llm_provider,
-    memory=memory_strategy
-)
+async def use_redis_memory():
+    memory = AsyncRedisMemory(redis_url='redis://localhost:6379')
+    await memory.add_item('conversation_1', {'role': 'user', 'content': 'Hello'})
+    items = await memory.get_items('conversation_1')
 ```
 
-### Tool Integration
-```python
-class CalculatorTool:
-    def calculate(self, expression):
-        # Implement calculation logic
-        return eval(expression)
+## 📋 Requirements
 
-# Add tool to agent
-agent.add_tool(CalculatorTool())
+- Python 3.8+
+- asyncio
+- aioredis (optional)
+- aiohttp (optional)
+- beautifulsoup4 (optional)
+
+## 🔧 Development
+
+### Setup
+```bash
+git clone https://github.com/grami-ai/framework.git
+cd grami-ai
+pip install -e .[dev]
 ```
 
-## 🔬 Advanced Techniques
-
-### Conversation Context Management
-```python
-# Persist and retrieve conversation context
-conversation_id = 'unique_conversation_123'
-await memory.add_item(conversation_id, {'role': 'user', 'content': 'Hello'})
-history = await memory.get_items(conversation_id)
+### Running Tests
+```bash
+pytest
 ```
-
-## 🚧 Future Development Roadmap
-
-### Planned Features
-1. 🌈 More LLM Provider Integrations
-   - OpenAI GPT
-   - Anthropic Claude
-   - Mistral AI
-   - Local model support expansion
-
-2. 🛠 Enhanced Tool Ecosystem
-   - Pre-built tools for common tasks
-   - Enhanced tool discovery and management
-   - Better tool composition and chaining
-
-3. 🧠 Advanced Memory Backends
-   - Distributed memory storage
-   - Persistent memory solutions
-   - Machine learning-enhanced memory retrieval
-
-4. 📊 Monitoring and Observability
-   - Conversation analytics
-   - Performance tracking
-   - Detailed logging and tracing
-
-5. 🔒 Security Enhancements
-   - Advanced input sanitization
-   - Configurable safety filters
-   - Comprehensive error handling
-
-### Research Directions
-- Multi-modal agent interactions
-- Reinforcement learning for agent behavior
-- Cross-language model collaboration
-- Ethical AI development practices
 
 ## 🤝 Contributing
 
-### Ways to Contribute
-1. Report Bugs
-2. Suggest Enhancements
-3. Submit Pull Requests
-4. Improve Documentation
-5. Create Example Use Cases
-
-### Contribution Guidelines
-- Follow PEP 8 Style Guide
-- Write Comprehensive Tests
-- Document New Features
-- Maintain Backward Compatibility
+We welcome contributions! Please see our contribution guidelines.
 
 ## 📄 License
-MIT License - Empowering Open-Source AI Innovation
 
-## 🌟 Star the Project!
-If you find Grami AI useful, please give us a star on GitHub!
+MIT License
+
+## 🌐 Project Links
+
+- Documentation: [GitHub README](https://github.com/grami-ai/framework/blob/main/README.md)
+- Source Code: [GitHub Repository](https://github.com/grami-ai/framework)
+- Issue Tracker: [GitHub Issues](https://github.com/grami-ai/framework/issues)
+
+## 💡 Future Roadmap
+
+- Expand LLM provider implementations
+- Enhance tool ecosystem
+- Develop more memory backends
+- Improve documentation
+- Add comprehensive testing
+- Performance optimization
+- More example use cases
