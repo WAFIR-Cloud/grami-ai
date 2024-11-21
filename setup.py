@@ -42,6 +42,12 @@ setup(
             'mypy>=1.3.0',
             'black',
             'flake8'
+        ],
+        'docs': [
+            'sphinx>=4.5.0',
+            'sphinx-rtd-theme>=1.0.0',
+            'sphinx-autodoc-typehints>=1.18.3',
+            'sphinxcontrib-napoleon>=0.7'
         ]
     },
     keywords=[
@@ -56,8 +62,8 @@ setup(
         'tools'
     ],
     project_urls={
-        'Documentation': 'https://github.com/yourusername/grami-ai/blob/main/README.md',
-        'Source': 'https://github.com/yourusername/grami-ai',
-        'Tracker': 'https://github.com/yourusername/grami-ai/issues',
+        'Documentation': 'https://grami-ai.readthedocs.io/',
+        'Source': 'https://github.com/grami-ai/framework',
+        'Tracker': 'https://github.com/grami-ai/framework/issues',
     },
 )

@@ -110,6 +110,111 @@ async def use_redis_memory():
     items = await memory.get_items('conversation_1')
 ```
 
+## 🚀 Comprehensive Examples
+
+Grami AI provides rich, real-world example scripts to demonstrate the framework's capabilities:
+
+### 1. 🔬 AI Research Assistant
+`examples/ai_research_assistant.py`
+
+A sophisticated research workflow that showcases:
+- Async tool composition
+- Web scraping
+- Text processing
+- Memory management
+- Complex research automation
+
+```python
+async def main():
+    research_assistant = AIResearchAssistant()
+    research_results = await research_assistant.research_topic(
+        "Artificial Intelligence in Scientific Research"
+    )
+```
+
+### 2. 📊 Data Analysis Pipeline
+`examples/data_analysis_pipeline.py`
+
+An advanced data analysis tool demonstrating:
+- Stock data retrieval
+- Web scraping
+- JSON parsing
+- Statistical calculations
+- Async data processing
+
+```python
+async def main():
+    pipeline = DataAnalysisPipeline()
+    analysis_results = await pipeline.analyze_stock_data('AAPL')
+```
+
+### 3. 🌐 Multi-Tool Global Trend Analysis
+`examples/multi_tool_workflow.py`
+
+A complex workflow showcasing:
+- Parallel topic research
+- Async data gathering
+- Comprehensive trend analysis
+- Tool interaction and synthesis
+
+```python
+async def main():
+    workflow = MultiToolWorkflow()
+    global_trends = await workflow.analyze_global_trends([
+        "Artificial Intelligence",
+        "Climate Change",
+        "Renewable Energy"
+    ])
+```
+
+### 🖥️ Running Examples
+
+To run the example scripts, ensure you have the necessary dependencies:
+
+```bash
+# Install optional dependencies for web scraping
+pip install aiohttp beautifulsoup4
+
+# Run specific example scripts
+python examples/ai_research_assistant.py
+python examples/data_analysis_pipeline.py
+python examples/multi_tool_workflow.py
+```
+
+**Note**: Some examples involve web scraping and may require:
+- Active internet connection
+- Handling potential network-related exceptions
+- Respecting website terms of service
+
+### 🎓 Learning Paths
+
+These examples demonstrate different aspects of the Grami AI framework:
+- **Beginners**: Start with individual tool usage
+- **Intermediate**: Explore tool composition
+- **Advanced**: Study complex async workflows
+
+### 🚀 Quick Start
+
+1. Clone the repository
+2. Install dependencies
+3. Explore and run example scripts
+4. Modify and adapt to your use cases
+
+```bash
+git clone https://github.com/grami-ai/framework.git
+cd grami-ai
+pip install -e .
+python examples/ai_research_assistant.py
+```
+
+## 💡 Example Highlights
+
+- **Async-First Design**: Non-blocking, high-performance operations
+- **Modular Architecture**: Easily extensible and customizable
+- **Tool Composition**: Seamless integration of multiple tools
+- **Memory Management**: Efficient context tracking
+- **Error Handling**: Robust and informative error management
+
 ## 📋 Requirements
 
 - Python 3.8+

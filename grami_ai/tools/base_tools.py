@@ -1,108 +1,189 @@
+"""
+Grami AI Base Tools Module
+
+This module provides foundational async tools for the Grami AI framework,
+offering a comprehensive set of utility functions and base classes for 
+building intelligent, asynchronous AI agents.
+
+Key Features:
+- Async tool base classes
+- Flexible tool design
+- Comprehensive error handling
+- Modular architecture
+"""
+
 import asyncio
 import json
-import re
-from typing import Any, Dict, Optional
+import logging
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional, Union
 
-from grami_ai.core.interfaces import AsyncTool
+class BaseTool(ABC):
+    """
+    Abstract base class for all Grami AI tools.
 
-class BaseTool(AsyncTool):
+    Provides a standardized interface for async tool implementation,
+    ensuring consistent behavior across different tool types.
+
+    Attributes:
+        name (str): Unique identifier for the tool.
+        description (str): Human-readable description of the tool's purpose.
+        logger (logging.Logger): Logging instance for the tool.
     """
-    Base implementation for async tools
-    
-    Provides:
-    - Async execution
-    - Input validation
-    - Error handling
-    - Logging support
-    """
-    
+
     def __init__(
         self, 
         name: str, 
-        description: Optional[str] = None
+        description: str, 
+        logger: Optional[logging.Logger] = None
     ):
         """
-        Initialize a base tool
-        
+        Initialize a base tool with name, description, and optional logger.
+
         Args:
-            name: Tool name
-            description: Optional tool description
+            name (str): Unique name for the tool.
+            description (str): Detailed description of the tool's functionality.
+            logger (Optional[logging.Logger], optional): Custom logger. 
+                Defaults to None, which creates a default logger.
         """
         self.name = name
-        self.description = description or f"Tool for {name} operations"
-    
-    async def execute(self, *args: Any, **kwargs: Any) -> Any:
+        self.description = description
+        self.logger = logger or logging.getLogger(f"grami_ai.tools.{name}")
+
+    @abstractmethod
+    async def run(self, *args: Any, **kwargs: Any) -> Any:
         """
-        Base async execution method
-        
+        Abstract method to execute the tool's primary functionality.
+
+        Must be implemented by all subclasses to define the tool's core logic.
+
         Args:
-            *args: Positional arguments
-            **kwargs: Keyword arguments
-        
+            *args: Variable positional arguments.
+            **kwargs: Variable keyword arguments.
+
         Returns:
-            Execution result
+            Any: Result of the tool's execution.
+
+        Raises:
+            NotImplementedError: If not implemented by subclass.
         """
-        raise NotImplementedError("Subclasses must implement execute method")
+        raise NotImplementedError(f"Tool {self.name} must implement run() method")
+
+    async def validate_input(self, *args: Any, **kwargs: Any) -> bool:
+        """
+        Validate input parameters before tool execution.
+
+        Provides a hook for input validation and preprocessing.
+
+        Args:
+            *args: Variable positional arguments to validate.
+            **kwargs: Variable keyword arguments to validate.
+
+        Returns:
+            bool: True if input is valid, False otherwise.
+        """
+        return True
+
+    def __str__(self) -> str:
+        """
+        String representation of the tool.
+
+        Returns:
+            str: Tool's name and description.
+        """
+        return f"Tool: {self.name} - {self.description}"
 
 class CalculatorTool(BaseTool):
     """
-    Async calculator tool with advanced parsing
-    
-    Supports:
-    - Basic arithmetic
-    - Complex expressions
-    - Error handling
+    A specialized async calculator tool for mathematical operations.
+
+    Supports basic arithmetic operations with comprehensive error handling
+    and logging.
+
+    Attributes:
+        Inherits all attributes from BaseTool.
     """
-    
+
     def __init__(self):
+        """
+        Initialize the CalculatorTool with predefined name and description.
+        """
         super().__init__(
             name="calculator", 
-            description="Perform mathematical calculations"
+            description="Perform mathematical calculations asynchronously"
         )
-    
-    async def execute(self, expression: str) -> float:
+
+    async def run(
+        self, 
+        operation: str, 
+        a: Union[int, float], 
+        b: Union[int, float]
+    ) -> Union[int, float]:
         """
-        Async calculation method
-        
+        Perform a mathematical operation asynchronously.
+
         Args:
-            expression: Mathematical expression to evaluate
-        
+            operation (str): Mathematical operation to perform.
+                Supported: 'add', 'subtract', 'multiply', 'divide'
+            a (Union[int, float]): First operand.
+            b (Union[int, float]): Second operand.
+
         Returns:
-            Calculation result
-        
+            Union[int, float]: Result of the calculation.
+
         Raises:
-            ValueError: For invalid expressions
+            ValueError: For invalid operations or division by zero.
         """
-        # Simulate async work
-        await asyncio.sleep(0.1)
-        
-        # Sanitize and validate expression
-        sanitized_expr = self._sanitize_expression(expression)
-        
+        await asyncio.sleep(0.1)  # Simulate async operation
+
+        if not await self.validate_input(operation, a, b):
+            raise ValueError("Invalid input parameters")
+
         try:
-            result = eval(sanitized_expr)
-            return float(result)
-        except (SyntaxError, TypeError, ZeroDivisionError) as e:
-            raise ValueError(f"Invalid calculation: {e}")
-    
-    def _sanitize_expression(self, expression: str) -> str:
+            if operation == 'add':
+                return a + b
+            elif operation == 'subtract':
+                return a - b
+            elif operation == 'multiply':
+                return a * b
+            elif operation == 'divide':
+                if b == 0:
+                    raise ValueError("Division by zero")
+                return a / b
+            else:
+                raise ValueError(f"Unsupported operation: {operation}")
+        except Exception as e:
+            self.logger.error(f"Calculation error: {e}")
+            raise
+
+    async def validate_input(
+        self, 
+        operation: str, 
+        a: Union[int, float], 
+        b: Union[int, float]
+    ) -> bool:
         """
-        Sanitize mathematical expression
-        
+        Validate calculator input parameters.
+
         Args:
-            expression: Raw expression string
-        
+            operation (str): Mathematical operation.
+            a (Union[int, float]): First operand.
+            b (Union[int, float]): Second operand.
+
         Returns:
-            Sanitized expression
+            bool: True if inputs are valid, False otherwise.
         """
-        # Remove whitespace
-        expression = expression.replace(' ', '')
+        valid_operations = ['add', 'subtract', 'multiply', 'divide']
         
-        # Validate characters
-        if not re.match(r'^[0-9+\-*/().]+$', expression):
-            raise ValueError("Invalid characters in expression")
+        if operation not in valid_operations:
+            self.logger.warning(f"Invalid operation: {operation}")
+            return False
         
-        return expression
+        if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+            self.logger.warning("Operands must be numeric")
+            return False
+        
+        return True
 
 class JSONParserTool(BaseTool):
     """
@@ -120,7 +201,7 @@ class JSONParserTool(BaseTool):
             description="Parse and manipulate JSON data"
         )
     
-    async def execute(
+    async def run(
         self, 
         json_data: str, 
         operation: str = 'parse',
@@ -196,7 +277,7 @@ class StringManipulationTool(BaseTool):
             description="Perform advanced string operations"
         )
     
-    async def execute(
+    async def run(
         self, 
         text: str, 
         operation: str = 'clean',
@@ -284,7 +365,7 @@ class WebScraperTool(BaseTool):
             description="Fetch and parse web content"
         )
     
-    async def execute(
+    async def run(
         self, 
         url: str, 
         operation: str = 'fetch',

@@ -12,7 +12,7 @@ async def main():
     # Create a BaseAgent using Gemini LLM with a configuration dictionary
     agent = BaseAgent(
         llm_provider={
-            'api_key': os.getenv('GOOGLE_AI_API_KEY', ''),
+            'api_key': os.getenv('GOOGLE_AI_API_KEY', 'your_api_key_here'),
             'model_name': 'models/gemini-1.5-flash',
             'system_instruction': 'You are a helpful AI assistant.',
         },
