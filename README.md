@@ -160,6 +160,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+- YAFATEK Solutions - The company behind GRAMI AI
 - The amazing open-source community
 - All our contributors and users
 
