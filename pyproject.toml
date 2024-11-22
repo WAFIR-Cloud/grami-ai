@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "grami-ai"
+version = "0.3.0"
+description = "Growth and Relationship AI Management Infrastructure"
+readme = "README.md"
+requires-python = ">=3.9,<4.0"
+license = {text = "MIT"}
+authors = [
+    {name = "YAFATek Solutions", email = "contact@yafatek.com"}
+]
+keywords = [
+    "ai", "agent", "framework", "marketing", 
+    "async", "generative-ai", "llm", 
+    "machine-learning", "artificial-intelligence"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.4",
+    "pytest-asyncio>=0.23.2",
+    "mypy>=1.8.0",
+    "ruff>=0.2.2",
+    "coverage>=7.4.3",
+]
+docs = [
+    "sphinx>=7.2.6",
+    "sphinx-rtd-theme>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/YAFATek/grami-ai"
+Repository = "https://github.com/YAFATek/grami-ai"
+Issues = "https://github.com/YAFATek/grami-ai/issues"
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "ANN", "ASYNC"]
+ignore = ["ANN101", "ANN102"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+
+[tool.coverage.run]
+source = ["grami_ai"]
+omit = [
+    "tests/*",
+    "examples/*",
+]
+
+[tool.black]
+line-length = 120
+target-version = ['py39']

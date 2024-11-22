@@ -1,0 +1,27 @@
+[bandit]
+# Skip specific tests
+skips: B101,B201,B301
+
+# Exclude specific paths
+exclude_dirs: tests,examples,docs
+
+# Confidence levels to include
+confidence: HIGH,MEDIUM
+
+# Severity levels to include
+severity: HIGH,MEDIUM
+
+# Ignore certain types of issues
+ignore-nosec: true
+
+# Additional configuration
+[python]
+version: 3.10
+
+# Specific test configurations
+[test_injection]
+no_sql_injection: true
+no_shell_injection: true
+
+[hardcoded_passwords]
+secret_regex: (?i)password|pass|secret|key
