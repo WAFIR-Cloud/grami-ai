@@ -1,4 +1,4 @@
-grami-ai==0.2.309
+grami-ai==0.2.310
 python-dotenv
 redis
 google-generativeai
