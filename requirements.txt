@@ -1,36 +1,29 @@
-# Core Python Requirements
-python>=3.10,<3.12
-
 # LLM Providers
-google-generativeai
 openai
 anthropic
-ollama
-# Add Gemini AI dependencies
 google-generativeai
+ollama
 
 # Async Libraries
-asyncio
 aiohttp
+asyncio
 
-# Optional Dependencies
-sentence-transformers  # For semantic similarity
-scikit-learn  # For additional ML capabilities
-
-# Web Search Tool
-google-api-python-client
-
-# Development and Testing
-pytest-asyncio
-mypy
-ruff  # Linting
-black  # Formatting
+# Configuration and Settings
+pydantic
+pydantic-settings
 
 # Optional Integrations
-aioredis  # Redis support
-aiokafka  # Kafka support
-websockets  # WebSocket support
-sphinx
-sphinx-rtd-theme
-sphinx-autodoc-typehints
-sphinxcontrib-napoleon
+redis
+fastapi
+uvicorn
+google-api-python-client
+
+# Utility Libraries
+tenacity
+typing-extensions
+
+# Logging and Debugging
+rich
+
+# Optional Tools
+websockets
