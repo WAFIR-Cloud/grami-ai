@@ -2,39 +2,39 @@
 -r requirements.txt
 
 # Testing
-pytest>=7.4.4
-pytest-asyncio>=0.23.2
-pytest-cov>=4.1.0
-coverage>=7.4.3
+pytest
+pytest-asyncio
+pytest-cov
+coverage
 
 # Type Checking
-mypy>=1.8.0
+mypy
 types-all
 
 # Linting and Formatting
-ruff>=0.2.2
-black>=24.2.0
-isort>=5.13.2
+ruff
+black
+isort
 
 # Security Scanning
-bandit>=1.7.7
-safety>=3.0.1
+bandit
+safety
 
 # Documentation
-sphinx>=7.2.6
-sphinx-rtd-theme>=2.0.0
-sphinx-autodoc-typehints>=2.0.0
+sphinx
+sphinx-rtd-theme
+sphinx-autodoc-typehints
 
 # Performance and Profiling
-memory-profiler>=0.61.0
-line-profiler>=4.1.1
+memory-profiler
+line-profiler
 
 # Debugging
-ipdb>=0.13.13
-pudb>=2022.1.3
+ipdb
+pudb
 
 # Benchmarking
-pytest-benchmark>=4.0.0
+pytest-benchmark
 
 # Type Stubs
 types-requests
