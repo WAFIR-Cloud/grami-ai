@@ -23,10 +23,10 @@ setup(
     version="0.3.0",
     
     # Metadata
-    author="YAFATek Solutions",
-    author_email="contact@yafatek.com",
+    author="YAFATek Solutions/ GRAMI AI Team",
+    author_email="support@yafatek.com",
     maintainer="YAFATek Solutions",
-    maintainer_email="contact@yafatek.com",
+    maintainer_email="supprt@yafatek.com",
     
     # Project Description
     description="Growth and Relationship AI Management Infrastructure",
@@ -34,11 +34,11 @@ setup(
     long_description_content_type="text/markdown",
     
     # Project URLs
-    url="https://github.com/YAFATek/grami-ai",
+    url="https://github.com/WAFIR-Cloud/grami-ai",
     project_urls={
-        "Bug Tracker": "https://github.com/YAFATek/grami-ai/issues",
-        "Documentation": "https://github.com/YAFATek/grami-ai/blob/main/README.md",
-        "Source Code": "https://github.com/YAFATek/grami-ai",
+        "Bug Tracker": "https://github.com/WAFIR-Cloud/grami-ai/issues",
+        "Documentation": "https://github.com/WAFIR-Cloud/grami-ai/blob/main/README.md",
+        "Source Code": "https://github.com/WAFIR-Cloud/grami-ai",
     },
     
     # Package Discovery
@@ -55,7 +55,6 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
@@ -78,7 +77,7 @@ setup(
     ],
     
     # Python Version and Dependencies
-    python_requires='>=3.9,<4.0',
+    python_requires='>=3.10,<3.13',
     
     # Install Requirements
     install_requires=[

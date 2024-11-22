@@ -124,13 +124,24 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ## 📄 License
 
-MIT License, Copyright (c) 2024 YAFATek Solutions
+MIT License, Copyright (c) 2024 WAFIR-Cloud
 
 ## 📞 Contact
 
 For support, collaboration, or inquiries:
-- Email: contact@yafatek.com
-- GitHub: [YAFATek/grami-ai](https://github.com/YAFATek/grami-ai)
+- Email: contact@wafir-cloud.com
+- GitHub: [WAFIR-Cloud/grami-ai](https://github.com/WAFIR-Cloud/grami-ai)
+
+## Repository Information
+
+**Repository:** [WAFIR-Cloud/grami-ai](https://github.com/WAFIR-Cloud/grami-ai)
+**Issues:** [GitHub Issues](https://github.com/WAFIR-Cloud/grami-ai/issues)
+**Documentation:** [README](https://github.com/WAFIR-Cloud/grami-ai/blob/main/README.md)
+
+## Python Compatibility
+
+- **Supported Python Versions:** 3.10 - 3.12
+- **Recommended Python Version:** 3.11
 
 ## 🌐 Roadmap
 
@@ -142,4 +153,4 @@ For support, collaboration, or inquiries:
 
 ## 🏆 Acknowledgements
 
-Built with ❤️ by YAFATek Solutions, pushing the boundaries of AI-powered solutions.
+Built with ❤️ by WAFIR-Cloud, pushing the boundaries of AI-powered solutions.

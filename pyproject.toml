@@ -7,10 +7,10 @@ name = "grami-ai"
 version = "0.3.0"
 description = "Growth and Relationship AI Management Infrastructure"
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<3.13"
 license = {text = "MIT"}
 authors = [
-    {name = "YAFATek Solutions", email = "contact@yafatek.com"}
+    {name = "WAFIR-Cloud", email = "support@wafir.cloud"}
 ]
 keywords = [
     "ai", "agent", "framework", "marketing", 
@@ -23,7 +23,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -46,21 +45,21 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/YAFATek/grami-ai"
-Repository = "https://github.com/YAFATek/grami-ai"
-Issues = "https://github.com/YAFATek/grami-ai/issues"
+Homepage = "https://github.com/WAFIR-Cloud/grami-ai"
+Repository = "https://github.com/WAFIR-Cloud/grami-ai"
+Issues = "https://github.com/WAFIR-Cloud/grami-ai/issues"
 
 [tool.ruff]
 line-length = 120
 indent-width = 4
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "ANN", "ASYNC"]
 ignore = ["ANN101", "ANN102"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -81,4 +80,4 @@ omit = [
 
 [tool.black]
 line-length = 120
-target-version = ['py39']
+target-version = ['py310']
