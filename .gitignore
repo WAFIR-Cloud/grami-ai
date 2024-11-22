@@ -59,9 +59,15 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# Environments
+# Environment Files
 .env
-.venv
+*.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Environments
 env/
 venv/
 ENV/

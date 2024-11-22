@@ -4,156 +4,104 @@
 
 GRAMI-AI is an open-source AI agent framework developed by YAFATek Solutions. We're excited to have you contribute to our project and help shape the future of AI-powered solutions!
 
-## 🎯 Our Vision
+## 🤝 Welcome Contributors!
 
-To create a flexible, powerful async AI agent framework that:
-- Empowers developers to build intelligent solutions
-- Provides modular, extensible architecture
-- Supports multiple LLM providers
-- Enables seamless integration of AI tools
+Thank you for your interest in contributing to GRAMI AI! We're excited to have you join our community.
 
-## 🚀 Ways to Contribute
+## 🚀 How to Contribute
 
-### 1. Code Contributions
-- Implement new features
-- Fix bugs
-- Improve documentation
-- Enhance performance
-- Add new LLM providers
-- Create additional tools
+### 1. Code of Conduct
 
-### 2. Non-Code Contributions
-- Report bugs
-- Suggest improvements
-- Write tutorials
-- Improve documentation
-- Share use cases
-- Provide feedback
+Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## 🛠 Development Setup
+### 2. Development Setup
 
-### Prerequisites
-- Python 3.9+
-- Git
-- Virtual environment support
+1. Fork the repository
+2. Clone your fork
+3. Create a virtual environment
+4. Install development dependencies:
 
-### Environment Setup
 ```bash
-# Clone the repository
-git clone https://github.com/YAFATek/grami-ai.git
-cd grami-ai
-
-# Create virtual environment
-python3 -m venv venv
+python -m venv venv
 source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
-## 🧪 Development Workflow
+### 3. Development Workflow
 
-### 1. Find an Issue
-- Check [GitHub Issues](https://github.com/YAFATek/grami-ai/issues)
-- Look for "good first issue" or "help wanted" labels
+- Create a new branch for your feature or bugfix
+- Follow our coding standards
+- Write tests for your changes
+- Run tests before submitting a PR
 
-### 2. Fork and Branch
 ```bash
-# Fork on GitHub
-# Clone your fork
-git clone https://github.com/your-username/grami-ai.git
-cd grami-ai
-
-# Create a descriptive branch
-git checkout -b feature/add-new-llm-provider
-```
-
-### 3. Coding Guidelines
-- Follow PEP 8 style guide
-- Use type hints
-- Write comprehensive docstrings
-- Maintain async programming patterns
-- Add unit tests for new functionality
-
-### 4. Code Checks
-```bash
-# Run linters
-ruff check .
-
-# Type checking
-mypy grami_ai
-
 # Run tests
-pytest tests/
+pytest
 
-# Check test coverage
-coverage run -m pytest
-coverage report
+# Run linters
+flake8
+mypy
 ```
 
-### 5. Commit and Push
-```bash
-# Stage changes
-git add .
+### 4. Contribution Types
 
-# Commit with descriptive message
-git commit -m "Add new LLM provider: X with async support"
+We welcome various types of contributions:
 
-# Push to your fork
-git push origin feature/add-new-llm-provider
-```
+- 🐛 Bug reports
+- 📝 Documentation improvements
+- 🚀 Feature enhancements
+- 🛠 Tool development
+- 🌐 Internationalization
 
-### 6. Create Pull Request
-- Open a PR against the `main` branch
-- Describe changes thoroughly
-- Link related issues
-- Pass all CI checks
+### 5. Submitting a Pull Request
 
-## 📋 Contribution Types
+1. Ensure your code follows our style guide
+2. Update documentation
+3. Add tests for new functionality
+4. Describe your changes in the PR description
 
-### 1. Bug Reports
+### 6. Code Review Process
+
+- PRs are reviewed by maintainers
+- We may request changes or provide feedback
+- Aim for clean, readable, and well-documented code
+
+### 7. Development Guidelines
+
+#### Async Programming
+- Use `async`/`await` consistently
+- Avoid blocking operations
+- Leverage Python's asyncio ecosystem
+
+#### Tool Development
+- Extend `AsyncBaseTool`
+- Provide comprehensive metadata
+- Implement robust error handling
+
+#### Testing
+- Use `pytest-asyncio`
+- Cover edge cases
+- Maintain high test coverage
+
+### 8. Reporting Issues
+
 - Use GitHub Issues
-- Provide detailed description
+- Provide a clear, concise description
 - Include reproduction steps
-- Share error logs and environment details
+- Share relevant code snippets or logs
 
-### 2. Feature Requests
-- Explain the use case
-- Describe proposed implementation
-- Discuss potential impact
+### 9. Feature Requests
 
-### 3. Documentation
-- Improve docstrings
-- Update README
-- Create tutorials and examples
-- Translate documentation
+- Open an issue with the "feature" label
+- Describe the proposed feature
+- Explain its value to the project
 
-### 4. Performance Improvements
-- Optimize async operations
-- Reduce memory consumption
-- Improve tool execution speed
+## 🌟 Recognition
 
-## 🤝 Code of Conduct
-
-1. Be respectful and inclusive
-2. Provide constructive feedback
-3. Collaborate openly
-4. Prioritize community well-being
-
-## 💡 Review Process
-
-- PRs reviewed by maintainers
-- Automated CI checks
-- Code quality assessment
-- Performance and security evaluation
-
-## 🏆 Recognition
-
-Contributors will be:
-- Credited in documentation
-- Featured in release notes
-- Considered for future opportunities
+Contributors will be recognized in our:
+- README
+- Documentation
+- Release notes
 
 ## 📞 Contact
 

@@ -20,7 +20,7 @@ def package_files(directory):
 
 setup(
     name="grami-ai",
-    version="0.3.0",
+    version="0.3.101",
     
     # Metadata
     author="YAFATek Solutions/ GRAMI AI Team",

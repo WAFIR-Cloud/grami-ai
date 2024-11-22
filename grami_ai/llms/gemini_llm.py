@@ -70,12 +70,36 @@ class GeminiLLMProvider(BaseLLMProvider):
             ))
     
     async def start_chat(
-        self,
+        self, 
         tools: Optional[List[ToolDefinition]] = None,
-        **provider_specific_params
+        system_prompt: Optional[str] = None,
+        **kwargs
     ):
-        """Start a new chat session."""
-        self.chat = self.model.start_chat()
+        """
+        Enhanced chat initialization with advanced configuration
+        
+        Supports dynamic tool injection and system prompts
+        """
+        # Use provided or default system prompt
+        prompt = system_prompt or self.system_instruction
+        
+        # Prepare tools
+        prepared_tools = self._prepare_tools_for_provider(tools or self.tools)
+        
+        # Create Gemini model with enhanced configuration
+        model = genai.GenerativeModel(
+            model_name=self.model_name,
+            tools=prepared_tools,
+            safety_settings=self._configure_safety_settings(),
+            generation_config=self._configure_generation_config(),
+            system_instruction=prompt
+        )
+        
+        # Start chat with configured model
+        self.chat = model.start_chat(
+            enable_automatic_function_calling=True,
+            **kwargs
+        )
         self.messages = []
         
         # Add system instruction if provided
@@ -209,3 +233,45 @@ class GeminiLLMProvider(BaseLLMProvider):
         """
         # Similar to generate, but uses streaming
         pass  # TODO: Implement streaming generation
+    
+    def _configure_safety_settings(self) -> List[Dict[str, str]]:
+        """
+        Configure advanced safety settings for Gemini
+        
+        Provides granular control over content filtering
+        """
+        return [
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+        ]
+    
+    def _configure_generation_config(self) -> genai.GenerationConfig:
+        """
+        Create flexible generation configuration
+        
+        Supports dynamic adjustment of generation parameters
+        """
+        return genai.GenerationConfig(
+            max_output_tokens=4000,
+            temperature=0.5,
+            top_p=0.95,
+            top_k=64,
+            response_mime_type="text/plain",
+        )
+    
+    def count_tokens(self, messages: List[Message]) -> int:
+        """
+        Count tokens for a list of messages
+        
+        Provides provider-specific token counting
+        """
+        # Convert messages to Gemini-compatible format
+        gemini_messages = [
+            {"role": msg.role.name.lower(), "parts": [{"text": msg.content}]}
+            for msg in messages
+        ]
+        
+        # Use Gemini's token counting
+        return self.model.count_tokens(gemini_messages).total_tokens

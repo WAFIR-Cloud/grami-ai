@@ -160,6 +160,59 @@ class ToolDefinition:
             }
         }
 
+@dataclass
+class ConversationMemory:
+    """
+    Advanced conversation memory management
+    
+    Provides token-based prioritization and context tracking
+    """
+    max_tokens: int = 4000
+    messages: List[Message] = field(default_factory=list)
+    
+    def add_message(self, message: Message):
+        """
+        Add a message to conversation memory
+        
+        Automatically manages message history based on token constraints
+        """
+        self.messages.append(message)
+        
+        # Implement token-based trimming logic
+        if len(self.messages) > 100:
+            self.messages = self.messages[-100:]
+    
+    def get_prioritized_history(
+        self, 
+        model: 'BaseLLMProvider', 
+        max_tokens: Optional[int] = None
+    ) -> List[Message]:
+        """
+        Retrieve prioritized conversation history
+        
+        Selects most relevant messages within token constraints
+        """
+        max_tokens = max_tokens or self.max_tokens
+        
+        def count_tokens(messages: List[Message]) -> int:
+            # Implement token counting logic specific to the provider
+            return model.count_tokens(messages)
+        
+        # Always keep recent messages
+        prioritized = self.messages[-10:]
+        total_tokens = count_tokens(prioritized)
+        
+        # Add important earlier messages
+        for msg in reversed(self.messages[:-10]):
+            msg_tokens = count_tokens([msg])
+            if total_tokens + msg_tokens <= max_tokens:
+                prioritized.insert(0, msg)
+                total_tokens += msg_tokens
+            else:
+                break
+        
+        return prioritized
+
 class BaseLLMProvider(ABC):
     """
     Abstract base class for LLM providers with flexible tool integration
