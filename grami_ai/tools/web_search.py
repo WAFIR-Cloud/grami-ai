@@ -54,41 +54,66 @@ class GoogleWebSearchTool(AsyncBaseTool):
                 "Set GOOGLE_SEARCH_API_KEY and GOOGLE_SEARCH_ENGINE_ID environment variables."
             )
     
-    async def _execute(
+    async def generate(
         self, 
-        task: str, 
-        context: Optional[Dict[str, Any]] = None
+        query: str, 
+        num_results: int = 5, 
+        **kwargs
     ) -> Dict[str, Any]:
         """
-        Execute web search using Google Custom Search API
+        Perform a web search using Google Custom Search API
         
         Args:
-            task: Search query
-            context: Additional search context (e.g., max_results)
+            query: Search query string
+            num_results: Number of search results to return (max 10)
+            **kwargs: Additional search parameters
         
         Returns:
-            Structured search results
-        """
-        max_results = context.get('max_results', 5) if context else 5
+            Dictionary containing search results
         
-        async with aiohttp.ClientSession() as session:
-            try:
-                params = {
-                    'key': self.api_key,
-                    'cx': self.search_engine_id,
-                    'q': task,
-                    'num': max_results
-                }
-                
-                async with session.get('https://www.googleapis.com/customsearch/v1', params=params) as response:
+        Raises:
+            ToolConfigurationError: If API credentials are missing
+            ToolExecutionError: If search request fails
+        """
+        # Validate configuration
+        if not self.api_key or not self.search_engine_id:
+            raise ToolConfigurationError(
+                "Missing Google Search API credentials. "
+                "Set GOOGLE_SEARCH_API_KEY and GOOGLE_SEARCH_ENGINE_ID environment variables."
+            )
+        
+        # Prepare search parameters
+        params = {
+            'key': self.api_key,
+            'cx': self.search_engine_id,
+            'q': query,
+            'num': min(num_results, 10)  # Google API limit
+        }
+        
+        # Optional additional parameters
+        if 'language' in kwargs:
+            params['lr'] = f'lang_{kwargs["language"]}'
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    'https://www.googleapis.com/customsearch/v1', 
+                    params=params
+                ) as response:
+                    # Check for successful response
                     if response.status != 200:
-                        raise ToolExecutionError(f"Search API returned status {response.status}")
+                        error_text = await response.text()
+                        raise ToolExecutionError(
+                            f"Google Search API request failed. Status: {response.status}. "
+                            f"Error: {error_text}"
+                        )
                     
-                    data = await response.json()
+                    # Parse search results
+                    search_data = await response.json()
                     
-                    # Extract and structure search results
+                    # Extract relevant information
                     results = []
-                    for item in data.get('items', []):
+                    for item in search_data.get('items', []):
                         results.append({
                             'title': item.get('title', ''),
                             'link': item.get('link', ''),
@@ -96,16 +121,15 @@ class GoogleWebSearchTool(AsyncBaseTool):
                         })
                     
                     return {
-                        'query': task,
-                        'total_results': len(results),
+                        'query': query,
+                        'total_results': search_data.get('searchInformation', {}).get('totalResults', 0),
                         'results': results
                     }
-            
-            except aiohttp.ClientError as e:
-                raise ToolExecutionError(f"Network error during web search: {str(e)}")
-            except Exception as e:
-                raise ToolExecutionError(f"Unexpected error in web search: {str(e)}")
-    
+        except aiohttp.ClientError as e:
+            raise ToolExecutionError(f"Network error during web search: {e}")
+        except Exception as e:
+            raise ToolExecutionError(f"Unexpected error during web search: {e}")
+
     def get_parameters(self) -> Dict[str, Any]:
         """
         Define web search parameters
@@ -119,7 +143,7 @@ class GoogleWebSearchTool(AsyncBaseTool):
                 "description": "Search query to perform",
                 "required": True
             },
-            "max_results": {
+            "num_results": {
                 "type": "integer",
                 "description": "Maximum number of search results",
                 "default": 5,
@@ -127,6 +151,3 @@ class GoogleWebSearchTool(AsyncBaseTool):
                 "max": 10
             }
         }
-
-# Register the tool with the global registry
-tool_registry.register_tool(GoogleWebSearchTool())

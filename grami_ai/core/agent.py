@@ -6,6 +6,7 @@ It enables easy creation of AI agents with different capabilities and interfaces
 """
 
 import asyncio
+import logging
 from typing import List, Optional, Any, Dict, Callable, Union, Type
 from enum import Enum
 
@@ -189,8 +190,45 @@ class AsyncAgent:
         3. When to use memory
         4. How to format response
         """
-        # Implementation for LLM-driven message processing
-        pass
+        # Log the incoming message
+        logger.info(f"Processing message: {message}")
+        
+        # Check if it's a content request
+        if isinstance(message, dict) and message.get('type') == 'content_request':
+            # Find the appropriate tool for content generation
+            content_tool = next((tool for tool in self.tools if tool.name == 'content_generation'), None)
+            
+            if content_tool:
+                try:
+                    # Generate content using the tool
+                    content = await content_tool.generate(
+                        platform=message.get('platform', 'instagram'),
+                        niche=message.get('niche', 'general'),
+                        content_type=message.get('content_type', 'post')
+                    )
+                    
+                    return {
+                        'status': 'success',
+                        'content': content
+                    }
+                except Exception as e:
+                    logger.error(f"Error generating content: {e}")
+                    return {
+                        'status': 'error',
+                        'message': str(e)
+                    }
+            else:
+                logger.warning("No content generation tool found")
+                return {
+                    'status': 'error',
+                    'message': 'No content generation tool available'
+                }
+        
+        # Default response for unhandled message types
+        return {
+            'status': 'error',
+            'message': 'Unsupported message type'
+        }
     
     async def start(self) -> None:
         """Start the agent's interface."""

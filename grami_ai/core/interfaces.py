@@ -442,21 +442,37 @@ class WebSocketInterface(AgentInterface):
         self.server_task = None
         self.server = None
         
+        # Explicitly define the WebSocket endpoint
         @self.app.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
-            await websocket.accept()
+            print(f"WebSocket connection attempt received")
             try:
+                await websocket.accept()
+                print(f"WebSocket connection accepted")
+                
                 while True:
-                    data = await websocket.receive_json()
-                    if self.agent:
+                    try:
+                        data = await websocket.receive_json()
+                        print(f"Received data: {data}")
+                        
+                        if not self.agent:
+                            print("Agent not initialized")
+                            await websocket.send_json({"error": "Agent not initialized"})
+                            continue
+                        
                         response = await self.agent.process(data)
+                        print(f"Sending response: {response}")
                         await websocket.send_json(response)
-            except WebSocketDisconnect:
-                print("Client disconnected")
+                    except json.JSONDecodeError:
+                        print("Invalid JSON received")
+                        await websocket.send_json({"error": "Invalid JSON"})
+                    except Exception as e:
+                        print(f"Error processing WebSocket message: {e}")
+                        await websocket.send_json({"error": str(e)})
             except Exception as e:
-                print(f"WebSocket error: {e}")
+                print(f"WebSocket connection error: {e}")
                 try:
-                    await websocket.close()
+                    await websocket.close(code=1011)  # Internal server error
                 except:
                     pass
     
