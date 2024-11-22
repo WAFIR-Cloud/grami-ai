@@ -139,4 +139,4 @@ For support, collaboration, or inquiries:
 
 ## 🏆 Acknowledgements
 
-Built with ❤️ by WAFIR-Cloud, pushing the boundaries of AI-powered solutions.
+Built with ❤️ by YAFATek Solutions, pushing the boundaries of AI-powered solutions.
