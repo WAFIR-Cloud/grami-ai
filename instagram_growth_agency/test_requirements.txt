@@ -1,3 +1,5 @@
-aiokafka==0.8.1
-grami-ai==0.1.0
-python-dotenv==1.0.0
+grami-ai==0.2.309
+python-dotenv
+redis
+google-generativeai
+rich

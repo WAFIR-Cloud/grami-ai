@@ -39,14 +39,14 @@ mkdocs-material>=9.1.18
 mkdocstrings[python]>=0.22.0
 
 [monitoring]
-opentelemetry-sdk>=1.19.0
-opentelemetry-api>=1.19.0
 prometheus-client>=0.17.0
 opentelemetry-instrumentation>=0.40b0
+opentelemetry-sdk>=1.19.0
+opentelemetry-api>=1.19.0
 
 [storage]
 alembic>=1.11.1
 motor>=3.1.1
+asyncpg>=0.28.0
 sqlalchemy>=2.0.0
 pymongo>=4.3.3
-asyncpg>=0.28.0
