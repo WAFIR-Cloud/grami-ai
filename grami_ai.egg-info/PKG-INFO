@@ -45,16 +45,16 @@ Requires-Dist: openai>=1.12.0
 Requires-Dist: anthropic>=0.18.1
 Requires-Dist: google-generativeai>=0.3.0
 Provides-Extra: storage
-Requires-Dist: alembic>=1.11.1; extra == "storage"
-Requires-Dist: motor>=3.1.1; extra == "storage"
 Requires-Dist: asyncpg>=0.28.0; extra == "storage"
 Requires-Dist: sqlalchemy>=2.0.0; extra == "storage"
 Requires-Dist: pymongo>=4.3.3; extra == "storage"
+Requires-Dist: motor>=3.1.1; extra == "storage"
+Requires-Dist: alembic>=1.11.1; extra == "storage"
 Provides-Extra: monitoring
 Requires-Dist: prometheus-client>=0.17.0; extra == "monitoring"
 Requires-Dist: opentelemetry-instrumentation>=0.40b0; extra == "monitoring"
-Requires-Dist: opentelemetry-sdk>=1.19.0; extra == "monitoring"
 Requires-Dist: opentelemetry-api>=1.19.0; extra == "monitoring"
+Requires-Dist: opentelemetry-sdk>=1.19.0; extra == "monitoring"
 Provides-Extra: dev
 Requires-Dist: pytest>=7.3.1; extra == "dev"
 Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
