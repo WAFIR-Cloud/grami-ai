@@ -1,5 +1,5 @@
 # Core Python Requirements
-python>=3.10,<3.13
+python>=3.10,<3.12
 
 # LLM Providers
 google-generativeai
