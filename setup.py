@@ -1,18 +1,54 @@
 from setuptools import setup, find_packages
+import os
 
+# Read the README.md
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
+
+# Read requirements from requirements.txt
+def read_requirements(filename):
+    with open(filename, 'r') as file:
+        return [line.strip() for line in file if line.strip() and not line.startswith('#')]
+
+# Determine package data files
+def package_files(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join('..', path, filename))
+    return paths
 
 setup(
     name="grami-ai",
     version="0.3.0",
-    author="Grami AI Team",
-    author_email="support@grami.ai",
-    description="Flexible Multi-Agent AI Framework with Advanced WebSocket Communication",
+    
+    # Metadata
+    author="YAFATek Solutions",
+    author_email="contact@yafatek.com",
+    maintainer="YAFATek Solutions",
+    maintainer_email="contact@yafatek.com",
+    
+    # Project Description
+    description="Growth and Relationship AI Management Infrastructure",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/grami-ai/framework",
+    
+    # Project URLs
+    url="https://github.com/YAFATek/grami-ai",
+    project_urls={
+        "Bug Tracker": "https://github.com/YAFATek/grami-ai/issues",
+        "Documentation": "https://github.com/YAFATek/grami-ai/blob/main/README.md",
+        "Source Code": "https://github.com/YAFATek/grami-ai",
+    },
+    
+    # Package Discovery
     packages=find_packages(exclude=['tests*', 'examples*', 'docs*']),
+    package_data={
+        'grami_ai': package_files('grami_ai'),
+    },
+    include_package_data=True,
+    
+    # Classifiers
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
@@ -25,76 +61,76 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        "Framework :: AsyncIO",
+        "Topic :: Internet :: WWW/HTTP",
     ],
+    
+    # Keywords
     keywords=[
         "ai", 
-        "async", 
-        "websocket", 
-        "multi-agent", 
-        "content-generation", 
-        "machine-learning"
+        "agent", 
+        "framework", 
+        "marketing", 
+        "async",
+        "generative-ai",
+        "llm",
+        "machine-learning",
+        "artificial-intelligence"
     ],
-    python_requires='>=3.9',
+    
+    # Python Version and Dependencies
+    python_requires='>=3.9,<4.0',
+    
+    # Install Requirements
     install_requires=[
         # Core Async and Web Libraries
-        'asyncio',
         'aiohttp>=3.9.3',
-        'websockets>=12.0',
+        'aioredis>=2.0.1',
+        'aiokafka>=0.9.1',
         'fastapi>=0.110.0',
         'uvicorn>=0.27.1',
 
-        # Configuration and Environment
-        'python-dotenv>=1.0.1',
-        'pydantic>=2.6.4',
-        'pydantic-settings>=2.2.1',
-
         # Data Processing and Utilities
-        'typing-extensions>=4.10.0',
-        'tenacity>=8.2.3',
-        'aiofiles>=23.2.1',
-        'pillow>=10.2.0',
         'beautifulsoup4>=4.12.3',
-
-        # Authentication and Security
-        'python-jose[cryptography]>=3.3.0',
-        'passlib[bcrypt]>=1.7.4',
-        'python-multipart>=0.0.9',
-
-        # Templating and Rendering
-        'jinja2>=3.1.3',
+        'typing-extensions>=4.10.0',
+        'pydantic>=2.6.0',
+        'python-dotenv>=1.0.0',
 
         # LLM and AI Providers
         'openai>=1.14.3',
         'anthropic>=0.20.0',
         'google-generativeai>=0.4.1',
+        'ollama>=0.1.6',
+
+        # Logging and Monitoring
+        'structlog>=24.1.0',
 
         # Optional but Recommended
-        'redis>=5.0.3',  # For backend memory management
+        'redis>=5.0.1',
     ],
+    
+    # Optional Dependencies
     extras_require={
         'dev': [
             'pytest>=7.4.4',
-            'pytest-asyncio>=0.23.3',
-            'mypy>=1.9.0',
-            'ruff>=0.3.3',
-            'black>=24.3.0',
+            'pytest-asyncio>=0.23.2',
+            'mypy>=1.8.0',
+            'ruff>=0.2.2',
+            'coverage>=7.4.3',
         ],
         'docs': [
-            'mkdocs>=1.5.3',
-            'mkdocstrings[python]>=0.24.0',
+            'sphinx>=7.2.6',
+            'sphinx-rtd-theme>=2.0.0',
         ],
     },
+    
+    # Entry Points
     entry_points={
         'console_scripts': [
             'grami-ai=grami_ai.cli:main',
         ],
     },
-    project_urls={
-        'Documentation': 'https://github.com/grami-ai/framework/docs',
-        'Source': 'https://github.com/grami-ai/framework',
-        'Tracker': 'https://github.com/grami-ai/framework/issues',
-    },
-    include_package_data=True,
-    zip_safe=False
+    
+    # Metadata
+    zip_safe=False,
+    license='MIT',
 )

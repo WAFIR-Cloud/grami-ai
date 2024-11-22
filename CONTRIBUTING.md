@@ -1,127 +1,170 @@
-# Contributing to Grami AI 🤝
+# Contributing to GRAMI-AI 🤝
 
-## Welcome Contributors! 
+## 🌟 Welcome Contributors!
 
-Grami AI is an open-source project that thrives on community collaboration. We welcome contributions from developers, researchers, and AI enthusiasts worldwide.
+GRAMI-AI is an open-source AI agent framework developed by YAFATek Solutions. We're excited to have you contribute to our project and help shape the future of AI-powered solutions!
 
-## 🌟 Our Vision
+## 🎯 Our Vision
 
-To create a flexible, powerful async AI agent framework that empowers developers to build intelligent solutions with ease.
+To create a flexible, powerful async AI agent framework that:
+- Empowers developers to build intelligent solutions
+- Provides modular, extensible architecture
+- Supports multiple LLM providers
+- Enables seamless integration of AI tools
 
-## 🚀 How to Contribute
+## 🚀 Ways to Contribute
 
 ### 1. Code Contributions
+- Implement new features
+- Fix bugs
+- Improve documentation
+- Enhance performance
+- Add new LLM providers
+- Create additional tools
 
-#### Setting Up Your Environment
+### 2. Non-Code Contributions
+- Report bugs
+- Suggest improvements
+- Write tutorials
+- Improve documentation
+- Share use cases
+- Provide feedback
+
+## 🛠 Development Setup
+
+### Prerequisites
+- Python 3.9+
+- Git
+- Virtual environment support
+
+### Environment Setup
 ```bash
-# Fork the repository
-git clone https://github.com/your-username/grami-ai.git
+# Clone the repository
+git clone https://github.com/YAFATek/grami-ai.git
 cd grami-ai
 
-# Create a virtual environment
-python -m venv venv
+# Create virtual environment
+python3 -m venv venv
 source venv/bin/activate
 
-# Install development dependencies
+# Install dependencies
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
-#### Development Workflow
-1. Create a new branch
+## 🧪 Development Workflow
+
+### 1. Find an Issue
+- Check [GitHub Issues](https://github.com/YAFATek/grami-ai/issues)
+- Look for "good first issue" or "help wanted" labels
+
+### 2. Fork and Branch
 ```bash
-git checkout -b feature/your-feature-name
+# Fork on GitHub
+# Clone your fork
+git clone https://github.com/your-username/grami-ai.git
+cd grami-ai
+
+# Create a descriptive branch
+git checkout -b feature/add-new-llm-provider
 ```
 
-2. Make your changes
-- Follow PEP 8 style guidelines
+### 3. Coding Guidelines
+- Follow PEP 8 style guide
+- Use type hints
 - Write comprehensive docstrings
-- Add type hints
-- Include unit tests
+- Maintain async programming patterns
+- Add unit tests for new functionality
 
-3. Run checks before committing
+### 4. Code Checks
 ```bash
 # Run linters
 ruff check .
 
-# Run type checking
+# Type checking
 mypy grami_ai
 
 # Run tests
 pytest tests/
+
+# Check test coverage
+coverage run -m pytest
+coverage report
 ```
 
-### 2. Types of Contributions
+### 5. Commit and Push
+```bash
+# Stage changes
+git add .
 
-We welcome:
-- Bug fixes
-- New features
-- Documentation improvements
-- Tool implementations
-- Performance optimizations
-- Test coverage enhancements
+# Commit with descriptive message
+git commit -m "Add new LLM provider: X with async support"
 
-### 3. Contribution Areas
+# Push to your fork
+git push origin feature/add-new-llm-provider
+```
 
-#### 🧩 Tool Development
-- Create new async tools
-- Improve existing tool implementations
-- Add support for new platforms/services
+### 6. Create Pull Request
+- Open a PR against the `main` branch
+- Describe changes thoroughly
+- Link related issues
+- Pass all CI checks
 
-#### 🌐 LLM Provider Integration
-- Add support for new language models
-- Improve existing provider implementations
-- Create provider-specific optimizations
+## 📋 Contribution Types
 
-#### 📚 Documentation
-- Improve README
+### 1. Bug Reports
+- Use GitHub Issues
+- Provide detailed description
+- Include reproduction steps
+- Share error logs and environment details
+
+### 2. Feature Requests
+- Explain the use case
+- Describe proposed implementation
+- Discuss potential impact
+
+### 3. Documentation
+- Improve docstrings
+- Update README
 - Create tutorials and examples
-- Write API documentation
+- Translate documentation
 
-### 4. Submission Process
+### 4. Performance Improvements
+- Optimize async operations
+- Reduce memory consumption
+- Improve tool execution speed
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Write tests
-5. Ensure all checks pass
-6. Submit a Pull Request
+## 🤝 Code of Conduct
 
-### 5. Code of Conduct
+1. Be respectful and inclusive
+2. Provide constructive feedback
+3. Collaborate openly
+4. Prioritize community well-being
 
-- Be respectful and inclusive
-- Provide constructive feedback
-- Collaborate openly
-- Prioritize community needs
+## 💡 Review Process
+
+- PRs reviewed by maintainers
+- Automated CI checks
+- Code quality assessment
+- Performance and security evaluation
 
 ## 🏆 Recognition
 
 Contributors will be:
-- Listed in CONTRIBUTORS.md
-- Recognized in release notes
-- Potentially invited to core team discussions
+- Credited in documentation
+- Featured in release notes
+- Considered for future opportunities
 
 ## 📞 Contact
 
-- Open an issue for bugs/suggestions
-- Join our Discord community
-- Email: contributors@grami-ai.org
+- Email: contribute@yafatek.com
+- Discord: [GRAMI-AI Community](https://discord.gg/your-discord-link)
+- GitHub Discussions
 
-## 🔒 Security
+## 📄 License
 
-If you discover a security vulnerability:
-1. Do NOT open a public issue
-2. Email security@grami-ai.org
-3. Provide detailed information
-4. Expect a response within 48 hours
+By contributing, you agree to license your contributions under the MIT License.
 
-## 💡 Feature Requests
+---
 
-Have an idea? 
-1. Check existing issues
-2. Open a new issue with:
-   - Clear description
-   - Use case
-   - Potential implementation approach
-
-Thank you for helping make Grami AI amazing! 🚀
+🌈 Thank you for helping make GRAMI-AI better!

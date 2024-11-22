@@ -1,102 +1,145 @@
-# Grami AI Framework
+# GRAMI-AI: Growth and Relationship AI Management Infrastructure
 
-## Overview
+## 🚀 Overview
 
-Grami AI is a flexible, multi-agent AI framework designed for advanced WebSocket communication and intelligent content generation. Built with an async-first approach, the framework provides a modular and extensible architecture for creating sophisticated AI-powered applications.
+GRAMI-AI is an advanced, async-first AI agent framework designed to revolutionize collaborative marketing solutions. Built with flexibility, modularity, and scalability in mind, this library empowers developers to create intelligent, context-aware AI agents.
 
-## 🚀 Key Features
+## 🌟 Key Features
 
-- **Async-First Design**: Leveraging Python's async capabilities for high-performance operations
-- **Modular Tool System**: Easily extensible tool-based architecture
-- **WebSocket Communication**: Robust, real-time communication interface
-- **Content Generation**: AI-powered content creation for multiple platforms
-- **Flexible Configuration**: Minimal setup, environment-variable driven
+### 1. Async-First Architecture
+- High-performance, non-blocking agent interactions
+- Designed for scalable, concurrent AI operations
 
-## 🛠 Installation
+### 2. Modular Design
+- Easily extensible components for:
+  - Language Models (LLMs)
+  - Memory Providers
+  - Tools and Interfaces
+  - Event Streaming
 
-### Prerequisites
-- Python 3.12+
-- pip
-- Redis (for backend memory management)
+### 3. Multi-Provider Support
+- LLM Providers:
+  - Google Gemini
+  - OpenAI
+  - Anthropic
+  - Ollama
 
-### Setup
+### 4. Flexible Memory Management
+- In-Memory Storage
+- Redis Backend
+- Customizable Memory Providers
+
+### 5. Advanced Tooling
+- Content Generation
+- Web Search
+- Social Media Analytics
+- API Interactions
+
+## 📦 Installation
+
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/grami-ai.git
-cd grami-ai
-
-# Create a virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+pip install grami-ai
 ```
 
-## 🏃 Quick Start
+## 🚀 Quick Start
 
-### Running the Framework
+### Basic Agent Creation
 
-```bash
-# Run Growth Manager and Client
-./run_grami.py
+```python
+from grami_ai.core.agent import AsyncAgent
+from grami_ai.llms.gemini_llm import GeminiLLMProvider
 
-# Or using Python
-python3 run_grami.py
+# Create an AI agent for marketing
+async def main():
+    agent = await AsyncAgent.create(
+        name="MarketingAssistant",
+        llm="gemini",
+        tools=["content_generation", "web_search"]
+    )
+
+    # Generate marketing content
+    response = await agent.process({
+        "type": "content_request",
+        "platform": "instagram",
+        "niche": "tech",
+        "content_type": "post"
+    })
+    print(response)
+
+# Run the agent
+asyncio.run(main())
 ```
 
-## 📦 Core Components
+## 🛠 Core Components
+
+### Agent
+- Orchestrates LLM, memory, tools, and interfaces
+- Async message processing
+- Dynamic tool selection
 
 ### Tools
-- **Content Generation Tool**: Create social media content across platforms
-- **Web Search Tool**: Perform comprehensive web searches
-- **Extensible Tool Registry**: Add and manage custom tools easily
+- Extensible async tool base class
+- Metadata-driven tool configuration
+- Support for various tool categories
 
-### Agents
-- **AsyncAgent**: Base agent for async operations
-- **Growth Manager**: Coordinate AI-driven growth strategies
+### Memory
+- Async memory providers
+- In-memory and Redis backends
+- Conversation and state management
+
+### Logging
+- Async logging with structured output
+- Configurable log levels
+- Context-aware logging
 
 ## 🔧 Configuration
 
-Configuration is managed through environment variables:
-
-- `GOOGLE_SEARCH_API_KEY`: Google Custom Search API key
-- `GOOGLE_SEARCH_ENGINE_ID`: Google Custom Search Engine ID
-- Additional platform-specific credentials as needed
-
-## 📝 Example: Creating a Tool
+GRAMI-AI supports environment-based configuration:
+- Development
+- Testing
+- Production
 
 ```python
-from grami_ai.tools.base import AsyncBaseTool, ToolMetadata, ToolCategory
+from grami_ai.core.config import get_settings
 
-class MyCustomTool(AsyncBaseTool):
-    def __init__(self):
-        metadata = ToolMetadata(
-            name="my_custom_tool",
-            description="A custom tool for specific tasks",
-            category=ToolCategory.CUSTOM
-        )
-        super().__init__(metadata=metadata)
-    
-    async def generate(self, **kwargs):
-        # Implement your tool's logic here
-        pass
+# Get environment-specific settings
+settings = get_settings()
 ```
+
+## 📡 Interfaces
+
+- WebSocket
+- Kafka Consumer
+- Custom Interface Support
+
+## 🔒 Security
+
+- Environment variable management
+- Configurable token expiration
+- Resource limits
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md).
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+MIT License, Copyright (c) 2024 YAFATek Solutions
 
 ## 📞 Contact
 
-Your Name - your.email@example.com
+For support, collaboration, or inquiries:
+- Email: contact@yafatek.com
+- GitHub: [YAFATek/grami-ai](https://github.com/YAFATek/grami-ai)
 
-Project Link: [https://github.com/yourusername/grami-ai](https://github.com/yourusername/grami-ai)
+## 🌐 Roadmap
+
+- [ ] Enhanced LLM Provider Support
+- [ ] Advanced Tool Ecosystem
+- [ ] Comprehensive Documentation
+- [ ] Performance Benchmarking
+- [ ] Community Extensions
+
+## 🏆 Acknowledgements
+
+Built with ❤️ by YAFATek Solutions, pushing the boundaries of AI-powered solutions.
