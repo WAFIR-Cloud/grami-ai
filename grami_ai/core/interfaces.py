@@ -28,8 +28,25 @@ from typing import (
     Callable, 
     Coroutine
 )
+import json
+import socket
+
+try:
+    from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+    import uvicorn
+    WEBSOCKET_AVAILABLE = True
+except ImportError:
+    WEBSOCKET_AVAILABLE = False
 
 T = TypeVar('T')
+
+def find_free_port():
+    """Find a free port for WebSocket server."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(('', 0))
+        s.listen(1)
+        port = s.getsockname()[1]
+    return port
 
 class AsyncTool(Protocol):
     """
@@ -414,19 +431,16 @@ class AgentInterface(Protocol):
 class WebSocketInterface(AgentInterface):
     """WebSocket-based agent interface."""
     
-    def __init__(self, host: str = "0.0.0.0", port: int = 8765):
+    def __init__(self, host: str = "0.0.0.0", port: Optional[int] = None):
+        if not WEBSOCKET_AVAILABLE:
+            raise ImportError("FastAPI and uvicorn are required for WebSocket interface. Install with: pip install fastapi uvicorn")
+            
         self.host = host
-        self.port = port
+        self.port = port or find_free_port()
         self.agent = None
-        self.app = None
-        self.server_task = None
-    
-    async def initialize(self, agent: Any) -> None:
-        """Initialize FastAPI app and WebSocket endpoint."""
-        from fastapi import FastAPI, WebSocket
-        
-        self.agent = agent
         self.app = FastAPI()
+        self.server_task = None
+        self.server = None
         
         @self.app.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
@@ -434,29 +448,38 @@ class WebSocketInterface(AgentInterface):
             try:
                 while True:
                     data = await websocket.receive_json()
-                    response = await self.agent.process(data)
-                    await websocket.send_json(response)
+                    if self.agent:
+                        response = await self.agent.process(data)
+                        await websocket.send_json(response)
+            except WebSocketDisconnect:
+                print("Client disconnected")
             except Exception as e:
                 print(f"WebSocket error: {e}")
-            finally:
-                await websocket.close()
+                try:
+                    await websocket.close()
+                except:
+                    pass
+    
+    async def initialize(self, agent: Any) -> None:
+        """Initialize the interface with an agent."""
+        self.agent = agent
     
     async def start(self) -> None:
         """Start the WebSocket server."""
-        import uvicorn
-        
-        server = uvicorn.Server(
-            uvicorn.Config(
-                self.app,
-                host=self.host,
-                port=self.port,
-                log_level="info"
-            )
+        config = uvicorn.Config(
+            app=self.app,
+            host=self.host,
+            port=self.port,
+            log_level="info"
         )
+        self.server = uvicorn.Server(config)
         
         # Run server in a separate task
-        import asyncio
-        self.server_task = asyncio.create_task(server.serve())
+        self.server_task = asyncio.create_task(self.server.serve())
+        
+        # Wait a moment for the server to start
+        await asyncio.sleep(1)
+        print(f"WebSocket server started on {self.host}:{self.port}")
     
     async def stop(self) -> None:
         """Stop the WebSocket server."""
@@ -466,6 +489,9 @@ class WebSocketInterface(AgentInterface):
                 await self.server_task
             except asyncio.CancelledError:
                 pass
+            
+        if self.server:
+            await self.server.shutdown()
     
     async def send(self, message: Any) -> None:
         """Not used in WebSocket interface."""
@@ -497,7 +523,6 @@ class KafkaConsumerInterface(AgentInterface):
     async def initialize(self, agent: Any) -> None:
         """Initialize Kafka consumer and producer."""
         from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
-        import json
         
         self.agent = agent
         

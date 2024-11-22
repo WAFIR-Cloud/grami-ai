@@ -31,6 +31,11 @@ async def main():
         # Start the agent (this will start the WebSocket server)
         await agent.start()
         
+        # Print the WebSocket port for the client to use
+        if hasattr(agent.interface, 'port'):
+            os.environ['GRAMI_WEBSOCKET_PORT'] = str(agent.interface.port)
+            print(f"WebSocket server running on port {agent.interface.port}")
+        
         # Keep the agent running
         while True:
             await asyncio.sleep(1)

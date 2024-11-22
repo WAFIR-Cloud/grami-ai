@@ -1,44 +1,43 @@
 import asyncio
 import websockets
 import json
+import os
+import sys
+
+# Add the project root to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from grami_ai.core.interfaces import find_free_port
 
 async def send_message(websocket, message):
-    await websocket.send(json.dumps(message))
-    response = await websocket.recv()
-    return json.loads(response)
+    try:
+        await websocket.send(json.dumps(message))
+        response = await websocket.recv()
+        return json.loads(response)
+    except Exception as e:
+        print(f"Error sending message: {e}")
+        return None
 
 async def main():
-    uri = "ws://localhost:8765/ws"
-    async with websockets.connect(uri) as websocket:
-        # Example: Request content ideas for Instagram
-        message = {
-            "type": "content_request",
-            "platform": "instagram",
-            "niche": "tech_startup",
-            "content_type": "carousel",
-            "theme": "AI and automation"
-        }
-        
-        print("Sending request for content ideas...")
-        response = await send_message(websocket, message)
-        print(f"Response: {json.dumps(response, indent=2)}")
-        
-        # Example: Analyze engagement metrics
-        message = {
-            "type": "analyze_engagement",
-            "platform": "instagram",
-            "metrics": {
-                "likes": 1200,
-                "comments": 45,
-                "shares": 30,
-                "saves": 80,
-                "reach": 5000
+    # Read the port from an environment variable or use a default
+    port = int(os.environ.get('GRAMI_WEBSOCKET_PORT', 8765))
+    uri = f"ws://localhost:{port}/ws"
+    
+    try:
+        async with websockets.connect(uri) as websocket:
+            # Example: Request content ideas for Instagram
+            message = {
+                "type": "content_request",
+                "platform": "instagram",
+                "niche": "tech",
+                "content_type": "post"
             }
-        }
-        
-        print("\nRequesting engagement analysis...")
-        response = await send_message(websocket, message)
-        print(f"Response: {json.dumps(response, indent=2)}")
+            
+            response = await send_message(websocket, message)
+            if response:
+                print("Response:", response)
+    except Exception as e:
+        print(f"Connection error: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())
