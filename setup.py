@@ -5,10 +5,17 @@ import os
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-# Read requirements from requirements.txt
+# Simplified requirements reading
 def read_requirements(filename):
-    with open(filename, 'r') as file:
-        return [line.strip() for line in file if line.strip() and not line.startswith('#')]
+    try:
+        with open(filename, 'r') as file:
+            return [
+                line.strip() 
+                for line in file 
+                if line.strip() and not line.startswith('#') and not line.startswith('-')
+            ]
+    except FileNotFoundError:
+        return []
 
 # Determine package data files
 def package_files(directory):
@@ -20,13 +27,13 @@ def package_files(directory):
 
 setup(
     name="grami-ai",
-    version="0.3.101",
+    version="0.3.102",  # Increment version
     
     # Metadata
     author="YAFATek Solutions/ GRAMI AI Team",
     author_email="support@yafatek.com",
     maintainer="YAFATek Solutions",
-    maintainer_email="supprt@yafatek.com",
+    maintainer_email="support@yafatek.com",
     
     # Project Description
     description="Growth and Relationship AI Management Infrastructure",
@@ -80,32 +87,7 @@ setup(
     python_requires='>=3.10,<3.13',
     
     # Install Requirements
-    install_requires=[
-        # Core Async and Web Libraries
-        'aiohttp>=3.9.3',
-        'aioredis>=2.0.1',
-        'aiokafka>=0.9.1',
-        'fastapi>=0.110.0',
-        'uvicorn>=0.27.1',
-
-        # Data Processing and Utilities
-        'beautifulsoup4>=4.12.3',
-        'typing-extensions>=4.10.0',
-        'pydantic>=2.6.0',
-        'python-dotenv>=1.0.0',
-
-        # LLM and AI Providers
-        'openai>=1.14.3',
-        'anthropic>=0.20.0',
-        'google-generativeai>=0.4.1',
-        'ollama>=0.1.6',
-
-        # Logging and Monitoring
-        'structlog>=24.1.0',
-
-        # Optional but Recommended
-        'redis>=5.0.1',
-    ],
+    install_requires=read_requirements('requirements.txt'),
     
     # Optional Dependencies
     extras_require={
