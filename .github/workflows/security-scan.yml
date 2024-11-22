@@ -49,13 +49,3 @@ jobs:
         path: |
           bandit-results.json
           safety-results.txt
-    
-    - name: Notify on security issues
-      if: failure()
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        text: Security scan detected vulnerabilities in GRAMI-AI
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
