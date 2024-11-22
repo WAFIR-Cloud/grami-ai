@@ -3,7 +3,7 @@ import json
 import requests
 from typing import Any, Dict, List, Optional
 
-from grami_ai.llms.base_llm import BaseLLMProvider
+from grami_ai.llms.base import BaseLLMProvider
 
 
 class OllamaLLMProvider(BaseLLMProvider):

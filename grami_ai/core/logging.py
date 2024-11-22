@@ -1,59 +1,44 @@
-"""
-Centralized logging configuration for GRAMI AI Framework.
-
-This module provides a standardized logging setup across the entire framework,
-ensuring consistent log formatting, levels, and output.
-"""
-
 import logging
 import sys
-from typing import Optional, Union
+from typing import Optional
 
-def configure_logger(
-    name: str = 'grami_ai', 
-    level: Union[int, str] = logging.INFO,
+def create_logger(
+    name: str = "grami_ai", 
+    level: int = logging.INFO,
     log_file: Optional[str] = None
 ) -> logging.Logger:
     """
-    Configure and return a standardized logger.
+    Create a configured logger with optional file output
     
     Args:
-        name: Logger name (default: 'grami_ai')
-        level: Logging level (default: logging.INFO)
-        log_file: Optional file path to save logs
+        name: Logger name
+        level: Logging level
+        log_file: Optional file path to log to
     
     Returns:
-        Configured logging.Logger instance
+        Configured logger instance
     """
     # Create logger
     logger = logging.getLogger(name)
     logger.setLevel(level)
     
-    # Clear any existing handlers to prevent duplicate logs
-    logger.handlers.clear()
-    
-    # Console Handler
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(level)
-    
-    # Formatter with timestamp, log level, and message
+    # Create formatter
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    console_handler.setFormatter(formatter)
     
-    # Add console handler
+    # Console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
     
-    # Optional file logging
+    # File handler if log_file is provided
     if log_file:
         file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(level)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
     
     return logger
 
-# Create a default logger
-logger = configure_logger()
+# Default logger
+logger = create_logger()

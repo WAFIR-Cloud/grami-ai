@@ -11,9 +11,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from grami_ai.core.config import settings
 from grami_ai.core.constants import Role
 from grami_ai.core.logging import logger
-from grami_ai.llms.base_llm import BaseLLMProvider
-from grami_ai.llms.prompts import Message, MessageRole, FORMATTERS
-
+from grami_ai.llms.base import BaseLLMProvider, Message, MessageRole
 
 class OpenAILLMProvider(BaseLLMProvider):
     """OpenAI LLM provider implementation."""
@@ -40,10 +38,8 @@ class OpenAILLMProvider(BaseLLMProvider):
         if not self.api_key:
             raise ValueError("OpenAI API key not found")
 
-        self.system_instruction = FORMATTERS["openai"].format_system_prompt(
-            system_instruction or "You are a helpful AI assistant."
-        )
-
+        self.system_instruction = system_instruction or "You are a helpful AI assistant."
+        
         self.generation_config = generation_config or {
             "temperature": 0.7,
             "max_tokens": 1000,
@@ -54,7 +50,6 @@ class OpenAILLMProvider(BaseLLMProvider):
 
         # Initialize client and formatter
         self.client = AsyncOpenAI(api_key=self.api_key)
-        self.formatter = FORMATTERS["openai"]
 
         # Initialize conversation history
         self.messages = [
@@ -89,7 +84,9 @@ class OpenAILLMProvider(BaseLLMProvider):
             ))
 
             # Format messages for OpenAI API
-            formatted_messages = self.formatter.format_messages(self.messages)
+            formatted_messages = [
+                {"role": msg.role.value, "content": msg.content} for msg in self.messages
+            ]
 
             # Get response from OpenAI
             response = await self.client.chat.completions.create(

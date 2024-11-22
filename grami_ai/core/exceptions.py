@@ -68,12 +68,34 @@ class StateError(GramiError):
     """Raised when an operation is invalid for the current state."""
     pass
 
+# Tool-specific exceptions
+class ToolError(GramiError):
+    """Base exception for tool-related errors."""
+    pass
+
+class ToolConfigurationError(ToolError):
+    """Raised when there is an error in tool configuration."""
+    pass
+
+class ToolExecutionError(ToolError):
+    """Raised when there is an error during tool execution."""
+    pass
+
+class ToolNotFoundError(ToolError):
+    """Raised when a requested tool is not found."""
+    pass
+
+class ToolValidationError(ToolError):
+    """Raised when tool validation fails."""
+    pass
+
 def handle_exception(
     exc: Exception,
     default_msg: str = "An unexpected error occurred",
     error_cls: Type[GramiError] = GramiError
 ) -> GramiError:
-    """Convert any exception to a GramiError.
+    """
+    Convert any exception to a GramiError.
     
     Args:
         exc: Original exception
@@ -85,19 +107,15 @@ def handle_exception(
     """
     if isinstance(exc, GramiError):
         return exc
-        
-    details = {
-        "type": exc.__class__.__name__,
-        "original_message": str(exc)
-    }
     
     return error_cls(
-        message=default_msg,
-        details=details
+        message=str(exc) or default_msg,
+        details={"original_error": str(exc)}
     )
 
 def format_error(error: GramiError) -> Dict[str, Any]:
-    """Format a GramiError for API responses.
+    """
+    Format a GramiError for API responses.
     
     Args:
         error: GramiError instance
@@ -114,7 +132,8 @@ def format_error(error: GramiError) -> Dict[str, Any]:
     }
 
 def is_retryable_error(error: Exception) -> bool:
-    """Check if an error should trigger a retry.
+    """
+    Check if an error should trigger a retry.
     
     Args:
         error: Exception to check
@@ -123,15 +142,15 @@ def is_retryable_error(error: Exception) -> bool:
         True if error is retryable
     """
     retryable_errors = (
+        RateLimitError,
         TimeoutError,
-        ResourceError,
-        ProviderError
+        ResourceError
     )
-    
     return isinstance(error, retryable_errors)
 
 def is_fatal_error(error: Exception) -> bool:
-    """Check if an error is fatal and should stop processing.
+    """
+    Check if an error is fatal and should stop processing.
     
     Args:
         error: Exception to check
@@ -144,5 +163,4 @@ def is_fatal_error(error: Exception) -> bool:
         AuthenticationError,
         ValidationError
     )
-    
     return isinstance(error, fatal_errors)

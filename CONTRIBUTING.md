@@ -1,211 +1,127 @@
-# 🤝 Contributing to GRAMI AI
+# Contributing to Grami AI 🤝
 
-First off, thank you for considering contributing to GRAMI AI! It's people like you that make GRAMI AI such a great tool.
+## Welcome Contributors! 
 
-## 📋 Table of Contents
+Grami AI is an open-source project that thrives on community collaboration. We welcome contributions from developers, researchers, and AI enthusiasts worldwide.
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Process](#development-process)
-- [Pull Request Process](#pull-request-process)
-- [Style Guidelines](#style-guidelines)
-- [Testing](#testing)
-- [Documentation](#documentation)
-- [Community](#community)
+## 🌟 Our Vision
 
-## 📜 Code of Conduct
+To create a flexible, powerful async AI agent framework that empowers developers to build intelligent solutions with ease.
 
-This project and everyone participating in it is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+## 🚀 How to Contribute
 
-## 🚀 Getting Started
+### 1. Code Contributions
 
-1. Fork the repository
-2. Clone your fork:
+#### Setting Up Your Environment
 ```bash
-git clone https://github.com/yourusername/grami-ai.git
+# Fork the repository
+git clone https://github.com/your-username/grami-ai.git
 cd grami-ai
-```
 
-3. Set up development environment:
-```bash
-# Create virtual environment
+# Create a virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate
 
 # Install development dependencies
-pip install -e ".[dev,test,docs]"
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
-4. Create a branch:
+#### Development Workflow
+1. Create a new branch
 ```bash
 git checkout -b feature/your-feature-name
 ```
 
-## 💻 Development Process
+2. Make your changes
+- Follow PEP 8 style guidelines
+- Write comprehensive docstrings
+- Add type hints
+- Include unit tests
 
-1. **Pick an Issue**
-   - Look for issues labeled `good first issue` or `help wanted`
-   - Comment on the issue to let others know you're working on it
-   - Ask questions if anything is unclear
-
-2. **Make Changes**
-   - Write clean, maintainable code
-   - Follow our [style guidelines](#style-guidelines)
-   - Add tests for new functionality
-   - Update documentation as needed
-
-3. **Commit Changes**
-   - Use meaningful commit messages
-   - Reference issue numbers in commits
-   - Keep commits focused and atomic
-
-4. **Update Your Branch**
+3. Run checks before committing
 ```bash
-git fetch origin
-git rebase origin/main
+# Run linters
+ruff check .
+
+# Run type checking
+mypy grami_ai
+
+# Run tests
+pytest tests/
 ```
 
-## 🔄 Pull Request Process
+### 2. Types of Contributions
 
-1. **Create Pull Request**
-   - Use our PR template
-   - Fill in all required sections
-   - Link related issues
+We welcome:
+- Bug fixes
+- New features
+- Documentation improvements
+- Tool implementations
+- Performance optimizations
+- Test coverage enhancements
 
-2. **PR Requirements**
-   - [ ] Tests pass
-   - [ ] Code follows style guidelines
-   - [ ] Documentation updated
-   - [ ] Changelog updated
-   - [ ] Version bumped (if applicable)
+### 3. Contribution Areas
 
-3. **Review Process**
-   - Address reviewer comments
-   - Keep PR updated with main branch
-   - Be responsive to feedback
+#### 🧩 Tool Development
+- Create new async tools
+- Improve existing tool implementations
+- Add support for new platforms/services
 
-## 🎨 Style Guidelines
+#### 🌐 LLM Provider Integration
+- Add support for new language models
+- Improve existing provider implementations
+- Create provider-specific optimizations
 
-### Python Code Style
+#### 📚 Documentation
+- Improve README
+- Create tutorials and examples
+- Write API documentation
 
-- Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/)
-- Use [Black](https://github.com/psf/black) for formatting
-- Use type hints
-- Maximum line length: 88 characters
-- Use descriptive variable names
+### 4. Submission Process
 
-### Example:
-```python
-from typing import List, Optional
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Write tests
+5. Ensure all checks pass
+6. Submit a Pull Request
 
-async def process_data(
-    input_data: List[str],
-    max_items: Optional[int] = None
-) -> dict:
-    """Process input data and return results.
-    
-    Args:
-        input_data: List of strings to process
-        max_items: Optional limit on items to process
-        
-    Returns:
-        Dictionary containing processed results
-    """
-    result = {}
-    for item in input_data[:max_items]:
-        result[item] = await self._process_item(item)
-    return result
-```
+### 5. Code of Conduct
 
-### Documentation Style
-
-- Use Google-style docstrings
-- Keep documentation up to date
-- Include examples where helpful
-- Document both success and error cases
-
-## 🧪 Testing
-
-1. **Running Tests**
-```bash
-# Run all tests
-pytest
-
-# Run specific test file
-pytest tests/test_agents.py
-
-# Run with coverage
-pytest --cov=grami_ai
-```
-
-2. **Writing Tests**
-```python
-import pytest
-from grami_ai import BaseAgent
-
-@pytest.mark.asyncio
-async def test_agent_initialization():
-    agent = BaseAgent()
-    await agent.initialize()
-    assert agent.is_initialized
-    assert len(agent.tools) == 0
-```
-
-## 📚 Documentation
-
-1. **Building Docs**
-```bash
-# Install docs dependencies
-pip install -e ".[docs]"
-
-# Build documentation
-cd docs
-make html
-```
-
-2. **Documentation Guidelines**
-- Keep API documentation up to date
-- Add examples for new features
-- Update quickstart guide as needed
-- Include performance considerations
-
-## 👥 Community
-
-- Join our [Discord](https://discord.gg/grami-ai)
-- Follow us on [Twitter](https://twitter.com/grami_ai)
-- Read our [blog](https://blog.grami-ai.org)
-
-## 🎯 Where to Contribute
-
-1. **Code**
-   - Fix bugs
-   - Add features
-   - Improve performance
-   - Write tests
-
-2. **Documentation**
-   - Fix typos
-   - Add examples
-   - Clarify explanations
-   - Translate content
-
-3. **Community**
-   - Answer questions
-   - Review PRs
-   - Write blog posts
-   - Give talks
+- Be respectful and inclusive
+- Provide constructive feedback
+- Collaborate openly
+- Prioritize community needs
 
 ## 🏆 Recognition
 
 Contributors will be:
-- Added to CONTRIBUTORS.md
-- Mentioned in release notes
-- Given credit in documentation
+- Listed in CONTRIBUTORS.md
+- Recognized in release notes
+- Potentially invited to core team discussions
 
-## ❓ Questions?
+## 📞 Contact
 
-- Open a [Discussion](https://github.com/yourusername/grami-ai/discussions)
-- Ask in our [Discord](https://discord.gg/grami-ai)
-- Email: support@grami-ai.org
+- Open an issue for bugs/suggestions
+- Join our Discord community
+- Email: contributors@grami-ai.org
 
-Thank you for contributing to GRAMI AI! 🙏
+## 🔒 Security
+
+If you discover a security vulnerability:
+1. Do NOT open a public issue
+2. Email security@grami-ai.org
+3. Provide detailed information
+4. Expect a response within 48 hours
+
+## 💡 Feature Requests
+
+Have an idea? 
+1. Check existing issues
+2. Open a new issue with:
+   - Clear description
+   - Use case
+   - Potential implementation approach
+
+Thank you for helping make Grami AI amazing! 🚀

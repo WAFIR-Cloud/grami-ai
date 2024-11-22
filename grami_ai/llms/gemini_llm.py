@@ -1,97 +1,211 @@
+import os
+import asyncio
+from typing import Optional, Dict, Any, List
+
+from grami_ai.llms.base import BaseLLMProvider, Message, MessageRole, ToolDefinition
 import google.generativeai as genai
-from typing import Any, Dict, List, Optional
-
-from grami_ai.llms.base_llm import BaseLLMProvider
-
 
 class GeminiLLMProvider(BaseLLMProvider):
     """
-    Concrete implementation of the BaseLLMProvider for Google's Gemini AI.
+    Gemini LLM Provider for Grami AI Framework
+    
+    Supports async text generation using Google's Gemini AI
     """
-
     def __init__(
         self, 
-        api_key: str, 
-        model_name: str = "models/gemini-1.5-flash", 
-        system_instruction: Optional[str] = "You are a helpful AI assistant.",
-        generation_config: Optional[Dict[str, Any]] = None,
-        safety_settings: Optional[List[Dict[str, str]]] = None
+        api_key: Optional[str] = None, 
+        model_name: str = 'gemini-pro',
+        system_instruction: Optional[str] = None,
+        tool_definitions: Optional[List[ToolDefinition]] = None,
+        **kwargs
     ):
         """
-        Initialize the Gemini LLM provider.
+        Initialize Gemini LLM Provider
         
         Args:
-            api_key (str): Google AI API key
-            model_name (str, optional): Gemini model to use. Defaults to "models/gemini-1.5-flash".
-            system_instruction (Optional[str], optional): System-level instruction. Defaults to a generic instruction.
-            generation_config (Optional[Dict[str, Any]], optional): Generation configuration.
-            safety_settings (Optional[List[Dict[str, str]]], optional): Safety filtering settings.
+            api_key: Google AI API key (defaults to GOOGLE_API_KEY env var)
+            model_name: Gemini model to use
+            system_instruction: Initial context/personality
+            tool_definitions: Predefined tools/functions
+            **kwargs: Additional configuration parameters
         """
-        self.api_key = api_key
-        self.model_name = model_name
-        self.system_instruction = system_instruction
-        
-        # Default generation config if not provided
-        self.generation_config = generation_config or {
-            "max_output_tokens": 7000,
-            "temperature": 0.5
-        }
-        
-        # Default safety settings if not provided
-        self.safety_settings = safety_settings or [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-        ]
-        
-        # Configure the Gemini API
-        genai.configure(api_key=self.api_key)
-
-    async def start_chat(self, tools: Optional[List[Any]] = None):
-        """
-        Start a new chat session with Gemini.
-        
-        Args:
-            tools (Optional[List[Any]], optional): List of tools/functions to be used by the model.
-        
-        Returns:
-            Any: Gemini conversation object
-        """
-        model = genai.GenerativeModel(
-            self.model_name,
-            system_instruction=self.system_instruction,
-            safety_settings=self.safety_settings,
-            tools=tools
+        super().__init__(
+            api_key=api_key,
+            model_name=model_name,
+            system_instruction=system_instruction,
+            tool_definitions=tool_definitions
         )
-        return model.start_chat(enable_automatic_function_calling=True)
-
-    async def send_message(self, conversation, message: str, tools: Optional[List[Any]] = None):
+        
+        if not self.api_key:
+            self.api_key = os.getenv('GOOGLE_API_KEY')
+        
+        if not self.api_key:
+            raise ValueError(
+                "Google AI API key must be provided via 'api_key' "
+                "or GOOGLE_API_KEY environment variable"
+            )
+        
+        # Configure Gemini API
+        genai.configure(api_key=self.api_key)
+        
+        # Select model
+        self.model = genai.GenerativeModel(model_name)
+        
+        # Additional configuration
+        self.config = kwargs.get('config', {
+            'temperature': 0.7,
+            'top_p': 0.9,
+            'max_output_tokens': 2048
+        })
+        
+        # Initialize chat
+        self.chat = None
+        self.messages = []
+        
+        # Add system instruction if provided
+        if self.system_instruction:
+            self.messages.append(Message(
+                role=MessageRole.SYSTEM,
+                content=self.system_instruction
+            ))
+    
+    async def start_chat(
+        self,
+        tools: Optional[List[ToolDefinition]] = None,
+        **provider_specific_params
+    ):
+        """Start a new chat session."""
+        self.chat = self.model.start_chat()
+        self.messages = []
+        
+        # Add system instruction if provided
+        if self.system_instruction:
+            self.messages.append(Message(
+                role=MessageRole.SYSTEM,
+                content=self.system_instruction
+            ))
+            
+        # Register tools if provided
+        if tools:
+            for tool in tools:
+                self.register_tool(tool)
+    
+    async def send_message(
+        self,
+        conversation: Any,
+        message: str,
+        tools: Optional[List[ToolDefinition]] = None,
+        **provider_specific_params
+    ) -> str:
+        """Send a message and get response."""
+        # Add user message to history
+        self.messages.append(Message(
+            role=MessageRole.USER,
+            content=message
+        ))
+        
+        # Prepare full context
+        full_context = []
+        for msg in self.messages:
+            if msg.role == MessageRole.SYSTEM:
+                full_context.append(f"System: {msg.content}")
+            elif msg.role == MessageRole.USER:
+                full_context.append(f"User: {msg.content}")
+            elif msg.role == MessageRole.ASSISTANT:
+                full_context.append(f"Assistant: {msg.content}")
+        
+        # Generate response
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: self.model.generate_content(
+                "\n".join(full_context),
+                generation_config=self.config
+            )
+        )
+        
+        # Add assistant response to history
+        assistant_message = response.text
+        self.messages.append(Message(
+            role=MessageRole.ASSISTANT,
+            content=assistant_message
+        ))
+        
+        return assistant_message
+    
+    def register_tool(self, tool: ToolDefinition):
+        """Register a new tool."""
+        self.tools.append(tool)
+    
+    def _prepare_tools_for_provider(self, tools: List[ToolDefinition]) -> List[Dict[str, Any]]:
+        """Convert tools to Gemini-specific format."""
+        return [tool.to_provider_format('gemini') for tool in tools]
+    
+    async def generate(
+        self, 
+        prompt: str, 
+        system_instruction: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ) -> str:
         """
-        Send a message in an existing Gemini conversation.
+        Async text generation using Gemini
         
         Args:
-            conversation (Any): The Gemini conversation object
-            message (str): The message to send
-            tools (Optional[List[Any]], optional): Additional tools to use
+            prompt: User prompt
+            system_instruction: Optional system-level instructions
+            context: Optional context dictionary
+            **kwargs: Additional generation parameters
         
         Returns:
-            str: The model's response
+            Generated text response
         """
-        response = await conversation.send_message_async(message)
+        # Merge default config with passed kwargs
+        generation_config = {**self.config, **kwargs.get('config', {})}
+        
+        # Prepare full prompt with system instruction and context
+        full_prompt = []
+        if system_instruction:
+            full_prompt.append(system_instruction)
+        
+        if context:
+            context_str = "\n".join([
+                f"{k}: {v}" for k, v in context.items()
+            ])
+            full_prompt.append(f"Context:\n{context_str}")
+        
+        full_prompt.append(prompt)
+        
+        # Run generation in executor to avoid blocking
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None, 
+            lambda: self.model.generate_content(
+                "\n".join(full_prompt), 
+                generation_config=generation_config
+            )
+        )
+        
         return response.text
-
-    def format_history(self, history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    
+    async def stream_generate(
+        self, 
+        prompt: str, 
+        system_instruction: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None,
+        **kwargs
+    ):
         """
-        Format conversation history for Gemini's requirements.
+        Stream text generation
         
         Args:
-            history (List[Dict[str, Any]]): Conversation history to format
+            prompt: User prompt
+            system_instruction: Optional system-level instructions
+            context: Optional context dictionary
+            **kwargs: Additional generation parameters
         
-        Returns:
-            List[Dict[str, Any]]: Formatted conversation history
+        Yields:
+            Streaming text chunks
         """
-        return [
-            {"role": msg["role"], "parts": [{"text": msg["content"]}]} 
-            for msg in history
-        ]
+        # Similar to generate, but uses streaming
+        pass  # TODO: Implement streaming generation

@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: grami-ai
-Version: 0.2.309
+Version: 0.2.310
 Summary: Async AI Agent Framework
 Home-page: https://github.com/grami-ai/framework
 Author: Grami AI Team
@@ -23,38 +23,38 @@ Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Requires-Python: >=3.8
 Description-Content-Type: text/markdown
 License-File: LICENSE
-Requires-Dist: aiokafka>=0.8.1
+Requires-Dist: aiokafka>=0.9.1
 Requires-Dist: aioredis>=2.0.1
 Requires-Dist: asyncio
-Requires-Dist: aiohttp>=3.9.0
-Requires-Dist: beautifulsoup4>=4.12.2
-Requires-Dist: typing-extensions>=4.5.0
-Requires-Dist: pydantic>=2.9.0
+Requires-Dist: aiohttp>=3.9.3
+Requires-Dist: beautifulsoup4>=4.12.3
+Requires-Dist: typing-extensions>=4.10.0
+Requires-Dist: pydantic>=2.6.4
 Requires-Dist: pydantic-settings>=2.2.1
-Requires-Dist: fastapi>=0.100.0
-Requires-Dist: uvicorn>=0.22.0
+Requires-Dist: fastapi>=0.110.0
+Requires-Dist: uvicorn>=0.27.1
 Requires-Dist: python-jose[cryptography]>=3.3.0
 Requires-Dist: passlib[bcrypt]>=1.7.4
-Requires-Dist: python-multipart>=0.0.6
-Requires-Dist: tenacity>=8.2.2
-Requires-Dist: aiofiles>=23.1.0
-Requires-Dist: jinja2>=3.1.2
-Requires-Dist: pillow>=10.0.0
-Requires-Dist: python-dotenv>=1.0.0
-Requires-Dist: openai>=1.12.0
-Requires-Dist: anthropic>=0.18.1
-Requires-Dist: google-generativeai>=0.3.0
+Requires-Dist: python-multipart>=0.0.9
+Requires-Dist: tenacity>=8.2.3
+Requires-Dist: aiofiles>=23.2.1
+Requires-Dist: jinja2>=3.1.3
+Requires-Dist: pillow>=10.2.0
+Requires-Dist: python-dotenv>=1.0.1
+Requires-Dist: openai>=1.14.3
+Requires-Dist: anthropic>=0.20.0
+Requires-Dist: google-generativeai>=0.4.1
 Provides-Extra: storage
+Requires-Dist: motor>=3.1.1; extra == "storage"
 Requires-Dist: asyncpg>=0.28.0; extra == "storage"
+Requires-Dist: alembic>=1.11.1; extra == "storage"
 Requires-Dist: sqlalchemy>=2.0.0; extra == "storage"
 Requires-Dist: pymongo>=4.3.3; extra == "storage"
-Requires-Dist: motor>=3.1.1; extra == "storage"
-Requires-Dist: alembic>=1.11.1; extra == "storage"
 Provides-Extra: monitoring
-Requires-Dist: prometheus-client>=0.17.0; extra == "monitoring"
-Requires-Dist: opentelemetry-instrumentation>=0.40b0; extra == "monitoring"
 Requires-Dist: opentelemetry-api>=1.19.0; extra == "monitoring"
+Requires-Dist: prometheus-client>=0.17.0; extra == "monitoring"
 Requires-Dist: opentelemetry-sdk>=1.19.0; extra == "monitoring"
+Requires-Dist: opentelemetry-instrumentation>=0.40b0; extra == "monitoring"
 Provides-Extra: dev
 Requires-Dist: pytest>=7.3.1; extra == "dev"
 Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
@@ -78,18 +78,108 @@ Requires-Dist: mkdocstrings[python]>=0.22.0; extra == "docs"
 [![PyPI version](https://badge.fury.io/py/grami-ai.svg)](https://badge.fury.io/py/grami-ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# 🤖 GRAMI AI Framework
+# Grami AI: Async AI Agent Framework 
+
+## Project Overview
+
+Grami AI is an open-source, highly customizable async AI agent framework designed to empower developers and researchers in building intelligent, adaptable AI solutions.
+
+### Key Features
+
+- **Async-First Design**: Fully asynchronous implementation for non-blocking, high-performance operations
+- **LLM-Agnostic Architecture**: Seamless integration with multiple language models
+- **Modular Component System**: Easily extensible tools, memories, and communication interfaces
+- **Flexible Agent Creation**: Build custom AI agents with minimal boilerplate
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/grami-ai.git
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+## Quick Start
+
+### Creating a Basic Agent
+
+```python
+from grami_ai.core.agent import AsyncAgent
+from grami_ai.llms.gemini import GeminiLLMProvider
+
+async def main():
+    # Create an agent with default configurations
+    agent = AsyncAgent(
+        name="ResearchAssistant",
+        llm=GeminiLLMProvider(api_key="your_api_key")
+    )
+    
+    # Process a task
+    response = await agent.process_task(
+        "Summarize recent advancements in AI research"
+    )
+    print(response)
+```
+
+## Supported LLM Providers
+
+- Google Gemini
+- OpenAI
+- Anthropic
+- Ollama
+
+## Extensibility
+
+### Custom Tool Creation
+
+```python
+from grami_ai.tools.base import AsyncBaseTool
+
+class CustomWebScraperTool(AsyncBaseTool):
+    async def run(self, task: str, context: dict = None):
+        # Implement your custom tool logic
+        pass
+```
+
+## Community Contributions
+
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## License
+
+Grami AI is open-source, released under the MIT License.
+
+## Roadmap
+
+- [ ] Enhanced multi-modal support
+- [ ] More built-in tools
+- [ ] Advanced memory management
+- [ ] Comprehensive documentation
+
+## Community
+
+- Join our Discord
+- Follow us on Twitter
+- Star the GitHub repository
+
+## Acknowledgments
+
+Special thanks to all our contributors and the open-source community!
+
+##  GRAMI AI Framework
 
 GRAMI is an advanced, privacy-focused async AI agent framework designed for enterprise applications. It provides a flexible, modular architecture for building AI agents with support for both private and cloud-based LLM providers.
 
-## 🔐 Privacy-First Design
+## Privacy-First Design
 
 GRAMI prioritizes data privacy and security:
 - **Local LLM Support**: First-class support for Ollama, enabling fully private AI deployments
 - **Hybrid Options**: Use Google's Gemini for a balance of privacy and performance
 - **Flexible Architecture**: Easy integration of any LLM provider, cloud or local
 
-## 🚀 Quick Start
+## Quick Start
 
 1. Install GRAMI:
 ```bash
@@ -130,20 +220,20 @@ result = await agent.execute_task({
 })
 ```
 
-## 🛠️ Features
+## Features
 
 - **Async-First**: Built for high-performance async operations
 - **Provider Agnostic**: Support for multiple LLM providers:
-  - 🏠 **Ollama**: Local deployment with models like Llama 2
-  - 🌐 **Google Gemini**: Enterprise-grade cloud provider
-  - ☁️ **OpenAI**: GPT-3.5/4 integration (optional)
-  - 🤖 **Anthropic**: Claude models (optional)
+  - **Ollama**: Local deployment with models like Llama 2
+  - **Google Gemini**: Enterprise-grade cloud provider
+  - **OpenAI**: GPT-3.5/4 integration (optional)
+  - **Anthropic**: Claude models (optional)
 - **Memory Systems**: Flexible memory backends
 - **Tool Integration**: Extensible tool system
 - **Type Safety**: Full type hints and validation
 - **Enterprise Ready**: Built for production workloads
 
-## 📚 Examples
+## Examples
 
 See the [examples](examples/) directory for:
 - Private AI deployment with Ollama
@@ -152,7 +242,7 @@ See the [examples](examples/) directory for:
 - Custom tool integration
 - Memory system usage
 
-## 🔧 Installation Options
+## Installation Options
 
 ```bash
 # Core installation
@@ -168,7 +258,7 @@ pip install grami-ai[ollama]
 pip install grami-ai[all]
 ```
 
-## 🔒 Security
+## Security
 
 GRAMI is designed with security in mind:
 - No data leaves your infrastructure with local LLM deployment
@@ -176,25 +266,25 @@ GRAMI is designed with security in mind:
 - Configurable safety settings
 - Rate limiting and retry mechanisms
 
-## 📖 Documentation
+## Documentation
 
 - [Full Documentation](https://docs.grami-ai.org)
 - [API Reference](https://docs.grami-ai.org/api)
 - [Security Guide](https://docs.grami-ai.org/security)
 - [Provider Setup](https://docs.grami-ai.org/providers)
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-## 📄 License
+## License
 
 GRAMI is licensed under MIT - see [LICENSE](LICENSE) for details.
 
 ---
 Made with ❤️ by YAFATEK Solutions
 
-## 🏗️ Architecture
+## Architecture
 
 ```
                                 GRAMI AI Architecture
@@ -218,7 +308,7 @@ Made with ❤️ by YAFATEK Solutions
 └────────────┴────────────┴─────────────┴────────────┴────────────┘
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 1. Install GRAMI AI:
 ```bash
@@ -272,7 +362,7 @@ task = {
 result = await agent.execute_task(task)
 ```
 
-## 📦 Core Components
+## Core Components
 
 ### 1. Agents
 - Base agent class with common functionality
@@ -299,7 +389,7 @@ result = await agent.execute_task(task)
 - Secure secrets management
 - Dynamic configuration updates
 
-## 🔐 API Configuration
+## API Configuration
 
 ### Environment Variables
 
@@ -336,7 +426,7 @@ if not api_key:
     raise ValueError("API key not found. Set the environment variable.")
 ```
 
-## 🔧 Development
+## Development
 
 1. Clone the repository:
 ```bash
@@ -360,7 +450,7 @@ pip install -e ".[dev]"
 pytest tests/
 ```
 
-## 📖 Documentation
+## Documentation
 
 Full documentation is available at [docs.grami-ai.org](https://docs.grami-ai.org)
 
@@ -369,15 +459,15 @@ Full documentation is available at [docs.grami-ai.org](https://docs.grami-ai.org
 - [Examples](https://docs.grami-ai.org/examples)
 - [Contributing Guide](https://docs.grami-ai.org/contributing)
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - YAFATEK Solutions - The company behind GRAMI AI
 - The amazing open-source community
@@ -392,9 +482,9 @@ Grami AI is designed to revolutionize how developers build AI agents by providin
 - **Type Safety**: Comprehensive type hints and protocol-based interfaces
 - **Production Ready**: Built for reliability and scalability in real-world applications
 
-## 🚀 Advanced Example: Digital Marketing Agency AI
+## Advanced Example: Digital Marketing Agency AI
 
-### 🌐 Multi-Agent Digital Marketing System
+### Multi-Agent Digital Marketing System
 
 GRAMI introduces a cutting-edge Digital Marketing Agency AI that demonstrates:
 - Real-time client interaction
@@ -425,24 +515,24 @@ async def main():
 - Gemini-powered natural language processing
 - Scalable microservice architecture
 
-### 🔧 Prerequisites
+### Prerequisites
 - Redis server running
 - Kafka broker configured
 - Google Gemini API key
 
-### 📦 Dependencies
+### Dependencies
 ```bash
 pip install grami-ai[kafka,redis]
 ```
 
-### 🛡️ Security & Privacy
+### Security & Privacy
 - Environment-based configuration
 - Secure API key management
 - Minimal data persistence
 
-## 🚀 Advanced Use Cases
+## Advanced Use Cases
 
-### 🎨 Instagram Content Creation Agent
+### Instagram Content Creation Agent
 
 GRAMI introduces a cutting-edge Instagram Content Creation Agent that leverages multi-stage web search and AI-driven content generation:
 
@@ -467,12 +557,12 @@ content = await agent.create_instagram_content(content_brief)
 - Comprehensive hashtag ecosystem
 - Interactive content strategies
 
-## 🛠 Supported Platforms
+## Supported Platforms
 - Instagram
 - TikTok (Coming Soon)
 - YouTube Shorts (Coming Soon)
 
-## 📊 Analytics & Insights
+## Analytics & Insights
 - Trend tracking
 - Engagement prediction
 - Content performance analysis

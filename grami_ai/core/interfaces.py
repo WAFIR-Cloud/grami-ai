@@ -369,5 +369,188 @@ class ContextualPromptTemplate(PromptTemplate):
             kwargs.update(context)
         return await super().format(**kwargs)
 
+class AgentInterface(Protocol):
+    """
+    Protocol for agent interfaces.
+    
+    Defines how agents interact with their environment (chat, Kafka, etc.).
+    """
+    
+    async def initialize(self, agent: Any) -> None:
+        """
+        Initialize the interface with an agent.
+        
+        Args:
+            agent: The agent instance using this interface.
+        """
+        ...
+    
+    async def start(self) -> None:
+        """Start the interface."""
+        ...
+    
+    async def stop(self) -> None:
+        """Stop the interface."""
+        ...
+    
+    async def send(self, message: Any) -> None:
+        """
+        Send a message through the interface.
+        
+        Args:
+            message: Message to send.
+        """
+        ...
+    
+    async def receive(self) -> AsyncIterator[Any]:
+        """
+        Receive messages through the interface.
+        
+        Returns:
+            AsyncIterator[Any]: Iterator over received messages.
+        """
+        ...
+
+class WebSocketInterface(AgentInterface):
+    """WebSocket-based agent interface."""
+    
+    def __init__(self, host: str = "0.0.0.0", port: int = 8765):
+        self.host = host
+        self.port = port
+        self.agent = None
+        self.app = None
+        self.server_task = None
+    
+    async def initialize(self, agent: Any) -> None:
+        """Initialize FastAPI app and WebSocket endpoint."""
+        from fastapi import FastAPI, WebSocket
+        
+        self.agent = agent
+        self.app = FastAPI()
+        
+        @self.app.websocket("/ws")
+        async def websocket_endpoint(websocket: WebSocket):
+            await websocket.accept()
+            try:
+                while True:
+                    data = await websocket.receive_json()
+                    response = await self.agent.process(data)
+                    await websocket.send_json(response)
+            except Exception as e:
+                print(f"WebSocket error: {e}")
+            finally:
+                await websocket.close()
+    
+    async def start(self) -> None:
+        """Start the WebSocket server."""
+        import uvicorn
+        
+        server = uvicorn.Server(
+            uvicorn.Config(
+                self.app,
+                host=self.host,
+                port=self.port,
+                log_level="info"
+            )
+        )
+        
+        # Run server in a separate task
+        import asyncio
+        self.server_task = asyncio.create_task(server.serve())
+    
+    async def stop(self) -> None:
+        """Stop the WebSocket server."""
+        if self.server_task:
+            self.server_task.cancel()
+            try:
+                await self.server_task
+            except asyncio.CancelledError:
+                pass
+    
+    async def send(self, message: Any) -> None:
+        """Not used in WebSocket interface."""
+        pass
+    
+    async def receive(self) -> AsyncIterator[Any]:
+        """Not used in WebSocket interface."""
+        yield None
+
+class KafkaConsumerInterface(AgentInterface):
+    """Kafka consumer-based agent interface."""
+    
+    def __init__(
+        self,
+        bootstrap_servers: str,
+        input_topic: str,
+        output_topic: Optional[str] = None,
+        group_id: Optional[str] = None
+    ):
+        self.bootstrap_servers = bootstrap_servers
+        self.input_topic = input_topic
+        self.output_topic = output_topic
+        self.group_id = group_id or "grami_agent"
+        self.agent = None
+        self.consumer = None
+        self.producer = None
+        self._running = False
+    
+    async def initialize(self, agent: Any) -> None:
+        """Initialize Kafka consumer and producer."""
+        from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
+        import json
+        
+        self.agent = agent
+        
+        # Initialize consumer
+        self.consumer = AIOKafkaConsumer(
+            self.input_topic,
+            bootstrap_servers=self.bootstrap_servers,
+            group_id=self.group_id,
+            value_deserializer=lambda v: json.loads(v.decode('utf-8'))
+        )
+        
+        # Initialize producer if output topic is specified
+        if self.output_topic:
+            self.producer = AIOKafkaProducer(
+                bootstrap_servers=self.bootstrap_servers,
+                value_serializer=lambda v: json.dumps(v).encode('utf-8')
+            )
+    
+    async def start(self) -> None:
+        """Start consuming messages."""
+        await self.consumer.start()
+        if self.producer:
+            await self.producer.start()
+        
+        self._running = True
+        while self._running:
+            try:
+                async for msg in self.consumer:
+                    response = await self.agent.process(msg.value)
+                    if response and self.producer:
+                        await self.producer.send_and_wait(
+                            self.output_topic,
+                            response
+                        )
+            except Exception as e:
+                print(f"Kafka interface error: {e}")
+    
+    async def stop(self) -> None:
+        """Stop consuming messages."""
+        self._running = False
+        await self.consumer.stop()
+        if self.producer:
+            await self.producer.stop()
+    
+    async def send(self, message: Any) -> None:
+        """Send message to output topic."""
+        if self.producer and self.output_topic:
+            await self.producer.send_and_wait(self.output_topic, message)
+    
+    async def receive(self) -> AsyncIterator[Any]:
+        """Receive messages from input topic."""
+        async for msg in self.consumer:
+            yield msg.value
+
 # Utility type for async functions
 AsyncFunction = Callable[..., Coroutine[Any, Any, T]]
