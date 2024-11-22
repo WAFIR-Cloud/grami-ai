@@ -1,39 +1,99 @@
-# Instagram Growth Agency Microservices
+# Instagram Growth Agency AI Framework
 
-## Overview
-A distributed, event-driven microservices architecture for Instagram growth marketing.
+## 🚀 Overview
+A cutting-edge, distributed AI system for automated Instagram marketing and growth.
 
-## Services
-- Content Creator: Generates platform-specific content
-- Social Media Manager: Develops social media strategies
-- Market Researcher: Conducts market and competitive analysis
-- Growth Manager: Orchestrates overall campaign workflow
+## 🌟 Key Features
+- Event-driven microservices architecture
+- AI-powered content generation
+- Real-time workflow tracking
+- Modular and extensible design
 
-## Prerequisites
-- Docker
-- Docker Compose
-- Google Gemini API Key
+## 🛠 Services
+- **Chat Interface Agent**: Customer interaction and workflow coordination
+- **Growth Manager Agent**: Project initialization and strategy development
+- **Content Creation Agent**: AI-driven media content generation
+- **Scheduling Agent**: Optimal content posting schedule
+- **Execution Agent**: Instagram content posting and performance tracking
 
-## Setup
-1. Set environment variables
+## 📋 Prerequisites
+- Docker (20.10+)
+- Docker Compose (1.29+)
+- Python 3.12
+- Minimum 16GB RAM recommended
+
+## 🔧 Setup & Installation
+
+### 1. Clone the Repository
 ```bash
-export GOOGLE_GEMINI_API_KEY=your_api_key
+git clone https://github.com/yourusername/instagram-growth-agency.git
+cd instagram-growth-agency
 ```
 
-2. Build and run services
+### 2. Environment Configuration
+Copy `.env.example` to `.env` and update with your credentials:
 ```bash
-docker-compose up --build
+cp .env.example .env
 ```
 
-## Architecture
-- Kafka for event-driven communication
-- Redis for state management
-- Containerized Python microservices
-- Event-based task processing
+Edit `.env` and replace placeholders:
+- `OPENAI_API_KEY`
+- `INSTAGRAM_API_KEY`
+- `GOOGLE_GEMINI_API_KEY`
 
-## Communication Flow
-1. Growth Manager receives client request
-2. Tasks distributed via Kafka topics
-3. Individual services process tasks
-4. Results stored in Redis
-5. Final strategy compiled by Growth Manager
+### 3. Build and Run Services
+```bash
+# Build all services
+docker-compose build
+
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+```
+
+### 4. Development Mode
+```bash
+# Run in development mode with hot-reloading
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+## 🧪 Testing
+```bash
+# Run unit tests
+docker-compose run --rm test
+
+# Run integration tests
+docker-compose run --rm integration-test
+```
+
+## 🔍 Monitoring
+- Kafka: `http://localhost:9092`
+- Redis Commander: `http://localhost:8081`
+- Prometheus Metrics: `http://localhost:9090`
+
+## 📦 Deployment
+- Supports Kubernetes via Helm charts
+- CI/CD ready with GitHub Actions
+
+## 🚨 Troubleshooting
+- Check Docker logs: `docker-compose logs <service_name>`
+- Verify network connectivity
+- Ensure all API keys are correctly configured
+
+## 🤝 Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push and create a Pull Request
+
+## 📄 License
+MIT License
+
+## 💬 Support
+Join our [Discord Community](https://discord.gg/your-community) for support and discussions.
+
+---
+
+**Note**: This is an AI-powered system. Always review and validate generated content before publishing.

@@ -1,60 +1,215 @@
 import asyncio
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
-from pydantic import BaseModel
+from typing import Dict, Any, Optional, List, Union
+from pydantic import BaseModel, Field, validator
+import uuid
+import logging
+import asyncio
+from enum import Enum, auto
+from datetime import datetime
+
+# Kafka and Redis imports (placeholders)
+import aiokafka
+import redis.asyncio as redis
+
+class AgentRole(Enum):
+    GROWTH_MANAGER = auto()
+    CONTENT_CREATOR = auto()
+    SCHEDULING_SPECIALIST = auto()
+    EXECUTION_SPECIALIST = auto()
+
+class CommunicationProtocol(BaseModel):
+    """Standard communication protocol between agents"""
+    sender: str
+    recipient: str
+    message_type: str
+    payload: Dict[str, Any]
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    project_id: Optional[str] = None
+
+class ResourceConfig(BaseModel):
+    """Configuration for computational resources"""
+    llm_model: str = "gpt-4"
+    gpu_required: bool = False
+    memory_gb: int = 8
+    cpu_cores: int = 2
 
 class AgentConfig(BaseModel):
-    """Configuration for digital marketing agents."""
+    """Comprehensive agent configuration"""
     name: str
-    description: str
-    model: str = "gpt-4"
-    temperature: float = 0.7
+    role: AgentRole
+    description: Optional[str] = None
+    resource_config: ResourceConfig = ResourceConfig()
+    
+    @validator('name')
+    def validate_name(cls, v):
+        if not v or len(v) < 3:
+            raise ValueError("Agent name must be at least 3 characters long")
+        return v
+
+class ProjectState(BaseModel):
+    """Enhanced project state with more detailed tracking"""
+    project_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    customer_details: Dict[str, Any] = {}
+    current_stage: str = "initialization"
+    team_progress: Dict[str, str] = Field(default_factory=lambda: {
+        role.name.lower(): "pending" for role in AgentRole
+    })
+    media_assets: List[Dict[str, Any]] = Field(default_factory=list)
+    posting_schedule: Optional[List[Dict[str, Any]]] = None
+    execution_results: Optional[List[Dict[str, Any]]] = None
+    status: str = "active"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class BaseDigitalMarketingAgent(ABC):
-    """Abstract base class for digital marketing agents."""
+    """
+    Advanced distributed agent for digital marketing workflows
     
-    def __init__(self, config: AgentConfig):
+    Supports:
+    - Kafka-based event streaming
+    - Redis-based state management
+    - Configurable computational resources
+    - Standardized communication protocol
+    """
+    
+    def __init__(
+        self, 
+        config: AgentConfig, 
+        kafka_bootstrap_servers: str = 'localhost:9092',
+        redis_host: str = 'localhost',
+        redis_port: int = 6379
+    ):
+        """
+        Initialize the distributed agent
+        
+        Args:
+            config (AgentConfig): Agent configuration
+            kafka_bootstrap_servers (str): Kafka broker address
+            redis_host (str): Redis server host
+            redis_port (int): Redis server port
+        """
         self.config = config
         self.logger = logging.getLogger(f"{self.__class__.__name__}_{config.name}")
-        self.logger.setLevel(logging.INFO)
+        
+        # Kafka configuration
+        self.kafka_producer = None
+        self.kafka_consumer = None
+        self.kafka_bootstrap_servers = kafka_bootstrap_servers
+        
+        # Redis configuration
+        self.redis_client = None
+        self.redis_host = redis_host
+        self.redis_port = redis_port
     
-    @abstractmethod
-    async def process_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def initialize_communication_channels(self):
         """
-        Process a specific task for the agent.
+        Initialize Kafka producer/consumer and Redis client
+        """
+        # Kafka Producer
+        self.kafka_producer = aiokafka.AIOKafkaProducer(
+            bootstrap_servers=self.kafka_bootstrap_servers
+        )
+        await self.kafka_producer.start()
+        
+        # Kafka Consumer
+        self.kafka_consumer = aiokafka.AIOKafkaConsumer(
+            f'agent_{self.config.role.name.lower()}',
+            bootstrap_servers=self.kafka_bootstrap_servers
+        )
+        await self.kafka_consumer.start()
+        
+        # Redis Client
+        self.redis_client = redis.Redis(
+            host=self.redis_host, 
+            port=self.redis_port
+        )
+    
+    async def publish_event(self, topic: str, message: CommunicationProtocol):
+        """
+        Publish an event to Kafka
         
         Args:
-            task (Dict[str, Any]): Task details to be processed
-        
-        Returns:
-            Dict[str, Any]: Processed task result
+            topic (str): Kafka topic
+            message (CommunicationProtocol): Message to publish
         """
-        pass
+        await self.kafka_producer.send_and_wait(
+            topic, 
+            message.json().encode('utf-8')
+        )
     
-    async def communicate(self, message: str, context: Optional[Dict[str, Any]] = None) -> str:
+    async def consume_events(self):
         """
-        Simulate agent communication with potential LLM integration.
+        Consume events from Kafka for this agent's topic
+        """
+        async for msg in self.kafka_consumer:
+            try:
+                communication = CommunicationProtocol.parse_raw(msg.value)
+                await self.process_communication(communication)
+            except Exception as e:
+                self.logger.error(f"Error processing message: {e}")
+    
+    async def process_communication(self, communication: CommunicationProtocol):
+        """
+        Process incoming communication
         
         Args:
-            message (str): Message to process
-            context (Optional[Dict[str, Any]], optional): Additional context. Defaults to None.
+            communication (CommunicationProtocol): Received communication
+        """
+        raise NotImplementedError("Subclasses must implement communication processing")
+    
+    async def update_project_state(self, project_state: ProjectState):
+        """
+        Update project state in Redis
+        
+        Args:
+            project_state (ProjectState): Updated project state
+        """
+        await self.redis_client.json().set(
+            f"project:{project_state.project_id}", 
+            "$", 
+            project_state.dict()
+        )
+    
+    async def get_project_state(self, project_id: str) -> Optional[ProjectState]:
+        """
+        Retrieve project state from Redis
+        
+        Args:
+            project_id (str): Project identifier
         
         Returns:
-            str: Response from the agent
+            Optional[ProjectState]: Retrieved project state
         """
-        # Placeholder for LLM interaction
-        return f"Agent {self.config.name} received: {message}"
+        project_data = await self.redis_client.json().get(
+            f"project:{project_id}"
+        )
+        return ProjectState(**project_data) if project_data else None
     
-    def log_task(self, task: Dict[str, Any], status: str):
+    async def close_connections(self):
         """
-        Log task processing details.
+        Gracefully close Kafka and Redis connections
+        """
+        if self.kafka_producer:
+            await self.kafka_producer.stop()
+        if self.kafka_consumer:
+            await self.kafka_consumer.stop()
+        if self.redis_client:
+            await self.redis_client.close()
+    
+    async def process_task(self, task: Dict[str, Any], project_state: Optional[ProjectState] = None) -> ProjectState:
+        """
+        Abstract method to be implemented by subclasses
         
         Args:
             task (Dict[str, Any]): Task details
-            status (str): Processing status
+            project_state (Optional[ProjectState]): Current project state
+        
+        Returns:
+            ProjectState: Updated project state
         """
-        self.logger.info(f"Task {task.get('id', 'Unknown')} - Status: {status}")
+        raise NotImplementedError("Subclasses must implement process_task method")
 
 class AgentError(Exception):
     """Custom exception for agent-related errors."""
