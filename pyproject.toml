@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "grami-ai"
-version = "0.3.104"
+version = "0.3.105"
 description = "Growth and Relationship AI Management Infrastructure"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
 license = {text = "MIT"}
 authors = [
-    {name = "WAFIR-Cloud", email = "support@wafir.cloud"}
+    {name = "YAFATek Solutions", email = "support@yafatek.dev"}
 ]
 keywords = [
     "ai", "agent", "framework", "marketing", 
