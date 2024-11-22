@@ -1,0 +1,3 @@
+aiokafka==0.8.1
+grami-ai==0.1.0
+python-dotenv==1.0.0

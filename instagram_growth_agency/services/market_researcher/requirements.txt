@@ -1,0 +1,5 @@
+grami-ai==0.1.0
+aiokafka==0.8.1
+redis==4.5.4
+openai==0.27.8
+python-dotenv==1.0.0

@@ -1,0 +1,8 @@
+aiokafka==0.8.1
+redis==4.5.4
+openai==0.27.8
+pydantic==2.3.0
+python-dotenv==1.0.0
+asyncio==3.4.3
+pytest==7.4.2
+docker==6.1.2
