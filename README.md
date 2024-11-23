@@ -1,105 +1,88 @@
-# GRAMI-AI: Adaptive AI Agent Orchestration Framework
+# Grami AI Framework
 
 ## Overview
 
-GRAMI-AI is a cutting-edge, async-first AI agent framework designed to solve complex computational challenges through intelligent, collaborative agent interactions. Built with unprecedented flexibility, this library empowers developers to create sophisticated, context-aware AI systems that can adapt, learn, and collaborate across diverse domains.
+Grami is a dynamic and flexible AI agent framework designed to create powerful, customizable AI agents with ease. The framework provides a comprehensive set of abstractions for building AI-powered applications across various domains.
 
-## Key Innovations
+## Key Features
 
-- **Modular Agent Architecture**: Seamlessly compose and deploy AI agents with dynamic capabilities
-- **Multi-Provider LLM Integration**: Leverage models from OpenAI, Anthropic, Google Gemini, and more
-- **Async-First Design**: High-performance, non-blocking agent interactions
-- **Extensible Tool Ecosystem**: Easily integrate custom tools and expand agent capabilities
-- **Advanced Memory Management**: Intelligent context retention and retrieval
+- **Dynamic Agent Creation**: Define AI agents with specific roles and capabilities
+- **Multi-LLM Support**: Compatible with multiple Language Models (OpenAI, Gemini, Anthropic, etc.)
+- **Flexible Communication**: Supports various communication interfaces (WebSocket, REST, Kafka)
+- **Extensible Memory Management**: Pluggable memory providers (In-Memory, Redis, DynamoDB)
+- **Tool Customization**: Easily add and manage tools for agent functionality
+- **Streaming Responses**: Support for streaming token-by-token responses
+- **Asynchronous Design**: Built with modern Python async/await paradigms
 
-## Use Cases
+## Quick Start
 
-While initially conceived for marketing and growth solutions, GRAMI-AI's flexible architecture supports a wide range of applications:
-- Marketing Intelligence
-- Research Automation
-- Complex Problem Solving
-- Interactive AI Assistants
-- Cross-Domain Knowledge Synthesis
-
-## Installation
+### Installation
 
 ```bash
 pip install grami-ai
 ```
 
-## Quick Start
-
-### Basic Agent Creation
+### Basic Usage
 
 ```python
-import asyncio
-from grami_ai.core.agent import AsyncAgent
+from grami.agent import Agent
+from grami.providers import GeminiProvider
+from grami.tools import CalculatorTool
 
 async def main():
-    # Create an AI agent for marketing
-    agent = await AsyncAgent.create(
-        name="MarketingAssistant",
-        llm="gemini",
-        tools=["content_generation", "web_search"]
+    # Create an AI agent with a specific role and tool
+    math_agent = Agent(
+        name="MathAssistant",
+        role="Mathematical Problem Solver",
+        llm_provider=GeminiProvider(api_key="your_api_key"),
+        tools=[CalculatorTool()],
+        initial_context=[
+            {
+                "role": "system", 
+                "content": "You are a helpful math assistant."
+            }
+        ]
     )
 
-    # Generate marketing content
-    response = await agent.process({
-        "type": "content_request",
-        "platform": "instagram",
-        "niche": "tech",
-        "content_type": "post"
-    })
-
+    # Send a message and get a response
+    response = await math_agent.send_message("Calculate the area of a circle with radius 5")
     print(response)
 
-# Run the agent
-asyncio.run(main())
+    # Stream a detailed explanation
+    async for token in math_agent.stream_message("Explain circle area calculation"):
+        print(token, end='', flush=True)
 ```
 
-## Core Components
+## Supported Language Models
 
-### Agent
-- Orchestrates LLM, memory, tools, and interfaces
-- Async message processing
-- Dynamic tool selection
+- Google Gemini
+- OpenAI GPT
+- Anthropic Claude (Coming Soon)
 
-## Configuration
+## Tools and Extensibility
 
-GRAMI-AI supports environment-based configuration for:
-- Development
-- Testing
-- Production
+Grami supports custom tools that agents can use to enhance their capabilities:
 
-## Interfaces
-
-- WebSocket
-- Kafka Consumer
-- Custom Interface Support
-
-## Security
-
-- Environment variable management
-- Configurable token expiration
-- Resource limits
+- Calculator Tool
+- Web Search Tool
+- Weather Information Tool
+- Custom Tool Development Support
 
 ## Contributing
 
-We welcome contributions! Check out our [Contributing Guidelines](CONTRIBUTING.md).
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get started.
 
 ## License
 
-MIT License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Roadmap
+
+- [ ] Add more LLM providers
+- [ ] Enhance tool ecosystem
+- [ ] Improve documentation
+- [ ] Add comprehensive test suite
 
 ## Contact
 
-- Email: support@yafatek.dev
-- GitHub: https://github.com/yafatek/grami-ai
-
-## Community
-
-Join our community to collaborate, share ideas, and push the boundaries of AI-powered solutions.
-
-## Acknowledgements
-
-Built with ❤️ by YAFATek Solutions, pushing the frontiers of intelligent computing.
+For questions, support, or collaboration, please open an issue on our GitHub repository.

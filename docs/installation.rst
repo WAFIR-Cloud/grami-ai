@@ -1,29 +1,54 @@
 Installation
 ============
 
-Grami AI can be installed using pip:
+This guide will help you install Grami AI and set up your development environment.
 
-.. code-block:: bash
-
-    pip install grami-ai
-
-Requirements
------------
+Prerequisites
+-------------
 
 - Python 3.8+
-- asyncio
-- aiohttp (for web scraping)
-- beautifulsoup4 (for web scraping)
+- pip package manager
 
-Development Installation
-----------------------
+Installation Methods
+-------------------
 
-For development, clone the repository and install in editable mode:
+Using pip
+^^^^^^^^^
 
 .. code-block:: bash
 
-    git clone https://github.com/yourusername/grami-ai.git
-    cd grami-ai
-    pip install -e .
+   # Install the latest stable version
+   pip install grami-ai
 
-This will install all required dependencies and allow you to modify the code while using it.
+   # Install from GitHub (latest development version)
+   pip install git+https://github.com/your-username/grami-ai.git
+
+Virtual Environment (Recommended)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+   # Create a virtual environment
+   python3 -m venv grami-env
+
+   # Activate the virtual environment
+   source grami-env/bin/activate  # On Unix/macOS
+   grami-env\Scripts\activate     # On Windows
+
+   # Install Grami AI
+   pip install grami-ai
+
+Verifying Installation
+---------------------
+
+.. code-block:: python
+
+   import grami
+   print(grami.__version__)
+
+Troubleshooting
+---------------
+
+- Ensure you have the latest version of pip
+- Check your Python version (3.8+ required)
+- Verify internet connection during installation

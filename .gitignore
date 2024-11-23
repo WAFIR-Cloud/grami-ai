@@ -59,44 +59,57 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# Environment Files
-.env
+# API Keys and Secrets
 *.env
-.env.local
-.env.development
-.env.test
-.env.production
-
-# Environments
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Sensitive Configuration Files
+.env
 *.secret
-*.key
-*.pem
+secrets.json
+config.json
 
-# IDE-specific files
-.idea/
+# IDE and Editor Files
 .vscode/
 *.swp
 *.swo
 
-# Logs
+# Logging and Temporary Files
 *.log
-logs/
+*.tmp
+temp/
 
-# macOS specific
+# Virtual Environments
+venv/
+env/
+.venv/
+.env/
+
+# Sensitive Configuration
+config/secrets/
+**/secrets/
+**/*.key
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# System and Backup Files
 .DS_Store
-.AppleDouble
-.LSOverride
+Thumbs.db
+*.bak
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# Python Specific
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Project-specific ignores
-config/secrets.yml
-secrets/
+# Sensitive Documentation
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# Sensitive Project Files
+*.credentials
+*.pem
+*.ppk
+
+# Sensitive Development Artifacts
+development_config/
+local_settings.py
