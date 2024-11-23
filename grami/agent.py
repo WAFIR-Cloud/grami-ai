@@ -1,9 +1,12 @@
 from typing import List, Dict, Any, Optional, AsyncGenerator, Union, Callable
 from .core.base import BaseLLMProvider, BaseMemoryProvider, BaseCommunicationProvider, BaseTool
+from .providers.gemini_provider import GeminiProvider
 import logging
 import asyncio
 from datetime import datetime
 import uuid
+import json
+import os
 
 class Agent:
     """
@@ -251,26 +254,157 @@ class AsyncAgent:
     """
     Asynchronous agent that can interact with different LLM providers.
     """
+    @classmethod
+    async def setup_communication(
+        cls,
+        communication_type: str = 'websocket', 
+        host: str = 'localhost', 
+        port: int = 8765,
+        path: str = '/ws'
+    ):
+        """
+        Class method to setup a communication interface.
+        
+        :param communication_type: Type of communication interface (default: websocket)
+        :param host: Host for the communication server
+        :param port: Port for the communication server
+        :param path: WebSocket path
+        :return: Configured communication interface
+        """
+        if communication_type == 'websocket':
+            import websockets
+            import asyncio
+            
+            # Create a WebSocket server
+            server = await websockets.serve(
+                cls._handle_websocket_connection,
+                host, 
+                port, 
+                subprotocols=['agent-protocol']
+            )
+            
+            return {
+                'type': 'websocket',
+                'server': server,
+                'host': host,
+                'port': port,
+                'path': path
+            }
+        
+        raise ValueError(f"Unsupported communication type: {communication_type}")
+
+    @classmethod
+    async def _handle_websocket_connection(cls, websocket, path):
+        """
+        Handle WebSocket connections for communication.
+        
+        :param websocket: WebSocket connection
+        :param path: Connection path
+        """
+        try:
+            async for message_str in websocket:
+                try:
+                    message = json.loads(message_str)
+                    
+                    # Handle different message types
+                    if message.get('type') == 'agent_request':
+                        # Advanced request handling
+                        request_type = message.get('request_type')
+                        payload = message.get('payload', {})
+                        
+                        # Create a temporary agent instance for processing
+                        agent = cls(
+                            name="WebSocket Request Agent",
+                            llm=GeminiProvider(api_key=os.getenv("GEMINI_API_KEY")),
+                            system_instructions="Process various types of requests"
+                        )
+                        
+                        # Process the request based on type
+                        if hasattr(agent, 'process_request'):
+                            response = await agent.process_request(request_type, payload)
+                        else:
+                            # Fallback to standard message processing
+                            response = await agent.send_message(
+                                f"Process {request_type} request: {json.dumps(payload)}"
+                            )
+                        
+                        # Send response back
+                        await websocket.send(json.dumps(response))
+                    
+                    elif message.get('type') == 'agent_message':
+                        # Standard message handling
+                        response = await cls._process_message(message)
+                        await websocket.send(json.dumps(response))
+                    
+                    else:
+                        # Invalid message type
+                        await websocket.send(json.dumps({
+                            'status': 'error',
+                            'message': 'Invalid message type'
+                        }))
+                
+                except json.JSONDecodeError:
+                    await websocket.send(json.dumps({
+                        'status': 'error',
+                        'message': 'Invalid JSON format'
+                    }))
+                except Exception as e:
+                    await websocket.send(json.dumps({
+                        'status': 'error',
+                        'message': str(e)
+                    }))
+        
+        except Exception as e:
+            logging.error(f"WebSocket connection error: {e}")
+
+    @classmethod
+    async def _process_message(cls, message):
+        """
+        Process incoming messages.
+        
+        :param message: Incoming message dictionary
+        :return: Response dictionary
+        """
+        # Placeholder implementation
+        if message.get('type') == 'agent_message':
+            return {
+                'status': 'processed',
+                'content': f"Received message: {message.get('content')}"
+            }
+        elif message.get('type') == 'tool_call':
+            return {
+                'status': 'error',
+                'message': 'No agent context to process tool call'
+            }
+        
+        return {
+            'status': 'error',
+            'message': 'Invalid message type'
+        }
+
     def __init__(
         self,
         name: str,
         llm: BaseLLMProvider,
         memory: Optional[BaseMemoryProvider] = None,
         system_instructions: Optional[str] = None,
-        tools: Optional[Dict[str, Callable]] = None
+        tools: Optional[List[Callable]] = None,
+        communication_interface: Optional[Any] = None
     ):
         """
-        Initialize an AsyncAgent.
+        Initialize an AsyncAgent with optional communication interface.
 
         :param name: Name of the agent
         :param llm: Language model provider
         :param memory: Memory provider for storing conversation context
         :param system_instructions: System-level instructions to guide the model's behavior
-        :param tools: Optional dictionary of tools the agent can use
+        :param tools: Optional list of tool functions the agent can use
+        :param communication_interface: Optional communication interface for agent interactions
         """
         self.name = name
         self.llm = llm
         self.memory = memory
+        self.communication_interface = communication_interface
         self.system_instructions = system_instructions
         
         # Set system instructions on the provider if supported
@@ -279,7 +413,90 @@ class AsyncAgent:
         
         # Register tools if provided
         if tools:
-            self.llm.register_tools(tools)
+            self.llm.tools = tools
+    
+    async def start_communication_server(self):
+        """
+        Start the communication server for the agent.
+        """
+        if not hasattr(self, 'communication_interface'):
+            raise ValueError("No communication interface configured")
+        
+        if self.communication_interface['type'] == 'websocket':
+            server = self.communication_interface['server']
+            
+            # Modify the WebSocket handler to use this specific agent's context
+            async def agent_specific_handler(websocket, path):
+                try:
+                    async for message_str in websocket:
+                        message = json.loads(message_str)
+                        
+                        # Process message using this agent's specific context
+                        response = await self._handle_communication_message(message)
+                        
+                        await websocket.send(json.dumps(response))
+                except Exception as e:
+                    logging.error(f"WebSocket connection error: {e}")
+            
+            # Replace the generic handler with the agent-specific handler
+            server.ws_handler = agent_specific_handler
+            
+            # Keep the server running
+            await server.wait_closed()
+    
+    async def _handle_communication_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Handle incoming messages through the communication interface.
+
+        :param message: Incoming message dictionary
+        :return: Response to the message
+        """
+        try:
+            # Process agent-specific messages
+            if message.get('type') == 'agent_message':
+                response = await self.send_message(message.get('content', ''))
+                return {
+                    'status': 'processed',
+                    'response': response,
+                    'agent': self.name
+                }
+            
+            # Handle tool invocation
+            elif message.get('type') == 'tool_call':
+                tool_name = message.get('tool')
+                tool_args = message.get('args', {})
+                
+                # Find and execute the tool
+                for tool_func in self.llm.tools:
+                    if tool_func.__name__ == tool_name:
+                        try:
+                            result = tool_func(**tool_args)
+                            return {
+                                'status': 'processed',
+                                'result': result,
+                                'tool': tool_name
+                            }
+                        except Exception as e:
+                            return {
+                                'status': 'error',
+                                'message': str(e),
+                                'tool': tool_name
+                            }
+                
+                return {
+                    'status': 'error',
+                    'message': f'Tool {tool_name} not found'
+                }
+            
+            return {
+                'status': 'unknown_message_type',
+                'message': 'Unrecognized message type'
+            }
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': str(e)
+            }
     
     async def send_message(
         self, 

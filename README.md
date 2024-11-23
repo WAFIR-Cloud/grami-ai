@@ -17,6 +17,7 @@
 - [Memory Providers](#-memory-providers)
 - [Working with Tools](#-working-with-tools)
 - [Development Roadmap](#-development-roadmap)
+- [Communication Interfaces](#-communication-interfaces)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -138,6 +139,46 @@ agent = AsyncAgent(
 )
 ```
 
+## 🌐 Communication Interfaces
+
+GRAMI-AI supports multiple communication interfaces, including WebSocket for real-time, bidirectional communication between agents.
+
+### WebSocket Communication
+
+Create a WebSocket-enabled agent using the built-in `setup_communication()` method:
+
+```python
+from grami.agent import AsyncAgent
+from grami.providers.gemini_provider import GeminiProvider
+from grami.memory.lru import LRUMemory
+
+# Create an agent with WebSocket communication
+agent = AsyncAgent(
+    name="ToolsAgent", 
+    llm=GeminiProvider(api_key=os.getenv('GEMINI_API_KEY')),
+    memory=LRUMemory(capacity=100),
+    tools=[calculate_area, generate_fibonacci]
+)
+
+# Setup WebSocket communication
+communication_interface = await agent.setup_communication(
+    host='localhost', 
+    port=0  # Dynamic port selection
+)
+```
+
+#### Key Features of WebSocket Communication
+- Real-time bidirectional messaging
+- Dynamic port allocation
+- Seamless tool and LLM interaction
+- Secure communication channel
+
+#### Example Use Cases
+- Distributed AI systems
+- Real-time collaborative agents
+- Interactive tool-based services
+- Event-driven agent communication
+
 ## 🗺 Development Roadmap
 
 ### Core Framework Design
@@ -169,7 +210,7 @@ agent = AsyncAgent(
 - [x] Provider-specific configuration handling
 
 ### Communication Interfaces
-- [ ] WebSocket real-time communication
+- [x] WebSocket real-time communication
 - [ ] REST API endpoint design
 - [ ] Kafka inter-agent communication
 - [ ] gRPC support
