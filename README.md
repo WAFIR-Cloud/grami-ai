@@ -61,21 +61,51 @@ print(response)
 
 We provide a variety of example implementations to help you get started:
 
-### Available Examples
+### Basic Agents
+- `examples/simple_agent_example.py`: Basic mathematical calculation agent
+- `examples/gemini_example.py`: Multi-tool Gemini Agent with various capabilities
 
-1. **Basic Agents**
-   - `examples/gemini_example.py`: Multi-tool Gemini Agent
-   - `examples/openai_example.py`: OpenAI-powered Agent
-   - `examples/anthropic_example.py`: Claude Agent Implementation
+### Advanced Scenarios
+- `examples/content_creation_agent.py`: AI-Powered Content Creation Agent
+  - Generates blog posts
+  - Conducts topic research
+  - Creates supporting visuals
+  - Tailors content to specific audiences
 
-2. **Advanced Scenarios**
-   - `examples/agent_crew_example.py`: Multi-Agent Collaboration
-   - `examples/web_research_agent.py`: Web Research Specialist
-   - `examples/content_creation_agent.py`: Content Generation Agent
+- `examples/web_research_agent.py`: Advanced Web Research and Trend Analysis Agent
+  - Performs comprehensive market research
+  - Conducts web searches
+  - Analyzes sentiment
+  - Predicts industry trends
+  - Generates detailed reports
 
-3. **Tool Integration**
-   - `examples/custom_tool_example.py`: Creating Custom Tools
-   - `examples/kafka_communication_example.py`: Inter-Agent Communication
+### Collaborative Agents
+- `examples/agent_crew_example.py`: Multi-Agent Collaboration
+  - Demonstrates inter-agent communication
+  - Showcases specialized agent roles
+  - Enables complex task delegation
+
+### Tool Integration
+- `examples/tools.py`: Collection of custom tools
+  - Web Search
+  - Weather Information
+  - Calculator
+  - Sentiment Analysis
+  - Image Generation
+
+## Environment Variables
+
+### API Key Management
+
+GRAMI-AI uses environment variables to manage sensitive credentials securely. To set up your API keys:
+
+1. Create a `.env` file in the project root directory
+2. Add your API keys in the following format:
+   ```
+   GEMINI_API_KEY=your_gemini_api_key_here
+   ```
+
+**Important**: Never commit your `.env` file to version control. The `.gitignore` is already configured to prevent this.
 
 ## Development Checklist
 

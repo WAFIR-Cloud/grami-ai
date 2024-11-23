@@ -1,6 +1,10 @@
 import sys
 import os
+from dotenv import load_dotenv
 import asyncio
+
+# Load environment variables
+load_dotenv()
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -12,7 +16,7 @@ from examples.tools import WebSearchTool, WeatherTool, CalculatorTool
 async def main():
     # Initialize Gemini Provider
     gemini_provider = GeminiProvider(
-        api_key="AIzaSyCVcxzO6mSvZX-5j7T3pUqeJPto4FOO6v8"
+        api_key=os.getenv('GEMINI_API_KEY')
     )
 
     # Create an AI Agent with Gemini Provider and Tools

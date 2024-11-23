@@ -60,8 +60,6 @@ coverage.xml
 .pytest_cache/
 
 # API Keys and Secrets
-*.env
-.env
 *.secret
 secrets.json
 config.json
@@ -113,3 +111,11 @@ docs/_templates/
 # Sensitive Development Artifacts
 development_config/
 local_settings.py
+
+# Environment files
+.env
+*.env
+.env.local
+.env.development
+.env.test
+.env.production

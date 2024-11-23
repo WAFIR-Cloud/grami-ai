@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "grami-ai"
-version = "0.3.118"
+version = "0.3.120"
 description = "A dynamic and flexible AI agent framework for building intelligent, multi-modal AI agents"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -48,7 +48,8 @@ dependencies = [
     "anthropic>=0.7.0",
     "asyncio>=3.4.3",
     "requests>=2.28.0",
-    "pydantic>=2.0.0"
+    "pydantic>=2.0.0",
+    "python-dotenv"  # Add python-dotenv for .env file support
 ]
 
 [project.optional-dependencies]
