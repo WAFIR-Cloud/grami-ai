@@ -1,7 +1,7 @@
 # GRAMI-AI: Dynamic AI Agent Framework
 
 <div align="center">
-    <img src="https://img.shields.io/badge/dynamic/json?color=blue&label=version&query=$.tool.poetry.version&url=https%3A%2F%2Fraw.githubusercontent.com%2FYAFATEK%2Fgrami-ai%2Fmain%2Fpyproject.toml" alt="Version">
+    <img src="https://img.shields.io/badge/dynamic/json?color=blue&label=version&query=$.version&url=https%3A%2F%2Fraw.githubusercontent.com%2FYAFATEK%2Fgrami-ai%2Fmain%2Fpyproject.toml" alt="Version">
     <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Versions">
     <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
     <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
@@ -76,24 +76,6 @@ We provide a variety of example implementations to help you get started:
 3. **Tool Integration**
    - `examples/custom_tool_example.py`: Creating Custom Tools
    - `examples/kafka_communication_example.py`: Inter-Agent Communication
-
-## Documentation
-
-For detailed documentation, visit our [Documentation Website](https://grami-ai.readthedocs.io)
-
-## Contributing
-
-We welcome contributions! Please see our [Contribution Guidelines](CONTRIBUTING.md)
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
-## Community
-
-- Star the project on GitHub
-- Join our [Discord Community](https://discord.gg/your-discord-invite)
-- Follow us on [Twitter/X](https://twitter.com/yafatek)
 
 ## Development Checklist
 
@@ -191,3 +173,28 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Multi-language support
 - [ ] Enterprise-grade security features
 - [ ] AI agent marketplace
+
+## Documentation
+
+For detailed documentation, visit our [Documentation Website](https://grami-ai.readthedocs.io)
+
+## Contributing
+
+We welcome contributions! Please see our [Contribution Guidelines](CONTRIBUTING.md)
+
+## License
+
+MIT License - Empowering open-source innovation
+
+## About YAFATEK Solutions
+
+Pioneering AI innovation through flexible, powerful frameworks.
+
+## Contact & Support
+
+- **Email**: support@yafatek.dev
+- **GitHub**: [GRAMI-AI Issues](https://github.com/YAFATEK/grami-ai/issues)
+
+---
+
+**Star ⭐ the project if you believe in collaborative AI innovation!**
