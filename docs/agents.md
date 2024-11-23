@@ -53,66 +53,76 @@ response = await async_agent.send_message("Explain quantum entanglement")
 print(response)
 
 # Stream a response
-async for token in async_agent.stream_message("Explain photosynthesis"):
-    print(token, end='', flush=True)
+async for chunk in async_agent.stream_message("Describe the evolution of stars"):
+    print(chunk, end="", flush=True)
 ```
+
+## LLM Providers
+
+### GeminiProvider
+
+The `GeminiProvider` class offers integration with Google's Gemini model, supporting both synchronous and asynchronous operations.
+
+```python
+from grami.providers import GeminiProvider
+
+provider = GeminiProvider(api_key="YOUR_API_KEY")
+
+# Direct content generation
+content = await provider.generate_content("What are the three laws of robotics?")
+print(content)
+
+# Use with AsyncAgent for advanced features
+agent = AsyncAgent(
+    name="GeminiAI",
+    role="AI Assistant",
+    llm_provider=provider
+)
+```
+
+Key features:
+- Native async support with `generate_content`, `send_message`, and `stream_message`
+- Context maintenance across conversations
+- Streaming capability for real-time responses
+- Tool integration support
 
 ## Common Parameters
 
 Both agent types share these common parameters:
 
-- `name`: Unique identifier for the agent
-- `role`: The agent's primary function or purpose
-- `llm_provider`: Language model provider (e.g., GeminiProvider)
-- `memory_provider`: Optional memory management system
-- `communication_provider`: Optional communication interface
-- `tools`: Optional list of tools/functions
-- `initial_context`: Initial conversation context
-- `config`: Additional configuration parameters
-
-## Key Features
-
-### Message Handling
-- `send_message()`: Send a message and get a complete response
-- `stream_message()`: Get a streaming response token by token
-
-### Tool Integration
-- `add_tool()`: Add new tools to the agent's capabilities
-- Support for custom tool development
-
-### Context Management
-- `initialize_conversation()`: Set up initial conversation context
-- Support for conversation history tracking
-
-### Memory Management
-- Optional memory provider integration
-- Conversation state persistence
+- `name`: The agent's name (string)
+- `role`: The agent's role or purpose (string)
+- `llm_provider`: The LLM provider instance (BaseProvider)
+- `tools`: Optional list of tools the agent can use (List[BaseTool])
+- `initial_context`: Optional initial conversation context (List[Dict])
+- `max_tokens`: Maximum tokens per response (Optional[int])
+- `temperature`: Response randomness (Optional[float])
 
 ## Best Practices
 
-1. **Choose the Right Agent Type**
-   - Use `Agent` for simple interactions
-   - Use `AsyncAgent` for streaming and complex interactions
+1. **Provider Selection**: Choose the appropriate provider based on your needs:
+   - Use `GeminiProvider` for advanced AI capabilities and streaming support
+   - Consider rate limits and API quotas when making provider decisions
 
-2. **Context Management**
-   - Always provide clear initial context
-   - Use system messages to define behavior
+2. **Agent Type Selection**:
+   - Use `AsyncAgent` for complex, streaming, or long-running interactions
+   - Use `Agent` for simple, synchronous operations
 
-3. **Error Handling**
-   - Implement try-catch blocks for async operations
-   - Handle potential API errors gracefully
+3. **Context Management**:
+   - Provide clear roles and initial context for better responses
+   - Monitor conversation length to avoid token limits
+   - Use tools appropriately to extend agent capabilities
 
-4. **Resource Management**
-   - Use async context managers when appropriate
-   - Clean up resources after use
-
-5. **Security**
-   - Store API keys in environment variables
-   - Never expose sensitive information in code
+4. **Error Handling**:
+   - Always implement proper error handling for API calls
+   - Consider rate limiting and retry strategies
+   - Handle streaming interruptions gracefully
 
 ## Examples
 
-Check out our example implementations in the `examples/` directory:
-- `simple_agent_example.py`: Basic Agent usage
-- `simple_async_agent.py`: AsyncAgent implementation
-- More complex examples in the examples directory
+Check out our [examples directory](../examples) for complete implementation examples, including:
+- Basic agent usage
+- Async streaming
+- Tool integration
+- Multi-turn conversations
+- Provider-specific features
