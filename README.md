@@ -175,6 +175,97 @@ gemini_provider = GeminiProvider(
 )
 ```
 
+## Working with Tools
+
+### Creating Tools
+
+Tools in GRAMI-AI are simple Python functions that can be dynamically used by AI agents. Here's how to create and use tools:
+
+```python
+def get_current_time() -> str:
+    """Get the current timestamp."""
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def calculate_age(birth_year: int) -> int:
+    """Calculate a person's age based on their birth year."""
+    current_year = datetime.now().year
+    return current_year - birth_year
+
+def generate_advice(age: int, interests: Optional[str] = None) -> str:
+    """Generate personalized life advice."""
+    base_advice = {
+        (0, 18): "Focus on education and personal growth.",
+        (18, 30): "Explore career opportunities and build skills.",
+        (30, 45): "Balance career and personal life, invest wisely.",
+        (45, 60): "Plan for retirement and enjoy life experiences.",
+        (60, 100): "Stay active, spend time with loved ones, and pursue hobbies."
+    }
+    
+    # Find appropriate advice based on age
+    advice = next((adv for (min_age, max_age), adv in base_advice.items() if min_age <= age < max_age), 
+                  "Enjoy life and stay positive!")
+    
+    # Personalize advice if interests are provided
+    if interests:
+        advice += f" Consider exploring {interests} to enrich your life."
+    
+    return advice
+```
+
+### Adding Tools to AsyncAgent
+
+You can add tools to an AsyncAgent in two ways:
+
+1. During Agent Initialization:
+```python
+agent = AsyncAgent(
+    name="AdviceAgent",
+    llm=gemini_provider,
+    tools=[
+        get_current_time,
+        calculate_age,
+        generate_advice
+    ]
+)
+```
+
+2. Adding Tools Dynamically:
+```python
+# Add a single tool
+await agent.add_tool(some_tool)
+
+# Or add multiple tools
+for tool in [tool1, tool2, tool3]:
+    await agent.add_tool(tool)
+```
+
+### Tool Best Practices
+
+- Keep tools focused and single-purpose
+- Use type hints for better model understanding
+- Return simple, serializable data types
+- Handle potential errors gracefully
+- Provide clear, concise docstrings
+
+### Example: Tool-Powered Interaction
+
+```python
+async def main():
+    agent = AsyncAgent(
+        name="PersonalAssistant",
+        llm=gemini_provider,
+        tools=[get_current_time, calculate_age, generate_advice]
+    )
+
+    # The agent can now use these tools dynamically
+    response = await agent.send_message(
+        "What advice would you give to a 35-year-old interested in technology?"
+    )
+    print(response)
+```
+
+Tools provide a powerful way to extend your agent's capabilities, allowing it to perform specific tasks, retrieve information, and generate context-aware responses.
+
 ## Development Checklist
 
 ### Core Framework Design

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "grami-ai"
-version = "0.3.129"
+version = "0.3.122"
 description = "A dynamic and flexible AI agent framework for building intelligent, multi-modal AI agents"
 readme = "README.md"
 requires-python = ">=3.8"
