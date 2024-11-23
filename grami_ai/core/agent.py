@@ -1,242 +1,268 @@
 """
 Grami AI Core Agent Module
 
-This module provides the core agent implementation for the Grami AI framework.
-It enables easy creation of AI agents with different capabilities and interfaces.
+Comprehensive async agent framework for intelligent, context-aware agents.
 """
 
 import asyncio
-import logging
-from typing import List, Optional, Any, Dict, Callable, Union, Type
+import uuid
 from enum import Enum
 
-from grami_ai.core.memory import AsyncMemory, AsyncInMemoryMemory, AsyncRedisMemory
-from grami_ai.core.config import settings, Settings
-from grami_ai.core.logger import logger, LoggingContext
+from pydantic import BaseModel, Field
+
+from grami_ai.core.interfaces import AgentInterface, WebSocketInterface
+from grami_ai.core.tools import AsyncBaseTool
+from grami_ai.core.prompt import AgentPrompt
+from grami_ai.core.logger import logger
+from grami_ai.core.memory import AsyncMemory, AsyncInMemoryMemory
+from grami_ai.core.config import Settings
 from grami_ai.llms.base import BaseLLMProvider
-from grami_ai.tools.base import AsyncBaseTool
-from grami_ai.core.interfaces import AgentInterface, WebSocketInterface, KafkaConsumerInterface
 
-class MemoryType(str, Enum):
-    """Supported memory backends"""
-    REDIS = "redis"
-    IN_MEMORY = "in_memory"
-    IN_MEMORY_TYPE = "in_memory_type"
+class AgentType(Enum):
+    """Predefined agent types"""
+    CONVERSATIONAL = 1
+    TASK_ORIENTED = 2
+    RESEARCH = 3
+    CREATIVE = 4
 
-class InterfaceType(str, Enum):
-    """Supported agent interfaces"""
-    WEBSOCKET = "websocket"
-    KAFKA_CONSUMER = "kafka_consumer"
-
-class LLMType(str, Enum):
-    """Supported LLM providers"""
-    GEMINI = "gemini"
-    OPENAI = "openai"
+class AgentConfig(BaseModel):
+    """Comprehensive agent configuration"""
+    model_config = Field(arbitrary_types_allowed=True)
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str = Field(default="GramiAgent")
+    type: AgentType = Field(default=AgentType.CONVERSATIONAL)
+    
+    # LLM Configuration
+    llm_provider: BaseLLMProvider
+    temperature: float = Field(default=0.7, ge=0, le=1)
+    max_tokens: int = Field(default=1500)
+    
+    # Memory Configuration
+    memory: AsyncMemory = Field(default_factory=AsyncInMemoryMemory)
+    memory_retention_window: int = Field(default=10)
+    
+    # Goal and Prompt Configuration
+    goals: list = Field(default_factory=list)
+    prompt_config: dict = Field(default_factory=dict)
+    prompt: dict
+    
+    # Interface Configuration
+    interface: AgentInterface = Field(default_factory=WebSocketInterface)
+    
+    # Tool Configuration
+    tools: list = Field(default_factory=list)
+    
+    def __init__(self, **data):
+        if 'prompt' in data and 'prompt_config' not in data:
+            data['prompt_config'] = data.pop('prompt')
+        super().__init__(**data)
 
 class AsyncAgent:
     """
-    Enhanced Async AI Agent Framework
+    Advanced Async Agent with comprehensive capabilities
     
     Features:
-    - Factory-style creation
-    - Multiple interface support
-    - Pluggable memory backends
-    - Automatic tool selection
-    - LLM-driven decision making
+    - Multi-modal goal tracking
+    - Sophisticated memory management
+    - Flexible communication interfaces
+    - Dynamic tool integration
+    - Configurable LLM interaction
     """
-    def __init__(
-        self,
-        name: str,
-        llm: BaseLLMProvider,
-        memory: AsyncMemory,
-        interface: AgentInterface,
-        tools: Optional[List[AsyncBaseTool]] = None,
-        system_instruction: Optional[str] = None,
-        config: Optional[Settings] = None
-    ):
-        self.name = name
-        self.llm = llm
-        self.memory = memory
-        self.interface = interface
-        self.tools = tools or []
-        self.system_instruction = system_instruction or settings.default_system_instruction
-        self.config = config or settings
-        
-        # Initialize interface
-        # self.interface.initialize(self)
     
-    @classmethod
-    async def create(
-        cls,
-        name: str,
-        llm: Union[str, BaseLLMProvider],
-        memory: Union[str, AsyncMemory] = MemoryType.IN_MEMORY,
-        interface: Union[str, AgentInterface] = InterfaceType.WEBSOCKET,
-        tools: Optional[List[Union[str, AsyncBaseTool]]] = None,
-        system_instruction: Optional[str] = None,
-        config: Optional[Settings] = None,
-        **kwargs
-    ) -> "AsyncAgent":
+    def __init__(
+        self, 
+        config: AgentConfig
+    ):
         """
-        Create an agent with the specified configuration.
+        Initialize a sophisticated async agent
         
         Args:
-            name: Agent name
-            llm: LLM provider name or instance
-            memory: Memory backend name or instance
-            interface: Interface type or instance
-            tools: List of tool names or instances
-            system_instruction: Custom system instruction
-            config: Custom settings
-            **kwargs: Additional configuration
-            
-        Returns:
-            Configured AsyncAgent instance
+            config: Comprehensive agent configuration
         """
-        # Resolve LLM provider
-        if isinstance(llm, str):
-            llm = await cls._get_llm_provider(llm, **kwargs)
-            
-        # Resolve memory backend
-        if isinstance(memory, str):
-            memory = await cls._get_memory_backend(memory, **kwargs)
-            
-        # Resolve interface
-        if isinstance(interface, str):
-            interface = await cls._get_interface(interface, **kwargs)
-            
-        # Resolve tools
-        if tools:
-            resolved_tools = await cls._get_tools(tools, **kwargs)
-        else:
-            resolved_tools = await cls._get_default_tools()
-            
-        return cls(
-            name=name,
-            llm=llm,
-            memory=memory,
-            interface=interface,
-            tools=resolved_tools,
-            system_instruction=system_instruction,
-            config=config
+        # Use default configuration if not provided
+        self.config = config
+        
+        # Setup core components
+        self.id = self.config.id
+        self.name = self.config.name
+        
+        # Initialize LLM
+        self.llm = self.config.llm_provider
+        
+        # Initialize memory
+        self.memory = self.config.memory
+        
+        # Initialize interface
+        self.interface = self.config.interface
+        
+        # Initialize tools
+        self.tools = self.config.tools
+        
+        # Configure logging
+        self.logger = logger.bind(
+            agent_id=self.id,
+            agent_name=self.name
         )
     
-    @staticmethod
-    async def _get_llm_provider(name: str, **kwargs) -> BaseLLMProvider:
-        """Get LLM provider by name"""
-        if name == LLMType.GEMINI:
-            from grami_ai.llms.gemini_llm import GeminiLLMProvider
-            return GeminiLLMProvider(**kwargs)
-        elif name == LLMType.OPENAI:
-            from grami_ai.llms.openai_llm import OpenAILLMProvider
-            return OpenAILLMProvider(**kwargs)
-        raise ValueError(f"Unsupported LLM provider: {name}")
-
-    @staticmethod
-    async def _get_memory_backend(name: str, **kwargs) -> AsyncMemory:
-        """Get memory backend by name"""
-        if name == MemoryType.REDIS:
-            return AsyncRedisMemory(**kwargs)
-        elif name == MemoryType.IN_MEMORY:
-            return AsyncInMemoryMemory()
-        elif name == MemoryType.IN_MEMORY_TYPE:
-            return AsyncInMemoryMemory()
-        raise ValueError(f"Unsupported memory type: {name}")
-    
-    @staticmethod
-    async def _get_interface(name: str, **kwargs) -> AgentInterface:
-        """Get interface by name"""
-        if name == InterfaceType.WEBSOCKET:
-            return WebSocketInterface(**kwargs)
-        elif name == InterfaceType.KAFKA_CONSUMER:
-            return KafkaConsumerInterface(**kwargs)
-        raise ValueError(f"Unsupported interface type: {name}")
-    
-    @staticmethod
-    async def _get_tools(
-        tools: List[Union[str, AsyncBaseTool]], 
-        **kwargs
-    ) -> List[AsyncBaseTool]:
-        """Get tools by name or use provided instances"""
-        resolved_tools = []
-        for tool in tools:
-            if isinstance(tool, str):
-                # Resolve tool by name
-                tool_instance = await AsyncAgent._resolve_tool(tool, **kwargs)
-                resolved_tools.append(tool_instance)
-            else:
-                resolved_tools.append(tool)
-        return resolved_tools
-    
-    @staticmethod
-    async def _get_default_tools() -> List[AsyncBaseTool]:
-        """Get default tools (communication, etc.)"""
-        # Implementation for default tools
-        pass
-    
-    @staticmethod
-    async def _resolve_tool(name: str, **kwargs) -> AsyncBaseTool:
-        """Resolve tool by name"""
-        # Implementation for tool resolution
-        pass
-    
-    async def process(self, message: Any) -> Any:
+    async def initialize(self):
         """
-        Process incoming message using LLM and tools
+        Comprehensive agent initialization routine
         
-        The LLM decides:
-        1. Which tools to use
-        2. How to respond
-        3. When to use memory
-        4. How to format response
+        Performs:
+        - Memory warm-up
+        - Interface setup
+        - Tool validation
         """
-        # Log the incoming message
-        logger.info(f"Processing message: {message}")
+        # Initialize memory
+        await self.memory.initialize()
         
-        # Check if it's a content request
-        if isinstance(message, dict) and message.get('type') == 'content_request':
-            # Find the appropriate tool for content generation
-            content_tool = next((tool for tool in self.tools if tool.name == 'content_generation'), None)
-            
-            if content_tool:
-                try:
-                    # Generate content using the tool
-                    content = await content_tool.generate(
-                        platform=message.get('platform', 'instagram'),
-                        niche=message.get('niche', 'general'),
-                        content_type=message.get('content_type', 'post')
-                    )
-                    
-                    return {
-                        'status': 'success',
-                        'content': content
-                    }
-                except Exception as e:
-                    logger.error(f"Error generating content: {e}")
-                    return {
-                        'status': 'error',
-                        'message': str(e)
-                    }
-            else:
-                logger.warning("No content generation tool found")
-                return {
-                    'status': 'error',
-                    'message': 'No content generation tool available'
-                }
+        # Setup interface
+        await self.interface.initialize(self)
         
-        # Default response for unhandled message types
+        # Validate and prepare tools
+        for tool in self.tools:
+            await tool.validate()
+    
+    async def process_goal(
+        self, 
+        goal: dict
+    ) -> dict:
+        """
+        Process and track agent goals
+        
+        Args:
+            goal: Goal description or dict instance
+        
+        Returns:
+            Goal processing result
+        """
+        # Prepare goal processing prompt
+        prompt = self._construct_goal_prompt(goal)
+        
+        # Generate goal strategy
+        strategy = await self.llm.generate(
+            prompt, 
+            temperature=self.config.temperature
+        )
+        
+        # Store goal in memory
+        await self.memory.store_goal(goal, strategy)
+        
         return {
-            'status': 'error',
-            'message': 'Unsupported message type'
+            "goal": goal,
+            "strategy": strategy
         }
     
-    async def start(self) -> None:
-        """Start the agent's interface."""
-        if self.interface:
-            await self.interface.initialize(self)
-            await self.interface.start()
-
-    async def stop(self) -> None:
-        """Stop the agent's interface."""
-        if self.interface:
-            await self.interface.stop()
+    def _construct_goal_prompt(self, goal: dict) -> str:
+        """
+        Construct a comprehensive prompt for goal processing
+        
+        Args:
+            goal: Agent goal to process
+        
+        Returns:
+            Constructed prompt
+        """
+        base_prompt = f"""
+        Goal Processing for Agent: {self.name}
+        
+        Goal Description: {goal.get("description", "Not specified")}
+        Priority: {goal.get("priority", "Not specified")}
+        Success Criteria: {goal.get("success_criteria", "Not specified")}
+        
+        Tasks:
+        1. Develop a comprehensive strategy
+        2. Break down the goal into actionable steps
+        3. Identify potential challenges
+        4. Propose mitigation strategies
+        
+        Provide a detailed, structured response.
+        """
+        
+        return base_prompt
+    
+    async def communicate(
+        self, 
+        message: str, 
+        context: dict = {}
+    ):
+        """
+        Communicate through the agent's interface
+        
+        Args:
+            message: Message to communicate
+            context: Additional context
+        
+        Yields:
+            Response chunks
+        """
+        # Retrieve relevant memory
+        relevant_memory = await self.memory.retrieve(message)
+        
+        # Construct communication prompt
+        prompt = self._construct_communication_prompt(
+            message, 
+            context, 
+            relevant_memory
+        )
+        
+        # Stream response through interface
+        async for chunk in self.llm.stream(prompt):
+            yield chunk
+            
+            # Optionally store in memory
+            await self.memory.store_interaction(
+                message, 
+                chunk, 
+                context
+            )
+    
+    def _construct_communication_prompt(
+        self, 
+        message: str, 
+        context: dict,
+        memory: list
+    ) -> str:
+        """
+        Construct a comprehensive communication prompt
+        
+        Args:
+            message: Incoming message
+            context: Communication context
+            memory: Relevant memory entries
+        
+        Returns:
+            Constructed prompt
+        """
+        base_prompt = f"""
+        Agent: {self.name}
+        Communication Context:
+        
+        Incoming Message: {message}
+        Context Details: {context}
+        
+        Relevant Memory:
+        {memory}
+        
+        Respond thoughtfully, considering context and past interactions.
+        """
+        
+        return base_prompt
+    
+    async def add_tool(self, tool):
+        """
+        Dynamically add a tool to the agent
+        
+        Args:
+            tool: Tool to add
+        """
+        await tool.validate()
+        self.tools.append(tool)
+    
+    async def close(self):
+        """
+        Gracefully close agent resources
+        """
+        await self.memory.close()
+        await self.interface.close()

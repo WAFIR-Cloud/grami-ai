@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "grami-ai"
-version = "0.3.105"
+version = "0.3.106"
 description = "Growth and Relationship AI Management Infrastructure"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"

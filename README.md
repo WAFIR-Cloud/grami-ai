@@ -94,7 +94,7 @@ MIT License
 ## Contact
 
 - Email: support@yafatek.dev
-- GitHub: [WAFIR-Cloud/grami-ai](https://github.com/WAFIR-Cloud/grami-ai)
+- GitHub: https://github.com/yafatek/grami-ai
 
 ## Community
 

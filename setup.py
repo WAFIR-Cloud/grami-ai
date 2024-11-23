@@ -30,10 +30,10 @@ setup(
     version="0.3.106",  # Increment version to ensure uniqueness
     
     # Metadata
-    author="YAFATek Solutions/ GRAMI AI Team",
-    author_email="support@yafatek.com",
+    author="YAFATek Solutions",
+    author_email="support@yafatek.dev",
     maintainer="YAFATek Solutions",
-    maintainer_email="support@yafatek.com",
+    maintainer_email="support@yafatek.dev",
     
     # Project Description
     description="Growth and Relationship AI Management Infrastructure",
@@ -41,11 +41,11 @@ setup(
     long_description_content_type="text/markdown",
     
     # Project URLs
-    url="https://github.com/WAFIR-Cloud/grami-ai",
+    url="https://github.com/yafatek/grami-ai",
     project_urls={
-        "Bug Tracker": "https://github.com/WAFIR-Cloud/grami-ai/issues",
-        "Documentation": "https://github.com/WAFIR-Cloud/grami-ai/blob/main/README.md",
-        "Source Code": "https://github.com/WAFIR-Cloud/grami-ai",
+        "Bug Tracker": "https://github.com/yafatek/grami-ai/issues",
+        "Documentation": "https://github.com/yafatek/grami-ai/blob/main/README.md",
+        "Source Code": "https://github.com/yafatek/grami-ai",
     },
     
     # Package Discovery
