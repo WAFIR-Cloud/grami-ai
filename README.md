@@ -86,3 +86,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 For questions, support, or collaboration, please open an issue on our GitHub repository.
+
+.. image:: https://img.shields.io/badge/version-0.3.107-blue.svg
+   :target: https://github.com/your-username/grami-ai
+   :alt: Version
