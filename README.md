@@ -235,40 +235,58 @@ GRAMI-AI uses environment variables to manage sensitive credentials securely. To
 
 ## Memory Management
 
-GRAMI-AI provides flexible memory management for AI agents, allowing you to store and retrieve conversation context, user information, and agent state.
+GRAMI-AI provides flexible memory management for AI agents, allowing seamless storage and retrieval of conversation context.
 
+#### Memory Storage Examples
+
+##### Synchronous Memory Storage
+```python
+from grami.agent import Agent
+from grami.providers import GeminiProvider
+from grami.memory.lru import LRUMemory
+
+# Initialize memory provider
+memory = LRUMemory(capacity=1000)
+
+# Create agent with memory
+agent = Agent(
+    name="MemoryAssistant",
+    llm_provider=GeminiProvider(api_key="YOUR_API_KEY", memory_provider=memory)
+)
+
+# Conversation with automatic memory storage
+response = agent.send_message("Tell me about quantum physics")
+```
+
+##### Streaming with Memory
 ```python
 from grami.agent import AsyncAgent
 from grami.providers import GeminiProvider
-from grami.memory import LRUMemory
+from grami.memory.lru import LRUMemory
 
-# Initialize memory with a capacity of 1000 items
+# Initialize memory provider
 memory = LRUMemory(capacity=1000)
 
-# Create an agent with memory
-agent = AsyncAgent(
-    name="MemoryBot",
-    role="AI Assistant with memory capabilities",
-    llm_provider=GeminiProvider(api_key="YOUR_API_KEY"),
-    memory_provider=memory
+# Create async agent with memory
+async_agent = AsyncAgent(
+    name="StreamingMemoryBot",
+    llm_provider=GeminiProvider(api_key="YOUR_API_KEY", memory_provider=memory)
 )
 
-# Conversation with memory tracking
-response = await agent.send_message("Hi, I'm Alice and I love chess!")
+# Stream response with automatic memory storage
+async for token in async_agent.stream_message("Explain machine learning"):
+    print(token, end='', flush=True)
 
 # Retrieve memory contents
-keys = await memory.list_keys()
-for key in keys:
-    value = await memory.retrieve(key)
-    print(f"Memory Entry: {key} - {value}")
+memory_contents = await memory.list_contents()
 ```
 
-#### Memory Providers
-
-- `LRUMemory`: Least Recently Used memory with configurable capacity
-- Easy to extend with custom memory providers
-- Supports storing and retrieving conversation context
-- Automatic management of memory capacity
+#### Key Memory Features
+- Automatic conversation turn storage
+- Unique key generation for each memory entry
+- Configurable memory providers (LRU, Redis, etc.)
+- Supports both synchronous and streaming interactions
+- Secure and efficient memory management
 
 ## Documentation
 

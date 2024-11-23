@@ -3,6 +3,7 @@ from .core.base import BaseLLMProvider, BaseMemoryProvider, BaseCommunicationPro
 import logging
 import asyncio
 from datetime import datetime
+import uuid
 
 class Agent:
     """
@@ -79,61 +80,104 @@ class Agent:
     
     async def send_message(
         self, 
-        message: str, 
-        context: Optional[Dict[str, Any]] = None
+        message: Union[str, Dict[str, str]], 
+        context: Optional[Dict] = None
     ) -> str:
         """
-        Asynchronously send a message and get a response.
+        Send a message using the LLM provider.
         
-        :param message: Message to send
-        :param context: Optional additional context
-        :return: LLM's response
+        :param message: Message to send (string or dictionary)
+        :param context: Optional context dictionary for additional parameters
+        :return: Response from the LLM
         """
-        try:
-            # Ensure conversation is initialized
-            if not hasattr(self.llm_provider, '_conversation'):
-                await self.initialize_conversation()
-            
-            # Prepare message with role
+        # Normalize message to dictionary format
+        if isinstance(message, str):
             message_payload = {"role": "user", "content": message}
+        else:
+            message_payload = message
+        
+        # Send message via LLM provider
+        response = await self.llm_provider.send_message(message_payload, context)
+        
+        # Store conversation turn in memory if memory provider exists
+        if self.memory_provider:
+            current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            unique_key = f"{current_timestamp}_{str(uuid.uuid4())[:8]}"
             
-            response = await self.llm_provider.send_message(message_payload, context)
-            
-            # Optionally store conversation in memory
-            if self.memory_provider:
-                await self.memory_provider.store(f"{self.name}_last_message", message)
-                await self.memory_provider.store(f"{self.name}_last_response", response)
-            
-            return response
-        except Exception as e:
-            self.logger.error(f"Error sending message: {e}")
-            raise
+            # Ensure memory_provider is an instance of BaseMemoryProvider
+            if hasattr(self.memory_provider, 'store'):
+                await self.memory_provider.store(
+                    unique_key, 
+                    {
+                        "type": "conversation_turn",
+                        "user_message": {
+                            "content": message_payload.get('content', ''),
+                            "role": "user"
+                        },
+                        "model_response": {
+                            "content": response,
+                            "role": "model"
+                        },
+                        "timestamp": current_timestamp
+                    }
+                )
+        
+        return response
     
     async def stream_message(
         self, 
-        message: str, 
-        context: Optional[Dict[str, Any]] = None
+        message: Union[str, Dict[str, str]], 
+        context: Optional[Dict] = None
     ) -> AsyncGenerator[str, None]:
         """
-        Asynchronously stream a message response.
+        Stream a message response from the LLM.
         
-        :param message: Message to send
-        :param context: Optional additional context
-        :yield: Streamed response tokens
+        :param message: Message to send (string or dictionary)
+        :param context: Optional context dictionary for additional parameters
+        :return: Async generator of response tokens
         """
-        try:
-            # Ensure conversation is initialized
-            if not hasattr(self.llm_provider, '_conversation'):
-                await self.initialize_conversation()
-            
-            # Prepare message with role
+        # Normalize message to dictionary format
+        if isinstance(message, str):
             message_payload = {"role": "user", "content": message}
+        else:
+            message_payload = message
+        
+        # Stream message via LLM provider
+        response_stream = await self.llm_provider.stream_message(message_payload, context)
+        
+        # Collect full response for memory storage
+        full_response = []
+        
+        # Stream tokens
+        async for token in response_stream:
+            full_response.append(token)
+            yield token
+        
+        # Combine tokens into full response
+        response = ''.join(full_response)
+        
+        # Store conversation turn in memory if memory provider exists
+        if self.memory_provider:
+            current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            unique_key = f"{current_timestamp}_{str(uuid.uuid4())[:8]}"
             
-            async for token in self.llm_provider.stream_message(message_payload, context):
-                yield token
-        except Exception as e:
-            self.logger.error(f"Error streaming message: {e}")
-            raise
+            # Ensure memory_provider is an instance of BaseMemoryProvider
+            if hasattr(self.memory_provider, 'store'):
+                await self.memory_provider.store(
+                    unique_key, 
+                    {
+                        "type": "conversation_turn",
+                        "user_message": {
+                            "content": message_payload.get('content', ''),
+                            "role": "user"
+                        },
+                        "model_response": {
+                            "content": response,
+                            "role": "model"
+                        },
+                        "timestamp": current_timestamp
+                    }
+                )
     
     async def broadcast(self, topic: str, message: Any) -> None:
         """
@@ -231,21 +275,35 @@ class AsyncAgent:
         if hasattr(self.llm_provider, 'register_tools'):
             self.llm_provider.register_tools(self.tools)
     
-    async def send_message(self, message: Union[str, Dict[str, str]], chat_id: Optional[str] = None) -> str:
-        """Send a message to the agent and get a response.
-        
-        Args:
-            message: Message to send (can be a string or a dictionary)
-            chat_id: Optional chat ID for conversation tracking
-            
-        Returns:
-            Agent's response
+    async def send_message(
+        self, 
+        message: Union[str, Dict[str, str]], 
+        context: Optional[Dict] = None
+    ) -> str:
         """
-        # Convert string message to dictionary if needed
-        if isinstance(message, str):
-            message = {"role": "user", "content": message}
+        Send a message using the LLM provider.
         
-        return await self.llm_provider.send_message(message, chat_id)
+        :param message: Message to send (string or dictionary)
+        :param context: Optional context dictionary for additional parameters
+        :return: Response from the LLM
+        """
+        # Normalize message to dictionary format
+        if isinstance(message, str):
+            message_payload = {"role": "user", "content": message}
+        else:
+            message_payload = message
+        
+        # Ensure context is a dictionary
+        context = context or {}
+        
+        # Add memory provider to context if self._memory_provider exists
+        if hasattr(self, '_memory_provider') and self._memory_provider:
+            context['memory_provider'] = self._memory_provider
+        
+        # Send message via LLM provider
+        response = await self.llm_provider.send_message(message_payload, context)
+        
+        return response
     
     async def stream_message(self, message: Dict[str, str], chat_id: Optional[str] = None) -> AsyncGenerator[str, None]:
         """Stream a message response from the agent.

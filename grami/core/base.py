@@ -38,13 +38,13 @@ class BaseLLMProvider(BaseProvider):
     @abstractmethod
     async def send_message(self, message: Dict[str, str], context: Optional[Dict] = None) -> str:
         """
-        Asynchronously send a message and get a response from the LLM.
+        Base method for sending a message.
         
-        :param message: User message to send with role and content
-        :param context: Optional additional context for the message
-        :return: LLM's response
+        :param message: Message to send
+        :param context: Optional context dictionary for additional parameters
+        :return: Response from the provider
         """
-        pass
+        raise NotImplementedError("Subclasses must implement send_message method")
     
     @abstractmethod
     async def stream_message(self, message: Dict[str, str], context: Optional[Dict] = None) -> AsyncGenerator[str, None]:

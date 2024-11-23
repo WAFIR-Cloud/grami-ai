@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any, List, Callable
+from typing import Optional, Dict, Any, List, Callable, AsyncGenerator, Union
 from ..core.base import BaseLLMProvider
 import google.generativeai as genai
 import logging
@@ -33,6 +33,19 @@ class GeminiProvider(BaseLLMProvider):
         self._model = genai.GenerativeModel(
             model_name=model_name,
             tools=tools,
+            safety_settings=[
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+        ],
+        generation_config=genai.GenerationConfig(
+            max_output_tokens=4000,
+            temperature=0.5,
+            top_p=0.95,
+            top_k=64,
+            response_mime_type="text/plain",
+        ),
         )
         self._chat = None
         self._tools = {}
@@ -66,72 +79,114 @@ class GeminiProvider(BaseLLMProvider):
             logger.error(f"Error initializing conversation: {str(e)}")
             raise
 
-    async def send_message(self, message: Dict[str, str], context: Optional[Dict] = None) -> str:
+    async def _store_conversation_memory(self, user_message: str, model_response: str) -> None:
+        """
+        Store a conversation turn in the memory provider.
+        
+        :param user_message: The user's input message
+        :param model_response: The model's response
+        """
+        if not self._memory_provider:
+            return
+        
+        try:
+            import uuid
+            from datetime import datetime
+            
+            current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            unique_key = f"{current_timestamp}_{str(uuid.uuid4())[:8]}"
+            
+            memory_entry = {
+                "type": "conversation_turn",
+                "user_message": {
+                    "content": user_message,
+                    "role": "user"
+                },
+                "model_response": {
+                    "content": model_response,
+                    "role": "model"
+                },
+                "timestamp": current_timestamp
+            }
+            
+            await self._memory_provider.store(unique_key, memory_entry)
+        except Exception as memory_error:
+            logging.error(f"Failed to store memory: {memory_error}")
+
+    async def send_message(self, message: Union[str, Dict[str, str]], context: Optional[Dict] = None) -> str:
         """
         Asynchronously send a message and get a response.
         
-        :param message: User message with role and content
+        :param message: User message (string or dictionary)
         :param context: Optional context
-        :return: LLM's response
+        :return: LLM's response as a string
         """
         if not self._chat:
             await self.initialize_conversation()
         
-        # Use memory provider to store and retrieve context if available
-        if self._memory_provider:
-            # Store the current message in memory
-            current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            await self._memory_provider.store(current_timestamp, {
-                "message": message.get('content', ''),
-                "role": message.get('role', 'user')
-            })
+        # Normalize message to dictionary format
+        if isinstance(message, str):
+            message_payload = {"role": "user", "content": message}
+        else:
+            message_payload = message
         
         # Add current message to conversation history
-        self._conversation_history.append(message)
+        self._conversation_history.append(message_payload)
         
         try:
-            # Use native async method
-            response = await self._chat.send_message_async(message['content'])
+            # Send message and get response
+            response = await self._chat.send_message_async(message_payload['content'])
             
-            # Store the response in memory if available
-            if self._memory_provider:
-                await self._memory_provider.store(
-                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 
-                    {
-                        "message": message.get('content', ''),
-                        "response": response.text,
-                        "role": "assistant"
-                    }
-                )
+            # Store memory for this conversation turn
+            await self._store_conversation_memory(
+                user_message=message_payload['content'], 
+                model_response=response.text
+            )
             
             return response.text
         except Exception as e:
-            # Handle potential errors
             print(f"Error sending message: {e}")
-            return f"An error occurred: {e}"
+            raise
 
-    async def stream_message(self, message: Dict[str, str], chat_id: Optional[str] = None):
-        """Stream a message response."""
+    async def stream_message(self, message: Union[str, Dict[str, str]], context: Optional[Dict] = None) -> AsyncGenerator[str, None]:
+        """
+        Asynchronously stream a message response.
+        
+        :param message: User message (string or dictionary)
+        :param context: Optional context
+        :return: Async generator of response tokens
+        """
+        if not self._chat:
+            await self.initialize_conversation()
+        
+        # Normalize message to dictionary format
+        if isinstance(message, str):
+            message_payload = {"role": "user", "content": message}
+        else:
+            message_payload = message
+        
+        # Add current message to conversation history
+        self._conversation_history.append(message_payload)
+        
+        full_response = ""
         try:
-            if not self._chat:
-                await self.initialize_conversation(chat_id)
-
-            content = message.get("content", "")
-            logger.info(f"Streaming message to Gemini: {content[:100]}...")
-
-            # Send message to Gemini
-            response = await self._chat.send_message_async(content)
-            response_text = ""
-
-            # Stream the response
-            async for chunk in response:
-                if chunk.text:
-                    response_text += chunk.text
-                    yield chunk.text
-
+            # Use native method to stream response
+            response = await self._chat.send_message_async(message_payload['content'])
+            
+            # Yield tokens from the response
+            for chunk in response.text.split():
+                full_response += chunk + ' '
+                yield chunk + ' '
+            
+            # Store memory after streaming is complete
+            await self._store_conversation_memory(
+                user_message=message_payload['content'], 
+                model_response=full_response
+            )
+        
         except Exception as e:
-            logger.error(f"Error in stream_message: {str(e)}")
-            yield f"Error streaming message: {e}"
+            print(f"Error streaming message: {e}")
+            raise StopAsyncIteration(f"An error occurred: {e}")
 
     def set_memory_provider(self, memory_provider):
         """

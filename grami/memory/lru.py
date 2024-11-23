@@ -78,6 +78,14 @@ class LRUMemory(BaseMemoryProvider):
         """
         return list(self.cache.keys())
     
+    async def list_contents(self) -> Dict[str, Any]:
+        """List all keys and their values in memory.
+        
+        Returns:
+            Dictionary of keys and their values
+        """
+        return {key: entry['value'] for key, entry in self.cache.items()}
+    
     async def clear(self) -> None:
         """Clear all items from memory."""
         self.cache.clear()
