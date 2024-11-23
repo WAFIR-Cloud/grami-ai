@@ -13,7 +13,7 @@ GRAMI-AI is a cutting-edge, async-first AI agent framework designed to solve com
 
 ## Key Features
 
-- Dynamic AI Agent Creation (Sync and Async)
+- Async AI Agent Creation
 - Multi-LLM Support (Gemini, OpenAI, Anthropic, Ollama)
 - Extensible Tool Ecosystem
 - Multiple Communication Interfaces
@@ -38,304 +38,106 @@ pip install -e .
 
 ## Quick Start
 
-### Basic Agent Creation
+### Basic Async Agent Creation
 
 ```python
-from grami.agent import Agent
-from grami.providers import GeminiProvider
+import asyncio
+from grami.agent import AsyncAgent
+from grami.providers.gemini_provider import GeminiProvider
 
-# Initialize a Gemini-powered Agent
-agent = Agent(
-    name="AssistantAI",
-    role="Helpful Digital Assistant",
-    llm_provider=GeminiProvider(api_key="YOUR_API_KEY"),
-    tools=[WebSearchTool(), CalculatorTool()]
-)
+async def main():
+    # Initialize a Gemini-powered Async Agent
+    agent = AsyncAgent(
+        name="AssistantAI",
+        llm=GeminiProvider(api_key="YOUR_API_KEY"),
+        system_instructions="You are a helpful digital assistant."
+    )
 
-# Send a message
-response = await agent.send_message("Help me plan a trip to Paris")
-print(response)
+    # Send an async message
+    response = await agent.send_message("Hello, how can you help me today?")
+    print(response)
+
+    # Stream a response
+    async for token in agent.stream_message("Tell me a story"):
+        print(token, end='', flush=True)
+
+asyncio.run(main())
 ```
 
-### Async Agent Creation
+## Example Configurations
 
+### 1. Async Agent with Memory and Streaming
 ```python
 from grami.agent import AsyncAgent
-from grami.providers import GeminiProvider
+from grami.providers.gemini_provider import GeminiProvider
+from grami.memory.lru import LRUMemory
 
-# Initialize a Gemini-powered AsyncAgent
-async_agent = AsyncAgent(
-    name="ScienceExplainerAI",
-    role="Scientific Concept Explainer",
-    llm_provider=GeminiProvider(api_key="YOUR_API_KEY"),
-    initial_context=[
-        {
-            "role": "system", 
-            "content": "You are an expert at explaining complex scientific concepts clearly."
-        }
-    ]
+agent = AsyncAgent(
+    name="MemoryStreamingAgent",
+    llm=provider,
+    memory=LRUMemory(capacity=100),
+    system_instructions="You are a storyteller."
 )
+```
 
-# Send a message
-response = await async_agent.send_message("Explain quantum entanglement")
-print(response)
+### 2. Async Agent without Memory
+```python
+agent = AsyncAgent(
+    name="NoMemoryAgent",
+    llm=provider,
+    memory=None,
+    system_instructions="You are a concise assistant."
+)
+```
 
-# Stream a response
-async for token in async_agent.stream_message("Explain photosynthesis"):
+### 3. Async Agent with Streaming Disabled
+```python
+response = await agent.send_message("Tell me about AI")
+```
+
+### 4. Async Agent with Streaming Enabled
+```python
+async for token in agent.stream_message("Explain quantum computing"):
     print(token, end='', flush=True)
 ```
 
-## Examples
+## Roadmap and TODO
 
-We provide a variety of example implementations to help you get started:
-
-### Basic Agents
-- `examples/simple_agent_example.py`: Basic mathematical calculation agent
-- `examples/simple_async_agent.py`: Async scientific explanation agent
-- `examples/gemini_example.py`: Multi-tool Gemini Agent with various capabilities
-
-### Advanced Scenarios
-- `examples/content_creation_agent.py`: AI-Powered Content Creation Agent
-  - Generates blog posts
-  - Conducts topic research
-  - Creates supporting visuals
-  - Tailors content to specific audiences
-
-- `examples/web_research_agent.py`: Advanced Web Research and Trend Analysis Agent
-  - Performs comprehensive market research
-  - Conducts web searches
-  - Analyzes sentiment
-  - Predicts industry trends
-  - Generates detailed reports
-
-### Collaborative Agents
-- `examples/agent_crew_example.py`: Multi-Agent Collaboration
-  - Demonstrates inter-agent communication
-  - Showcases specialized agent roles
-  - Enables complex task delegation
-
-### Tool Integration
-- `examples/tools.py`: Collection of custom tools
-  - Web Search
-  - Weather Information
-  - Calculator
-  - Sentiment Analysis
-  - Image Generation
-
-## Environment Variables
-
-### API Key Management
-
-GRAMI-AI uses environment variables to manage sensitive credentials securely. To set up your API keys:
-
-1. Create a `.env` file in the project root directory
-2. Add your API keys in the following format:
-   ```
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-
-**Important**: Never commit your `.env` file to version control. The `.gitignore` is already configured to prevent this.
-
-## Development Checklist
-
-### Core Framework Design
-- [x] Implement `AsyncAgent` base class with dynamic configuration
-- [x] Create flexible system instruction definition mechanism
-- [x] Design abstract LLM provider interface
-- [x] Develop dynamic role and persona assignment system
-- [ ] Implement multi-modal agent capabilities (text, image, video)
-
-### LLM Provider Abstraction
-- [x] Unified interface for diverse LLM providers
-  - [x] Google Gemini integration (start_chat(), send_message())
-  - [ ] OpenAI ChatGPT integration
-  - [ ] Anthropic Claude integration
-  - [ ] Ollama local LLM support
-- [ ] Standardize function/tool calling across providers
-- [x] Dynamic prompt engineering support
-- [x] Provider-specific configuration handling
-
-### Communication Interfaces
-- [ ] WebSocket real-time communication
-- [ ] REST API endpoint design
-- [ ] Kafka inter-agent communication
-- [ ] gRPC support
-- [ ] Event-driven agent notification system
-- [ ] Secure communication protocols
+### Core Framework
+- [x] Async-first design
+- [x] Multi-provider support
+- [x] Dynamic agent creation
+- [x] Flexible memory management
 
 ### Memory and State Management
 - [x] Pluggable memory providers
   - [x] In-memory state storage
-  - [ ] Redis distributed memory
-  - [ ] DynamoDB scalable storage
-  - [ ] S3 content storage
-- [x] Conversation and task history tracking
-- [ ] Global state management for agent crews
-- [ ] Persistent task and interaction logs
+  - [x] LRU Memory implementation
+- [x] Async memory operations
+- [ ] Persistent memory storage
+- [ ] Advanced memory indexing
 
-### Tool and Function Ecosystem
-- [x] Extensible tool integration framework
-- [x] Default utility tools
-  - [ ] Kafka message publisher
-  - [ ] Web search utility
-  - [ ] Content analysis tool
-- [ ] Provider-specific function calling support
-- [ ] Community tool marketplace
-- [x] Easy custom tool development
+### Provider Integrations
+- [x] Gemini Provider
+- [ ] OpenAI Provider
+- [ ] Anthropic Provider
+- [ ] Ollama Provider
 
-### Agent Crew Collaboration
-- [ ] Inter-agent communication protocol
-- [ ] Workflow and task delegation mechanisms
-- [ ] Approval and review workflows
-- [ ] Notification and escalation systems
-- [ ] Dynamic team composition
-- [ ] Shared context and memory management
-
-### Use Case Implementations
-- [ ] Digital Agency workflow template
-  - [ ] Growth Manager agent
-  - [ ] Content Creator agent
-  - [ ] Trend Researcher agent
-  - [ ] Media Creation agent
-- [ ] Customer interaction management
-- [ ] Approval and revision cycles
-
-### Security and Compliance
-- [x] Secure credential management
-- [ ] Role-based access control
-- [ ] Audit logging
-- [ ] Compliance with data protection regulations
-
-### Performance and Scalability
-- [x] Async-first design
-- [ ] Horizontal scaling support
-- [ ] Performance benchmarking
-- [ ] Resource optimization
-
-### Testing and Quality
-- [ ] Comprehensive unit testing
-- [ ] Integration testing for agent interactions
-- [ ] Mocking frameworks for LLM providers
-- [ ] Continuous integration setup
-
-### Documentation and Community
-- [x] Detailed API documentation
-- [x] Comprehensive developer guides
-- [x] Example use case implementations
-- [ ] Contribution guidelines
-- [ ] Community tool submission process
-- [ ] Regular maintenance and updates
-
-### Future Roadmap
-- [ ] Payment integration solutions
-- [ ] Advanced agent collaboration patterns
-- [ ] Specialized industry-specific agents
-- [ ] Enhanced security features
-- [ ] Extended provider support
-
-## Token Counting
-
-GRAMI-AI provides a convenient method to count tokens for input text, which is crucial for managing model input constraints.
-
-```python
-from grami.providers import GeminiProvider
-
-# Initialize Gemini Provider
-provider = GeminiProvider(api_key="YOUR_API_KEY")
-
-# Count tokens in a string
-text = "Hello, this is a sample text to count tokens."
-token_count = provider.count_tokens(text)
-print(f"Token count: {token_count}")
-
-# Count tokens in a dictionary input
-message = {"role": "user", "content": "Explain quantum computing"}
-token_count = provider.count_tokens(message)
-print(f"Token count: {token_count}")
-```
-
-Key features of token counting:
-- Supports both string and dictionary inputs
-- Uses native Gemini tokenizer
-- Provides fallback estimation if tokenization fails
-- Helps manage input size and model constraints
-
-## Memory Management
-
-GRAMI-AI provides flexible memory management for AI agents, allowing seamless storage and retrieval of conversation context.
-
-#### Memory Storage Examples
-
-##### Synchronous Memory Storage
-```python
-from grami.agent import Agent
-from grami.providers import GeminiProvider
-from grami.memory.lru import LRUMemory
-
-# Initialize memory provider
-memory = LRUMemory(capacity=1000)
-
-# Create agent with memory
-agent = Agent(
-    name="MemoryAssistant",
-    llm_provider=GeminiProvider(api_key="YOUR_API_KEY", memory_provider=memory)
-)
-
-# Conversation with automatic memory storage
-response = agent.send_message("Tell me about quantum physics")
-```
-
-##### Streaming with Memory
-```python
-from grami.agent import AsyncAgent
-from grami.providers import GeminiProvider
-from grami.memory.lru import LRUMemory
-
-# Initialize memory provider
-memory = LRUMemory(capacity=1000)
-
-# Create async agent with memory
-async_agent = AsyncAgent(
-    name="StreamingMemoryBot",
-    llm_provider=GeminiProvider(api_key="YOUR_API_KEY", memory_provider=memory)
-)
-
-# Stream response with automatic memory storage
-async for token in async_agent.stream_message("Explain machine learning"):
-    print(token, end='', flush=True)
-
-# Retrieve memory contents
-memory_contents = await memory.list_contents()
-```
-
-#### Key Memory Features
-- Automatic conversation turn storage
-- Unique key generation for each memory entry
-- Configurable memory providers (LRU, Redis, etc.)
-- Supports both synchronous and streaming interactions
-- Secure and efficient memory management
-
-## Documentation
-
-For detailed documentation, visit our [Documentation Website](https://grami-ai.readthedocs.io)
+### Security and Performance
+- [ ] Enhanced encryption for API keys
+- [ ] Rate limiting mechanisms
+- [ ] Secure communication protocols
+- [ ] Performance optimization for large-scale deployments
 
 ## Contributing
 
-We welcome contributions! Please see our [Contribution Guidelines](CONTRIBUTING.md)
+Contributions are welcome! Please check our [GitHub repository](https://github.com/YAFATEK/grami-ai) for guidelines.
 
-## License
-
-MIT License - Empowering open-source innovation
-
-## About YAFATEK Solutions
-
-Pioneering AI innovation through flexible, powerful frameworks.
-
-## Contact & Support
+## Support
 
 - **Email**: support@yafatek.dev
 - **GitHub**: [GRAMI-AI Issues](https://github.com/YAFATEK/grami-ai/issues)
 
 ---
 
-**Star ⭐ the project if you believe in collaborative AI innovation!**
+ 2024 YAFATEK. All Rights Reserved.

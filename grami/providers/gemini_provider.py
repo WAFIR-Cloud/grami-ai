@@ -1,5 +1,5 @@
-from typing import Optional, Dict, Any, List, Callable, AsyncGenerator
-from typing import Union
+from typing import Optional, Dict, Any, List, Callable, AsyncGenerator, Union
+from ..core.base import BaseLLMProvider
 import google.generativeai as genai
 import logging
 import inspect
@@ -15,9 +15,7 @@ class GeminiProvider(BaseLLMProvider):
         api_key: str,
         model_name: str = "gemini-pro",
         tools: Optional[List[Dict[str, Any]]] = None,
-        enable_automatic_function_calling: bool = False,
-        system_prompt: Optional[str] = None,
-        memory_provider=None
+        enable_automatic_function_calling: bool = False
     ):
         """Initialize the provider.
         
@@ -26,8 +24,6 @@ class GeminiProvider(BaseLLMProvider):
             model_name: The model name to use
             tools: Optional list of tools to register
             enable_automatic_function_calling: Whether to enable automatic function calling
-            system_prompt: Optional system-level prompt to guide the model's behavior
-            memory_provider: Memory provider to use for storing and retrieving conversation context
         """
         genai.configure(api_key=api_key)
         self._model = genai.GenerativeModel(
@@ -49,8 +45,6 @@ class GeminiProvider(BaseLLMProvider):
         )
         self._chat = None
         self._tools = {}
-        self._memory_provider = memory_provider
-        self._system_prompt = system_prompt
         self._enable_automatic_function_calling = enable_automatic_function_calling
         self._conversation_history = []
 
@@ -86,7 +80,7 @@ class GeminiProvider(BaseLLMProvider):
         :param user_message: The user's input message
         :param model_response: The model's response
         """
-        if not self._memory_provider:
+        if not hasattr(self, '_memory_provider') or not self._memory_provider:
             return
         
         try:
@@ -148,73 +142,70 @@ class GeminiProvider(BaseLLMProvider):
             print(f"Error sending message: {e}")
             raise
 
-    async def stream_message(self, message: Union[str, Dict[str, str]], context: Optional[Dict] = None) -> AsyncGenerator[str, None]:
+    async def stream_message(self, message: Union[str, Dict[str, str]], context: Optional[Dict] = None):
         """
         Asynchronously stream a message response.
         
         :param message: User message (string or dictionary)
         :param context: Optional context
-        :return: Async generator of response tokens
+        :return: Streaming response object to be iterated by the caller
         """
         if not self._chat:
             await self.initialize_conversation()
         
         # Normalize message to dictionary format
         if isinstance(message, str):
-            message_payload = {"role": "user", "content": message}
+            message_payload = {'content': message, 'role': 'user'}
         else:
             message_payload = message
         
         # Add current message to conversation history
         self._conversation_history.append(message_payload)
         
-        full_response = ""
         try:
-            # Use native method to stream response
-            response = await self._chat.send_message_async(message_payload['content'])
+            # Prepare contents, handling empty conversation history
+            contents = [
+                {'role': 'user', 'parts': [part['content'] for part in self._conversation_history if part.get('role') == 'user']},
+                {'role': 'model', 'parts': [part['content'] for part in self._conversation_history if part.get('role') == 'model']}
+            ]
             
-            # Yield tokens from the response
-            for chunk in response.text.split():
-                full_response += chunk + ' '
-                yield chunk + ' '
+            # Remove empty lists to prevent API errors
+            contents = [content for content in contents if content['parts']]
             
-            # Store memory after streaming is complete
-            await self._store_conversation_memory(
-                user_message=message_payload['content'], 
-                model_response=full_response
+            # Add current message
+            contents.append({'role': 'user', 'parts': [message_payload['content']]})
+            
+            # Send message with streaming, including conversation history
+            response = self._model.generate_content(
+                contents=contents,
+                stream=True
             )
-        
+            
+            # Prepare to collect full response for memory
+            full_response = ""
+            last_chunk = None
+            
+            # Iterate through chunks
+            for chunk in response:
+                token = chunk.text
+                full_response += token
+                last_chunk = chunk
+                yield token
+            
+            # Store memory after last chunk
+            if last_chunk and hasattr(self, '_memory_provider'):
+                await self._store_conversation_memory(
+                    user_message=message_payload['content'], 
+                    model_response=full_response
+                )
         except Exception as e:
-            print(f"Error streaming message: {e}")
-            raise StopAsyncIteration(f"An error occurred: {e}")
+            logger.error(f"Error preparing streaming message: {e}")
+            raise
 
     def set_memory_provider(self, memory_provider):
         """
         Set the memory provider for the Gemini provider.
         
-        Args:
-            memory_provider: Memory provider to use for storing and retrieving conversation context
+        :param memory_provider: Memory provider to use
         """
         self._memory_provider = memory_provider
-
-    def count_tokens(self, text: Union[str, Dict[str, str]]) -> int:
-        """
-        Count the number of tokens in the given text using the Gemini tokenizer.
-        
-        :param text: Input text or dictionary with a 'content' key
-        :return: Number of tokens in the input
-        """
-        # Normalize input to string
-        if isinstance(text, dict):
-            text = text.get('content', '')
-        elif not isinstance(text, str):
-            text = str(text)
-        
-        try:
-            # Use the model's tokenizer to count tokens
-            token_count = self._model.count_tokens(text)
-            return token_count.total_tokens
-        except Exception as e:
-            logging.error(f"Error counting tokens: {e}")
-            # Fallback token estimation (rough approximation)
-            return len(text.split())

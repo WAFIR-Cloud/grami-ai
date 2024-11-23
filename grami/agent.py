@@ -127,13 +127,15 @@ class Agent:
     async def stream_message(
         self, 
         message: Union[str, Dict[str, str]], 
-        context: Optional[Dict] = None
+        context: Optional[Dict] = None,
+        **kwargs
     ) -> AsyncGenerator[str, None]:
         """
         Stream a message response from the LLM.
         
         :param message: Message to send (string or dictionary)
         :param context: Optional context dictionary for additional parameters
+        :param kwargs: Additional keyword arguments to pass to the LLM provider
         :return: Async generator of response tokens
         """
         # Normalize message to dictionary format
@@ -142,8 +144,12 @@ class Agent:
         else:
             message_payload = message
         
+        # Merge context and kwargs
+        context = context or {}
+        context.update(kwargs)
+        
         # Stream message via LLM provider
-        response_stream = await self.llm_provider.stream_message(message_payload, context)
+        response_stream = self.llm_provider.stream_message(message_payload, context)
         
         # Collect full response for memory storage
         full_response = []
@@ -248,32 +254,32 @@ class AsyncAgent:
     def __init__(
         self,
         name: str,
-        role: str,
-        llm_provider: BaseLLMProvider,
-        memory_provider: Optional[BaseMemoryProvider] = None,
-        tools: Optional[List[BaseTool]] = None
+        llm: BaseLLMProvider,
+        memory: Optional[BaseMemoryProvider] = None,
+        system_instructions: Optional[str] = None,
+        tools: Optional[Dict[str, Callable]] = None
     ):
-        """Initialize async agent.
-        
-        Args:
-            name: Agent name
-            role: Agent role description
-            llm_provider: LLM provider to use
-            memory_provider: Optional memory provider for conversation history
-            tools: Optional list of tools for the agent to use
+        """
+        Initialize an AsyncAgent.
+
+        :param name: Name of the agent
+        :param llm: Language model provider
+        :param memory: Memory provider for storing conversation context
+        :param system_instructions: System-level instructions to guide the model's behavior
+        :param tools: Optional dictionary of tools the agent can use
         """
         self.name = name
-        self.role = role
-        self.llm_provider = llm_provider
-        self.tools = tools or []
+        self.llm = llm
+        self.memory = memory
+        self.system_instructions = system_instructions
         
-        # Set memory provider on LLM if provided
-        if memory_provider:
-            self.llm_provider.set_memory_provider(memory_provider)
+        # Set system instructions on the provider if supported
+        if hasattr(self.llm, '_system_prompt'):
+            self.llm._system_prompt = system_instructions
         
-        # Register tools with LLM provider if supported
-        if hasattr(self.llm_provider, 'register_tools'):
-            self.llm_provider.register_tools(self.tools)
+        # Register tools if provided
+        if tools:
+            self.llm.register_tools(tools)
     
     async def send_message(
         self, 
@@ -293,27 +299,91 @@ class AsyncAgent:
         else:
             message_payload = message
         
-        # Ensure context is a dictionary
-        context = context or {}
-        
-        # Add memory provider to context if self._memory_provider exists
-        if hasattr(self, '_memory_provider') and self._memory_provider:
-            context['memory_provider'] = self._memory_provider
-        
         # Send message via LLM provider
-        response = await self.llm_provider.send_message(message_payload, context)
+        response = await self.llm.send_message(message_payload, context)
+        
+        # Store conversation turn in memory if memory provider exists
+        if self.memory:
+            current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            unique_key = f"{current_timestamp}_{str(uuid.uuid4())[:8]}"
+            
+            # Ensure memory is an instance of BaseMemoryProvider
+            if hasattr(self.memory, 'store'):
+                await self.memory.store(
+                    unique_key, 
+                    {
+                        "type": "conversation_turn",
+                        "user_message": {
+                            "content": message_payload.get('content', ''),
+                            "role": "user"
+                        },
+                        "model_response": {
+                            "content": response,
+                            "role": "model"
+                        },
+                        "timestamp": current_timestamp
+                    }
+                )
         
         return response
     
-    async def stream_message(self, message: Dict[str, str], chat_id: Optional[str] = None) -> AsyncGenerator[str, None]:
-        """Stream a message response from the agent.
-        
-        Args:
-            message: Message to send
-            chat_id: Optional chat ID for conversation tracking
-            
-        Yields:
-            Chunks of the agent's response
+    async def stream_message(
+        self, 
+        message: Union[str, Dict[str, str]], 
+        context: Optional[Dict] = None,
+        **kwargs
+    ) -> AsyncGenerator[str, None]:
         """
-        async for chunk in self.llm_provider.stream_message(message, chat_id):
-            yield chunk
+        Stream a message response from the LLM.
+        
+        :param message: Message to send (string or dictionary)
+        :param context: Optional context dictionary for additional parameters
+        :param kwargs: Additional keyword arguments to pass to the LLM provider
+        :return: Async generator of response tokens
+        """
+        # Normalize message to dictionary format
+        if isinstance(message, str):
+            message_payload = {"role": "user", "content": message}
+        else:
+            message_payload = message
+        
+        # Merge context and kwargs
+        context = context or {}
+        context.update(kwargs)
+        
+        # Stream message via LLM provider
+        response_stream = self.llm.stream_message(message_payload, context)
+        
+        # Collect full response for memory storage
+        full_response = []
+        
+        # Stream tokens
+        async for token in response_stream:
+            full_response.append(token)
+            yield token
+        
+        # Combine tokens into full response
+        response = ''.join(full_response)
+        
+        # Store conversation turn in memory if memory provider exists
+        if self.memory:
+            current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            unique_key = f"{current_timestamp}_{str(uuid.uuid4())[:8]}"
+            
+            # Ensure memory is an instance of BaseMemoryProvider
+            if hasattr(self.memory, 'store'):
+                await self.memory.store(
+                    unique_key, 
+                    {
+                        "type": "conversation_turn",
+                        "user_message": {
+                            "content": message_payload.get('content', ''),
+                            "role": "user"
+                        },
+                        "model_response": {
+                            "content": response,
+                            "role": "model"
+                        },
+                        "timestamp": current_timestamp
+                    }
+                )
