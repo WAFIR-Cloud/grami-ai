@@ -101,6 +101,80 @@ async for token in agent.stream_message("Explain quantum computing"):
     print(token, end='', flush=True)
 ```
 
+## Memory Providers
+
+Grami AI supports multiple memory providers to suit different use cases:
+
+1. **LRU Memory**: A local, in-memory cache with a configurable capacity.
+   ```python
+   from grami.memory import LRUMemory
+   
+   # Initialize with default 100-item capacity
+   memory = LRUMemory(capacity=50)
+   ```
+
+2. **Redis Memory**: A distributed memory provider using Redis for scalable, shared memory storage.
+   ```python
+   from grami.memory import RedisMemory
+   
+   # Initialize with custom Redis configuration
+   memory = RedisMemory(
+       host='localhost',  # Redis server host
+       port=6379,         # Redis server port
+       capacity=100,      # Maximum number of items
+       provider_id='my_agent'  # Optional provider identifier
+   )
+   
+   # Store memory items
+   await memory.store('user_query', 'What is AI?')
+   await memory.store('agent_response', 'AI is...')
+   
+   # Retrieve memory items
+   query = await memory.retrieve('user_query')
+   
+   # List memory contents
+   contents = await memory.list_contents()
+   
+   # Get recent items
+   recent_items = await memory.get_recent_items(limit=5)
+   
+   # Clear memory
+   await memory.clear()
+   ```
+
+   #### Redis Memory Prerequisites
+   - Install Redis server locally or use a cloud-hosted Redis instance
+   - Ensure network accessibility to Redis server
+   - Install additional dependencies:
+     ```bash
+     pip install grami-ai[redis]
+     ```
+
+   #### Redis Memory Configuration Options
+   - `host`: Redis server hostname (default: 'localhost')
+   - `port`: Redis server port (default: 6379)
+   - `db`: Redis database number (default: 0)
+   - `capacity`: Maximum memory items (default: 100)
+   - `provider_id`: Unique memory namespace identifier
+
+   #### Best Practices
+   - Use unique `provider_id` for different conversations
+   - Set appropriate `capacity` based on memory requirements
+   - Handle potential network or connection errors
+   - Consider Redis persistence settings for data durability
+
+#### Memory Usage with LLM Providers
+
+Memory providers can be seamlessly integrated with LLM providers:
+
+```python
+# Example with Gemini Provider
+gemini_provider = GeminiProvider(
+    model_name='gemini-pro',
+    memory=memory  # Use either LRUMemory or RedisMemory
+)
+```
+
 ## Development Checklist
 
 ### Core Framework Design
@@ -142,7 +216,7 @@ async for token in agent.stream_message("Explain quantum computing"):
 ### Memory and State Management
 - [x] Pluggable memory providers
   - [x] In-memory state storage
-  - [ ] Redis distributed memory
+  - [x] Redis distributed memory
   - [ ] DynamoDB scalable storage
   - [ ] S3 content storage
 - [x] Conversation and task history tracking
