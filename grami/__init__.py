@@ -1,4 +1,4 @@
-from .agent import Agent, AgentCrew
+from .agent import Agent, AgentCrew, AsyncAgent
 from .core.base import (
     BaseProvider, 
     BaseLLMProvider, 
@@ -9,11 +9,12 @@ from .core.base import (
 
 __all__ = [
     'Agent', 
-    'AgentCrew', 
-    'BaseProvider', 
-    'BaseLLMProvider', 
-    'BaseMemoryProvider', 
-    'BaseCommunicationProvider', 
+    'AgentCrew',
+    'AsyncAgent',
+    'BaseProvider',
+    'BaseLLMProvider',
+    'BaseMemoryProvider',
+    'BaseCommunicationProvider',
     'BaseTool'
 ]
 

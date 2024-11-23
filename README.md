@@ -1,7 +1,7 @@
 # GRAMI-AI: Dynamic AI Agent Framework
 
 <div align="center">
-    <img src="https://img.shields.io/badge/version-0.3.117-blue.svg" alt="Version">
+    <img src="https://img.shields.io/badge/version-0.3.121-blue.svg" alt="Version">
     <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Versions">
     <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
     <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
@@ -13,7 +13,7 @@ GRAMI-AI is a cutting-edge, async-first AI agent framework designed to solve com
 
 ## Key Features
 
-- Dynamic AI Agent Creation
+- Dynamic AI Agent Creation (Sync and Async)
 - Multi-LLM Support (Gemini, OpenAI, Anthropic, Ollama)
 - Extensible Tool Ecosystem
 - Multiple Communication Interfaces
@@ -57,12 +57,41 @@ response = await agent.send_message("Help me plan a trip to Paris")
 print(response)
 ```
 
+### Async Agent Creation
+
+```python
+from grami.agent import AsyncAgent
+from grami.providers import GeminiProvider
+
+# Initialize a Gemini-powered AsyncAgent
+async_agent = AsyncAgent(
+    name="ScienceExplainerAI",
+    role="Scientific Concept Explainer",
+    llm_provider=GeminiProvider(api_key="YOUR_API_KEY"),
+    initial_context=[
+        {
+            "role": "system", 
+            "content": "You are an expert at explaining complex scientific concepts clearly."
+        }
+    ]
+)
+
+# Send a message
+response = await async_agent.send_message("Explain quantum entanglement")
+print(response)
+
+# Stream a response
+async for token in async_agent.stream_message("Explain photosynthesis"):
+    print(token, end='', flush=True)
+```
+
 ## Examples
 
 We provide a variety of example implementations to help you get started:
 
 ### Basic Agents
 - `examples/simple_agent_example.py`: Basic mathematical calculation agent
+- `examples/simple_async_agent.py`: Async scientific explanation agent
 - `examples/gemini_example.py`: Multi-tool Gemini Agent with various capabilities
 
 ### Advanced Scenarios
@@ -110,21 +139,21 @@ GRAMI-AI uses environment variables to manage sensitive credentials securely. To
 ## Development Checklist
 
 ### Core Framework Design
-- [ ] Implement `AsyncAgent` base class with dynamic configuration
-- [ ] Create flexible system instruction definition mechanism
-- [ ] Design abstract LLM provider interface
-- [ ] Develop dynamic role and persona assignment system
+- [x] Implement `AsyncAgent` base class with dynamic configuration
+- [x] Create flexible system instruction definition mechanism
+- [x] Design abstract LLM provider interface
+- [x] Develop dynamic role and persona assignment system
 - [ ] Implement multi-modal agent capabilities (text, image, video)
 
 ### LLM Provider Abstraction
-- [ ] Unified interface for diverse LLM providers
-  - [ ] Google Gemini integration (start_chat(), send_message())
+- [x] Unified interface for diverse LLM providers
+  - [x] Google Gemini integration (start_chat(), send_message())
   - [ ] OpenAI ChatGPT integration
   - [ ] Anthropic Claude integration
   - [ ] Ollama local LLM support
 - [ ] Standardize function/tool calling across providers
-- [ ] Dynamic prompt engineering support
-- [ ] Provider-specific configuration handling
+- [x] Dynamic prompt engineering support
+- [x] Provider-specific configuration handling
 
 ### Communication Interfaces
 - [ ] WebSocket real-time communication
@@ -135,24 +164,24 @@ GRAMI-AI uses environment variables to manage sensitive credentials securely. To
 - [ ] Secure communication protocols
 
 ### Memory and State Management
-- [ ] Pluggable memory providers
-  - [ ] In-memory state storage
+- [x] Pluggable memory providers
+  - [x] In-memory state storage
   - [ ] Redis distributed memory
   - [ ] DynamoDB scalable storage
   - [ ] S3 content storage
-- [ ] Conversation and task history tracking
+- [x] Conversation and task history tracking
 - [ ] Global state management for agent crews
 - [ ] Persistent task and interaction logs
 
 ### Tool and Function Ecosystem
-- [ ] Extensible tool integration framework
-- [ ] Default utility tools
+- [x] Extensible tool integration framework
+- [x] Default utility tools
   - [ ] Kafka message publisher
   - [ ] Web search utility
   - [ ] Content analysis tool
 - [ ] Provider-specific function calling support
 - [ ] Community tool marketplace
-- [ ] Easy custom tool development
+- [x] Easy custom tool development
 
 ### Agent Crew Collaboration
 - [ ] Inter-agent communication protocol
@@ -172,13 +201,13 @@ GRAMI-AI uses environment variables to manage sensitive credentials securely. To
 - [ ] Approval and revision cycles
 
 ### Security and Compliance
-- [ ] Secure credential management
+- [x] Secure credential management
 - [ ] Role-based access control
 - [ ] Audit logging
 - [ ] Compliance with data protection regulations
 
 ### Performance and Scalability
-- [ ] Async-first design
+- [x] Async-first design
 - [ ] Horizontal scaling support
 - [ ] Performance benchmarking
 - [ ] Resource optimization
@@ -190,19 +219,19 @@ GRAMI-AI uses environment variables to manage sensitive credentials securely. To
 - [ ] Continuous integration setup
 
 ### Documentation and Community
-- [ ] Detailed API documentation
-- [ ] Comprehensive developer guides
-- [ ] Example use case implementations
+- [x] Detailed API documentation
+- [x] Comprehensive developer guides
+- [x] Example use case implementations
 - [ ] Contribution guidelines
 - [ ] Community tool submission process
 - [ ] Regular maintenance and updates
 
 ### Future Roadmap
 - [ ] Payment integration solutions
-- [ ] Advanced context understanding
-- [ ] Multi-language support
-- [ ] Enterprise-grade security features
-- [ ] AI agent marketplace
+- [ ] Advanced agent collaboration patterns
+- [ ] Specialized industry-specific agents
+- [ ] Enhanced security features
+- [ ] Extended provider support
 
 ## Documentation
 
