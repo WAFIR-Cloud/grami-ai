@@ -233,6 +233,43 @@ GRAMI-AI uses environment variables to manage sensitive credentials securely. To
 - [ ] Enhanced security features
 - [ ] Extended provider support
 
+## Memory Management
+
+GRAMI-AI provides flexible memory management for AI agents, allowing you to store and retrieve conversation context, user information, and agent state.
+
+```python
+from grami.agent import AsyncAgent
+from grami.providers import GeminiProvider
+from grami.memory import LRUMemory
+
+# Initialize memory with a capacity of 1000 items
+memory = LRUMemory(capacity=1000)
+
+# Create an agent with memory
+agent = AsyncAgent(
+    name="MemoryBot",
+    role="AI Assistant with memory capabilities",
+    llm_provider=GeminiProvider(api_key="YOUR_API_KEY"),
+    memory_provider=memory
+)
+
+# Conversation with memory tracking
+response = await agent.send_message("Hi, I'm Alice and I love chess!")
+
+# Retrieve memory contents
+keys = await memory.list_keys()
+for key in keys:
+    value = await memory.retrieve(key)
+    print(f"Memory Entry: {key} - {value}")
+```
+
+#### Memory Providers
+
+- `LRUMemory`: Least Recently Used memory with configurable capacity
+- Easy to extend with custom memory providers
+- Supports storing and retrieving conversation context
+- Automatic management of memory capacity
+
 ## Documentation
 
 For detailed documentation, visit our [Documentation Website](https://grami-ai.readthedocs.io)

@@ -1,50 +1,71 @@
-from typing import Any, Dict, Optional, AsyncGenerator, List
+from typing import Optional, Dict, Any, List, Callable
+from ..core.base import BaseLLMProvider
 import google.generativeai as genai
-from ..core.base import BaseLLMProvider, BaseTool
-import asyncio
+import logging
+import inspect
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 class GeminiProvider(BaseLLMProvider):
-    """
-    Google Gemini LLM Provider with async support and streaming.
-    """
-    
-    def __init__(self, api_key: str, model: str = "gemini-pro"):
-        """
-        Initialize Gemini provider.
+    """Provider for Google's Gemini API."""
+
+    def __init__(
+        self,
+        api_key: str,
+        model_name: str = "gemini-pro",
+        tools: Optional[List[Dict[str, Any]]] = None,
+        enable_automatic_function_calling: bool = False,
+        system_prompt: Optional[str] = None,
+        memory_provider=None
+    ):
+        """Initialize the provider.
         
-        :param api_key: Google AI API key
-        :param model: Gemini model to use
+        Args:
+            api_key: The API key for Gemini
+            model_name: The model name to use
+            tools: Optional list of tools to register
+            enable_automatic_function_calling: Whether to enable automatic function calling
+            system_prompt: Optional system-level prompt to guide the model's behavior
+            memory_provider: Memory provider to use for storing and retrieving conversation context
         """
-        super().__init__()
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(model)
-        self._chat_session = None
-        self._conversation_history = []
-    
-    async def initialize_conversation(self, context: Optional[List[Dict[str, str]]] = None):
-        """
-        Asynchronously initialize conversation with context.
-        
-        :param context: List of context messages with role and content
-        """
-        # Prepare initial conversation history
-        self._conversation_history = context or []
-        
-        # Start chat session with initial context
-        history = [
-            {
-                'role': 'user' if msg['role'] == 'user' else 'model', 
-                'parts': [msg['content']]
-            } 
-            for msg in self._conversation_history
-        ]
-        
-        self._chat_session = self.model.start_chat(
-            history=history,
-            # Enable automatic function calling
-            enable_automatic_function_calling=True
+        self._model = genai.GenerativeModel(
+            model_name=model_name,
+            tools=tools,
         )
-    
+        self._chat = None
+        self._tools = {}
+        self._memory_provider = memory_provider
+        self._system_prompt = system_prompt
+        self._enable_automatic_function_calling = enable_automatic_function_calling
+        self._conversation_history = []
+
+    def validate_configuration(self, **kwargs) -> None:
+        """Validate the configuration parameters."""
+        if not kwargs.get("api_key"):
+            raise ValueError("API key is required")
+        if not kwargs.get("model_name"):
+            raise ValueError("Model name is required")
+
+    def register_tools(self, tools: Dict[str, Callable]) -> None:
+        """Register tools with the provider.
+        
+        Args:
+            tools: Dictionary mapping tool names to callable functions
+        """
+        self._tools = tools
+        logger.info(f"Registered {len(tools)} tools with GeminiProvider")
+
+    async def initialize_conversation(self, chat_id: Optional[str] = None) -> None:
+        """Initialize a new conversation."""
+        try:
+            self._chat = self._model.start_chat()
+            logger.info("Chat session initialized successfully")
+        except Exception as e:
+            logger.error(f"Error initializing conversation: {str(e)}")
+            raise
+
     async def send_message(self, message: Dict[str, str], context: Optional[Dict] = None) -> str:
         """
         Asynchronously send a message and get a response.
@@ -53,82 +74,70 @@ class GeminiProvider(BaseLLMProvider):
         :param context: Optional context
         :return: LLM's response
         """
-        if not self._chat_session:
+        if not self._chat:
             await self.initialize_conversation()
+        
+        # Use memory provider to store and retrieve context if available
+        if self._memory_provider:
+            # Store the current message in memory
+            current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            await self._memory_provider.store(current_timestamp, {
+                "message": message.get('content', ''),
+                "role": message.get('role', 'user')
+            })
         
         # Add current message to conversation history
         self._conversation_history.append(message)
         
         try:
             # Use native async method
-            response = await self._chat_session.send_message_async(message['content'])
+            response = await self._chat.send_message_async(message['content'])
+            
+            # Store the response in memory if available
+            if self._memory_provider:
+                await self._memory_provider.store(
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 
+                    {
+                        "message": message.get('content', ''),
+                        "response": response.text,
+                        "role": "assistant"
+                    }
+                )
+            
             return response.text
         except Exception as e:
             # Handle potential errors
             print(f"Error sending message: {e}")
             return f"An error occurred: {e}"
-    
-    async def stream_message(self, message: Dict[str, str], context: Optional[Dict] = None) -> AsyncGenerator[str, None]:
-        """
-        Asynchronously stream a message response.
-        
-        :param message: User message with role and content
-        :param context: Optional context
-        :yield: Streamed response tokens
-        """
-        if not self._chat_session:
-            await self.initialize_conversation()
-        
-        # Add current message to conversation history
-        self._conversation_history.append(message)
-        
+
+    async def stream_message(self, message: Dict[str, str], chat_id: Optional[str] = None):
+        """Stream a message response."""
         try:
-            # Temporarily disable automatic function calling for streaming
-            self._chat_session = self.model.start_chat(
-                history=self._chat_session.history,
-                enable_automatic_function_calling=False
-            )
-            
-            # Use native async method with streaming
-            async for chunk in await self._chat_session.send_message_async(message['content'], stream=True):
-                yield chunk.text
+            if not self._chat:
+                await self.initialize_conversation(chat_id)
+
+            content = message.get("content", "")
+            logger.info(f"Streaming message to Gemini: {content[:100]}...")
+
+            # Send message to Gemini
+            response = await self._chat.send_message_async(content)
+            response_text = ""
+
+            # Stream the response
+            async for chunk in response:
+                if chunk.text:
+                    response_text += chunk.text
+                    yield chunk.text
+
         except Exception as e:
-            # Handle potential errors
-            print(f"Error streaming message: {e}")
-            yield f"An error occurred: {e}"
-        finally:
-            # Restore automatic function calling
-            self._chat_session = self.model.start_chat(
-                history=self._chat_session.history,
-                enable_automatic_function_calling=True
-            )
-    
-    async def generate_content(self, prompt: str, tools: Optional[List[BaseTool]] = None) -> str:
+            logger.error(f"Error in stream_message: {str(e)}")
+            yield f"Error streaming message: {e}"
+
+    def set_memory_provider(self, memory_provider):
         """
-        Asynchronously generate content with optional tools.
+        Set the memory provider for the Gemini provider.
         
-        :param prompt: Generation prompt
-        :param tools: Optional list of tools to use
-        :return: Generated content
+        Args:
+            memory_provider: Memory provider to use for storing and retrieving conversation context
         """
-        try:
-            # Use native async method
-            response = await self.model.generate_content_async(prompt)
-            return response.text
-        except Exception as e:
-            print(f"Error generating content: {e}")
-            return f"An error occurred: {e}"
-    
-    async def validate_configuration(self, config: Dict[str, Any]) -> bool:
-        """
-        Validate the Gemini provider configuration.
-        
-        :param config: Configuration dictionary
-        :return: Boolean indicating if configuration is valid
-        """
-        # Basic validation for Gemini provider
-        return (
-            'api_key' in config and 
-            isinstance(config['api_key'], str) and 
-            len(config['api_key']) > 0
-        )
+        self._memory_provider = memory_provider
