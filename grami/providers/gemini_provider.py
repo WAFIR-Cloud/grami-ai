@@ -59,10 +59,9 @@ class GeminiProvider(BaseLLMProvider):
         # Add current message to conversation history
         self._conversation_history.append(message)
         
-        # Use synchronous send_message and convert to async
-        loop = asyncio.get_running_loop()
         try:
-            response = await loop.run_in_executor(None, self._chat_session.send_message, message['content'])
+            # Use native async method
+            response = await self._chat_session.send_message_async(message['content'])
             return response.text
         except Exception as e:
             # Handle potential errors
@@ -90,8 +89,8 @@ class GeminiProvider(BaseLLMProvider):
                 enable_automatic_function_calling=False
             )
             
-            response = self._chat_session.send_message(message['content'], stream=True)
-            for chunk in response:
+            # Use native async method with streaming
+            async for chunk in await self._chat_session.send_message_async(message['content'], stream=True):
                 yield chunk.text
         except Exception as e:
             # Handle potential errors
@@ -103,7 +102,23 @@ class GeminiProvider(BaseLLMProvider):
                 history=self._chat_session.history,
                 enable_automatic_function_calling=True
             )
-
+    
+    async def generate_content(self, prompt: str, tools: Optional[List[BaseTool]] = None) -> str:
+        """
+        Asynchronously generate content with optional tools.
+        
+        :param prompt: Generation prompt
+        :param tools: Optional list of tools to use
+        :return: Generated content
+        """
+        try:
+            # Use native async method
+            response = await self.model.generate_content_async(prompt)
+            return response.text
+        except Exception as e:
+            print(f"Error generating content: {e}")
+            return f"An error occurred: {e}"
+    
     async def validate_configuration(self, config: Dict[str, Any]) -> bool:
         """
         Validate the Gemini provider configuration.
