@@ -1,4 +1,4 @@
-# GRAMI-AI: Intelligent Agent Framework
+# GRAMI-AI: Dynamic AI Agent Framework
 
 <div align="center">
     <img src="https://img.shields.io/badge/version-0.3.107-blue.svg" alt="Version">
@@ -7,108 +7,128 @@
     <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
 </div>
 
-## Overview
+## Vision and Purpose
 
-GRAMI-AI is a cutting-edge, async-first AI agent framework designed to solve complex computational challenges through intelligent, collaborative agent interactions. Built with unprecedented flexibility, this library empowers developers to create sophisticated, context-aware AI systems that can adapt, learn, and collaborate across diverse domains.
+GRAMI-AI is a revolutionary, async-first AI agent framework designed to solve complex computational challenges through intelligent, collaborative agent interactions. Our mission is to create a highly flexible, extensible platform that empowers developers to build sophisticated, context-aware AI systems capable of adapting and collaborating across diverse domains.
 
-## Key Features
+## Framework Philosophy
 
-- **Async-First Architecture**: Designed for high-performance, non-blocking operations
-- **Multi-Modal Agent Interactions**: Seamless collaboration between specialized AI agents
-- **Flexible LLM Integration**: Support for multiple language models (Gemini, OpenAI, Anthropic)
-- **Dynamic Tool Ecosystem**: Easily extensible with custom tools and capabilities
-- **Context-Aware Agents**: Intelligent agents that maintain and leverage conversation context
+The core philosophy of GRAMI-AI is to provide an abstraction layer that:
+- Enables dynamic creation of AI agents with specific roles and capabilities
+- Supports multiple Language Models (LLMs) with their unique interfaces
+- Allows seamless integration of communication protocols
+- Provides flexible memory management
+- Supports extensible tool ecosystems
 
-## Installation
+## Key Architectural Goals
+
+### 1. Dynamic Agent Creation
+- Define agents with precise roles (e.g., Growth Manager, Content Creator)
+- Customize system instructions and behavior
+- Support multi-modal capabilities (text, image, video generation)
+
+### 2. LLM Abstraction
+- Unified interface for different LLMs (Gemini, OpenAI, Anthropic, Ollama)
+- Handle provider-specific nuances (prompt building, chat interfaces)
+- Flexible function/tool integration
+
+### 3. Communication Interfaces
+- Support multiple protocols (WebSocket, REST, Kafka)
+- Enable inter-agent communication
+- Implement global state management
+
+### 4. Memory Management
+- Pluggable memory providers (In-Memory, Redis, DynamoDB)
+- Persistent conversation and task history
+- Scalable state storage
+
+### 5. Tool Ecosystem
+- Default utility tools (Kafka publisher, web search)
+- Easy custom tool development
+- Provider-specific function handling
+
+## Roadmap and TODO List
+
+### Short-term Goals
+- [ ] Complete core agent abstraction
+- [ ] Implement multi-LLM support
+- [ ] Develop comprehensive documentation
+- [ ] Create robust testing framework
+- [ ] Implement basic memory providers
+
+### Mid-term Goals
+- [ ] Advanced inter-agent communication
+- [ ] Kafka integration for agent crews
+- [ ] WebSocket chat interfaces
+- [ ] S3 and cloud storage integrations
+- [ ] Payment solution abstractions
+
+### Long-term Vision
+- [ ] Machine learning-driven agent optimization
+- [ ] Advanced context and memory management
+- [ ] Multi-language support
+- [ ] Enterprise-grade security features
+- [ ] Community-driven tool marketplace
+
+## Conceptual Agent Example
+
+```python
+agent = AsyncAgent(
+    llm=GeminiProvider(),            # LLM Provider
+    memory=RedisMemoryProvider(),    # Memory Management
+    tools=[                          # Extensible Tools
+        KafkaPublisher(),
+        WebSearchTool(),
+        ContentAnalysisTool()
+    ],
+    system_instructions="You are a Growth Manager...",  # Role Definition
+    communication_interface=WebSocketInterface(),
+    storage=S3StorageProvider(),     # Optional Storage
+    crew_config={                    # Optional Crew Configuration
+        'team_members': ['ContentCreator', 'Researcher'],
+        'communication_protocol': 'kafka'
+    }
+)
+```
+
+## Community Contribution
+
+We envision GRAMI-AI as a collaborative ecosystem where developers can:
+- Create and share custom tools
+- Develop new LLM integrations
+- Build memory providers
+- Implement communication interfaces
+- Contribute to core framework development
+
+## Current Capabilities
+
+- [x] Async-first architecture
+- [x] Basic agent creation
+- [x] Gemini LLM integration
+- [x] Simple tool support
+- [ ] Advanced inter-agent communication
+- [ ] Multiple memory providers
+- [ ] Comprehensive LLM support
+
+## Getting Started
 
 ```bash
 pip install grami-ai
 ```
 
-## Quick Start
-
-```python
-import asyncio
-from grami.agent import Agent
-from grami.providers import GeminiProvider
-from grami.tools import CalculatorTool
-
-async def main():
-    # Create an intelligent math agent
-    math_agent = Agent(
-        name="MathTutor",
-        role="Mathematical Problem Solver",
-        llm_provider=GeminiProvider(api_key="your_api_key"),
-        tools=[CalculatorTool()],
-        initial_context=[
-            {
-                "role": "system", 
-                "content": "You are a helpful math assistant who explains solutions step by step."
-            }
-        ]
-    )
-
-    # Solve a mathematical problem
-    response = await math_agent.send_message(
-        "Calculate the area of a circle with radius 5 and explain your reasoning"
-    )
-    print(response)
-
-asyncio.run(main())
-```
-
-## Core Concepts
-
-### Agents
-Intelligent, configurable entities capable of:
-- Specialized role-based interactions
-- Autonomous tool utilization
-- Contextual learning and adaptation
-
-### Providers
-Seamless integration with:
-- Google Gemini
-- OpenAI GPT
-- Anthropic Claude
-
-### Tools
-Extensible capabilities including:
-- Mathematical calculations
-- Web search
-- Weather information retrieval
-- Custom tool development
-
-## Supported Platforms
-
-- Python 3.8+
-- Linux
-- macOS
-- Windows
-
-## Contributing
-
-We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-### Ways to Contribute
-- Report bugs
-- Suggest features
-- Submit pull requests
-- Improve documentation
-
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - Empowering open-source innovation
 
 ## About YAFATEK Solutions
 
-GRAMI-AI is developed by YAFATEK Solutions, a technology innovation company dedicated to pushing the boundaries of artificial intelligence and software engineering.
+Pioneering AI innovation through flexible, powerful frameworks.
 
 ## Contact & Support
 
 - **Email**: support@yafatek.dev
-- **GitHub Issues**: [Report an Issue](https://github.com/YAFATEK/grami-ai/issues)
-- **Website**: [YAFATEK Solutions](https://yafatek.dev)
+- **GitHub**: [GRAMI-AI Issues](https://github.com/YAFATEK/grami-ai/issues)
 
 ---
 
-**Star ⭐ the project if you find it useful!**
+**Star ⭐ the project if you believe in collaborative AI innovation!**
