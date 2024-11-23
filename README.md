@@ -1,7 +1,7 @@
 # GRAMI-AI: Dynamic AI Agent Framework
 
 <div align="center">
-    <img src="https://img.shields.io/badge/version-0.3.116-blue.svg" alt="Version">
+    <img src="https://img.shields.io/badge/version-0.3.117-blue.svg" alt="Version">
     <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Versions">
     <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
     <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
@@ -9,7 +9,7 @@
 
 ## Overview
 
-GRAMI-AI is a revolutionary, async-first AI agent framework designed to create intelligent, collaborative, and highly customizable AI agents across multiple domains.
+GRAMI-AI is a cutting-edge, async-first AI agent framework designed to solve complex computational challenges through intelligent, collaborative agent interactions. Built with unprecedented flexibility, this library empowers developers to create sophisticated, context-aware AI systems that can adapt, learn, and collaborate across diverse domains.
 
 ## Key Features
 
