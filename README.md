@@ -1,7 +1,7 @@
 # GRAMI-AI: Dynamic AI Agent Framework
 
 <div align="center">
-    <img src="https://img.shields.io/badge/version-0.3.107-blue.svg" alt="Version">
+    <img src="https://img.shields.io/badge/version-{{PACKAGE_VERSION}}-blue.svg" alt="Version">
     <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Versions">
     <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
     <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
@@ -49,84 +49,102 @@ The core philosophy of GRAMI-AI is to provide an abstraction layer that:
 
 ## Roadmap and TODO List
 
-### Short-term Goals
-- [ ] Complete core agent abstraction
-- [ ] Implement multi-LLM support
-- [ ] Develop comprehensive documentation
-- [ ] Create robust testing framework
-- [ ] Implement basic memory providers
-
-### Mid-term Goals
-- [ ] Advanced inter-agent communication
-- [ ] Kafka integration for agent crews
-- [ ] WebSocket chat interfaces
-- [ ] S3 and cloud storage integrations
-- [ ] Payment solution abstractions
-
-### Long-term Vision
-- [ ] Machine learning-driven agent optimization
-- [ ] Advanced context and memory management
-- [ ] Multi-language support
-- [ ] Enterprise-grade security features
-- [ ] Community-driven tool marketplace
-
 ### Development Checklist
 
-#### Core Framework Development
-- [ ] Implement base `Agent` abstract class
-- [ ] Create LLM provider abstraction layer
-- [ ] Develop async communication interfaces
-- [ ] Implement memory management system
-- [ ] Design tool integration mechanism
+#### Core Framework Design
+- [ ] Implement `AsyncAgent` base class with dynamic configuration
+- [ ] Create flexible system instruction definition mechanism
+- [ ] Design abstract LLM provider interface
+- [ ] Develop dynamic role and persona assignment system
+- [ ] Implement multi-modal agent capabilities (text, image, video)
 
-#### LLM Provider Support
-- [ ] Google Gemini integration
-- [ ] OpenAI GPT integration
-- [ ] Anthropic Claude integration
-- [ ] Ollama local LLM support
-- [ ] Add provider-specific function calling
+#### LLM Provider Abstraction
+- [ ] Unified interface for diverse LLM providers
+  - [ ] Google Gemini integration (start_chat(), send_message())
+  - [ ] OpenAI ChatGPT integration
+  - [ ] Anthropic Claude integration
+  - [ ] Ollama local LLM support
+- [ ] Standardize function/tool calling across providers
+- [ ] Dynamic prompt engineering support
+- [ ] Provider-specific configuration handling
 
-#### Communication Protocols
-- [ ] WebSocket implementation
+#### Communication Interfaces
+- [ ] WebSocket real-time communication
 - [ ] REST API endpoint design
-- [ ] Kafka message broker integration
+- [ ] Kafka inter-agent communication
 - [ ] gRPC support
+- [ ] Event-driven agent notification system
+- [ ] Secure communication protocols
+
+#### Memory and State Management
+- [ ] Pluggable memory providers
+  - [ ] In-memory state storage
+  - [ ] Redis distributed memory
+  - [ ] DynamoDB scalable storage
+  - [ ] S3 content storage
+- [ ] Conversation and task history tracking
+- [ ] Global state management for agent crews
+- [ ] Persistent task and interaction logs
+
+#### Tool and Function Ecosystem
+- [ ] Extensible tool integration framework
+- [ ] Default utility tools
+  - [ ] Kafka message publisher
+  - [ ] Web search utility
+  - [ ] Content analysis tool
+- [ ] Provider-specific function calling support
+- [ ] Community tool marketplace
+- [ ] Easy custom tool development
+
+#### Agent Crew Collaboration
 - [ ] Inter-agent communication protocol
+- [ ] Workflow and task delegation mechanisms
+- [ ] Approval and review workflows
+- [ ] Notification and escalation systems
+- [ ] Dynamic team composition
+- [ ] Shared context and memory management
 
-#### Memory Management
-- [ ] In-memory state storage
-- [ ] Redis persistent storage
-- [ ] DynamoDB scalable storage
-- [ ] Conversation history tracking
-- [ ] State serialization/deserialization
+#### Use Case Implementations
+- [ ] Digital Agency workflow template
+  - [ ] Growth Manager agent
+  - [ ] Content Creator agent
+  - [ ] Trend Researcher agent
+  - [ ] Media Creation agent
+- [ ] Customer interaction management
+- [ ] Approval and revision cycles
 
-#### Tool Ecosystem
-- [ ] Web search utility tool
-- [ ] Data analysis tool
-- [ ] Image generation tool
-- [ ] Code generation tool
-- [ ] Custom tool development framework
+#### Security and Compliance
+- [ ] Secure credential management
+- [ ] Role-based access control
+- [ ] Audit logging
+- [ ] Compliance with data protection regulations
+
+#### Performance and Scalability
+- [ ] Async-first design
+- [ ] Horizontal scaling support
+- [ ] Performance benchmarking
+- [ ] Resource optimization
 
 #### Testing and Quality
-- [ ] Unit tests for core components
-- [ ] Integration tests for agent interactions
-- [ ] Performance benchmarking
-- [ ] Security vulnerability scanning
+- [ ] Comprehensive unit testing
+- [ ] Integration testing for agent interactions
+- [ ] Mocking frameworks for LLM providers
 - [ ] Continuous integration setup
 
-#### Documentation
-- [ ] Comprehensive API documentation
-- [ ] Detailed usage examples
-- [ ] Developer guides
-- [ ] Architecture overview
+#### Documentation and Community
+- [ ] Detailed API documentation
+- [ ] Comprehensive developer guides
+- [ ] Example use case implementations
 - [ ] Contribution guidelines
-
-#### Community and Extensibility
-- [ ] Open-source contribution model
-- [ ] Plugin architecture
-- [ ] Community tool repository
+- [ ] Community tool submission process
 - [ ] Regular maintenance and updates
-- [ ] Feedback and feature request system
+
+#### Future Roadmap
+- [ ] Payment integration solutions
+- [ ] Advanced context understanding
+- [ ] Multi-language support
+- [ ] Enterprise-grade security features
+- [ ] AI agent marketplace
 
 ## Conceptual Agent Example
 
