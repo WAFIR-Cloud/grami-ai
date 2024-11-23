@@ -1,5 +1,5 @@
-from typing import Optional, Dict, Any, List, Callable, AsyncGenerator, Union
-from ..core.base import BaseLLMProvider
+from typing import Optional, Dict, Any, List, Callable, AsyncGenerator
+from typing import Union
 import google.generativeai as genai
 import logging
 import inspect
@@ -196,3 +196,25 @@ class GeminiProvider(BaseLLMProvider):
             memory_provider: Memory provider to use for storing and retrieving conversation context
         """
         self._memory_provider = memory_provider
+
+    def count_tokens(self, text: Union[str, Dict[str, str]]) -> int:
+        """
+        Count the number of tokens in the given text using the Gemini tokenizer.
+        
+        :param text: Input text or dictionary with a 'content' key
+        :return: Number of tokens in the input
+        """
+        # Normalize input to string
+        if isinstance(text, dict):
+            text = text.get('content', '')
+        elif not isinstance(text, str):
+            text = str(text)
+        
+        try:
+            # Use the model's tokenizer to count tokens
+            token_count = self._model.count_tokens(text)
+            return token_count.total_tokens
+        except Exception as e:
+            logging.error(f"Error counting tokens: {e}")
+            # Fallback token estimation (rough approximation)
+            return len(text.split())

@@ -233,6 +233,33 @@ GRAMI-AI uses environment variables to manage sensitive credentials securely. To
 - [ ] Enhanced security features
 - [ ] Extended provider support
 
+## Token Counting
+
+GRAMI-AI provides a convenient method to count tokens for input text, which is crucial for managing model input constraints.
+
+```python
+from grami.providers import GeminiProvider
+
+# Initialize Gemini Provider
+provider = GeminiProvider(api_key="YOUR_API_KEY")
+
+# Count tokens in a string
+text = "Hello, this is a sample text to count tokens."
+token_count = provider.count_tokens(text)
+print(f"Token count: {token_count}")
+
+# Count tokens in a dictionary input
+message = {"role": "user", "content": "Explain quantum computing"}
+token_count = provider.count_tokens(message)
+print(f"Token count: {token_count}")
+```
+
+Key features of token counting:
+- Supports both string and dictionary inputs
+- Uses native Gemini tokenizer
+- Provides fallback estimation if tokenization fails
+- Helps manage input size and model constraints
+
 ## Memory Management
 
 GRAMI-AI provides flexible memory management for AI agents, allowing seamless storage and retrieval of conversation context.
