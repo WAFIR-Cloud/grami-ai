@@ -1,7 +1,7 @@
 # GRAMI-AI: Dynamic AI Agent Framework
 
 <div align="center">
-    <img src="https://img.shields.io/badge/dynamic/json?color=blue&label=version&query=$.version&url=https%3A%2F%2Fraw.githubusercontent.com%2FYAFATEK%2Fgrami-ai%2Fmain%2Fpyproject.toml" alt="Version">
+    <img src="https://img.shields.io/badge/version-0.3.116-blue.svg" alt="Version">
     <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Versions">
     <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
     <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
