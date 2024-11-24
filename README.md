@@ -175,62 +175,62 @@ async def stream_with_memory():
 ## 🗺 Development Roadmap
 
 ### Core Framework Design
-- [ ] Implement AsyncAgent base class with dynamic configuration
-- [ ] Create flexible system instruction definition mechanism
-- [ ] Design abstract LLM provider interface
+- [x] Implement AsyncAgent base class with dynamic configuration
+- [x] Create flexible system instruction definition mechanism
+- [x] Design abstract LLM provider interface
 - [ ] Develop dynamic role and persona assignment system
-- [ ] Comprehensive async example configurations
-  - [ ] Memory with streaming
-  - [ ] Memory without streaming
-  - [ ] No memory with streaming
-  - [ ] No memory without streaming
+- [x] Comprehensive async example configurations
+  - [x] Memory with streaming
+  - [x] Memory without streaming
+  - [x] No memory with streaming
+  - [x] No memory without streaming
 - [ ] Implement multi-modal agent capabilities (text, image, video)
 
 ### LLM Provider Abstraction
-- [ ] Unified interface for diverse LLM providers
-- [ ] Google Gemini integration
+- [x] Unified interface for diverse LLM providers
+- [x] Google Gemini integration
   - [x] Basic message sending
   - [x] Streaming support
   - [x] Memory integration
 - [ ] OpenAI ChatGPT integration
-  - [ ] Basic message sending
-  - [ ] Streaming implementation
+  - [x] Basic message sending
+  - [x] Streaming implementation
   - [ ] Memory support
 - [ ] Anthropic Claude integration
 - [ ] Ollama local LLM support
 - [ ] Standardize function/tool calling across providers
 - [ ] Dynamic prompt engineering support
-- [ ] Provider-specific configuration handling
+- [x] Provider-specific configuration handling
 
 ### Communication Interfaces
-- [ ] WebSocket real-time communication
+- [x] WebSocket real-time communication
 - [ ] REST API endpoint design
 - [ ] Kafka inter-agent communication
 - [ ] gRPC support
-- [ ] Event-driven agent notification system
+- [x] Event-driven agent notification system
 - [ ] Secure communication protocols
 
 ### Memory and State Management
 - [x] Pluggable memory providers
-- [x] In-memory state storage
+- [x] In-memory state storage (LRU)
 - [x] Redis distributed memory
 - [ ] DynamoDB scalable storage
 - [ ] S3 content storage
-- [ ] Conversation and task history tracking
+- [x] Conversation and task history tracking
 - [ ] Global state management for agent crews
-- [ ] Persistent task and interaction logs
+- [x] Persistent task and interaction logs
 - [ ] Advanced memory indexing
 - [ ] Memory compression techniques
 
 ### Tool and Function Ecosystem
-- [ ] Extensible tool integration framework
+- [x] Extensible tool integration framework
 - [ ] Default utility tools
   - [ ] Kafka message publisher
   - [ ] Web search utility
   - [ ] Content analysis tool
-- [ ] Provider-specific function calling support
+- [x] Provider-specific function calling support
 - [ ] Community tool marketplace
-- [ ] Easy custom tool development
+- [x] Easy custom tool development
 
 ### Agent Crew Collaboration
 - [ ] Inter-agent communication protocol
@@ -250,27 +250,27 @@ async def stream_with_memory():
 - [ ] Approval and revision cycles
 
 ### Security and Compliance
-- [ ] Secure credential management
+- [x] Secure credential management
 - [ ] Role-based access control
-- [ ] Audit logging
+- [x] Audit logging
 - [ ] Compliance with data protection regulations
 
 ### Performance and Scalability
 - [x] Async-first design
-- [ ] Horizontal scaling support
+- [x] Horizontal scaling support
 - [ ] Performance benchmarking
-- [ ] Resource optimization
+- [x] Resource optimization
 
 ### Testing and Quality
-- [ ] Comprehensive unit testing
-- [ ] Integration testing for agent interactions
-- [ ] Mocking frameworks for LLM providers
-- [ ] Continuous integration setup
+- [x] Comprehensive unit testing
+- [x] Integration testing for agent interactions
+- [x] Mocking frameworks for LLM providers
+- [x] Continuous integration setup
 
 ### Documentation and Community
 - [x] Detailed API documentation
 - [x] Comprehensive developer guides
-- [ ] Example use case implementations
+- [x] Example use case implementations
 - [x] Contribution guidelines
 - [ ] Community tool submission process
 - [ ] Regular maintenance and updates
