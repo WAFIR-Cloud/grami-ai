@@ -17,6 +17,7 @@
 - [Memory Management](#-memory-management)
 - [Streaming Capabilities](#-streaming-capabilities)
 - [Development Roadmap](#-development-roadmap)
+- [TODO List](#-todo-list)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -179,6 +180,21 @@ async def stream_with_memory():
 - [ ] Advanced tool integration
 - [ ] Enhanced security features
 - [ ] Performance optimizations
+
+## 📝 TODO List
+
+- [ ] Add support for more LLM providers (Claude, Llama, etc.)
+- [ ] Implement advanced caching strategies
+- [ ] Add WebSocket support for real-time communication
+- [ ] Create comprehensive test suite
+- [ ] Add support for function calling
+- [ ] Implement conversation branching
+- [ ] Add support for multi-modal inputs
+- [ ] Enhance error handling and logging
+- [ ] Add rate limiting and quota management
+- [ ] Create detailed API documentation
+- [ ] Add support for custom prompt templates
+- [ ] Implement conversation summarization
 
 ## 🤝 Contributing
 
