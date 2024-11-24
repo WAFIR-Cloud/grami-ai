@@ -1,7 +1,7 @@
 # GRAMI-AI: Dynamic AI Agent Framework
 
 <div align="center">
-    <img src="https://img.shields.io/badge/version-0.3.132-blue.svg" alt="Version">
+    <img src="https://img.shields.io/badge/version-0.3.133-blue.svg" alt="Version">
     <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Versions">
     <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
     <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
@@ -26,6 +26,21 @@
 
 GRAMI-AI is a cutting-edge, async-first AI agent framework designed to solve complex computational challenges through intelligent, collaborative agent interactions. Built with unprecedented flexibility, this library empowers developers to create sophisticated, context-aware AI systems that can adapt, learn, and collaborate across diverse domains.
 
+### Why GRAMI-AI?
+
+- **Async-First Architecture**: Built from the ground up for asynchronous operations, ensuring optimal performance in high-concurrency environments
+- **Multi-Modal Capabilities**: Seamlessly handle text, images, and other data types through a unified interface
+- **Provider Agnostic**: Switch between different LLM providers (Gemini, OpenAI, Anthropic, Ollama) without changing your application code
+- **Enterprise Ready**: Built with security, scalability, and maintainability in mind
+- **Developer Friendly**: Intuitive API design with comprehensive documentation and examples
+
+### Core Design Principles
+
+1. **Modularity**: Every component is designed to be replaceable and extensible
+2. **Type Safety**: Comprehensive type hints and runtime checking for reliable code
+3. **Performance**: Optimized for both speed and resource efficiency
+4. **Security**: Built-in security best practices and configurable security policies
+
 ## 🚀 Key Features
 
 - Async AI Agent Creation
@@ -40,7 +55,7 @@ GRAMI-AI is a cutting-edge, async-first AI agent framework designed to solve com
 ### Using pip
 
 ```bash
-pip install grami-ai==0.3.132
+pip install grami-ai==0.3.133
 ```
 
 ### From Source
@@ -88,6 +103,53 @@ agent = AsyncAgent(
 ```python
 async for token in agent.stream_message("Tell me a story"):
     print(token, end='', flush=True)
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+```bash
+# Required for different LLM providers
+GEMINI_API_KEY=your_gemini_api_key
+OPENAI_API_KEY=your_openai_api_key
+ANTHROPIC_API_KEY=your_anthropic_api_key
+
+# Optional configuration
+GRAMI_LOG_LEVEL=INFO  # DEBUG, INFO, WARNING, ERROR
+GRAMI_MEMORY_PROVIDER=redis  # redis, dynamodb, memory
+GRAMI_MAX_TOKENS=2000
+```
+
+### Logging and Monitoring
+
+GRAMI-AI uses Python's standard logging module with enhanced formatting:
+
+```python
+import logging
+from grami.utils.logging import setup_logging
+
+# Setup logging with custom configuration
+setup_logging(
+    log_level="INFO",
+    log_format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    log_file="grami.log"
+)
+```
+
+### Error Handling
+
+GRAMI-AI provides custom exceptions for better error handling:
+
+```python
+from grami.exceptions import LLMProviderError, MemoryProviderError
+
+try:
+    response = await agent.send_message("Hello")
+except LLMProviderError as e:
+    logger.error(f"LLM provider error: {e}")
+except MemoryProviderError as e:
+    logger.error(f"Memory provider error: {e}")
 ```
 
 ## 💾 Memory Providers
@@ -320,6 +382,41 @@ agent = AsyncAgent(
 - [ ] Specialized industry-specific agents
 - [ ] Enhanced security features
 - [ ] Extended provider support
+
+## 🗺 Advanced Features (Q2 2024)
+- [ ] Multi-Modal Processing
+  - [ ] Image generation and analysis
+  - [ ] Audio processing capabilities
+  - [ ] Video content analysis
+- [ ] Advanced RAG Integration
+  - [ ] Vector store integration
+  - [ ] Semantic search capabilities
+  - [ ] Document processing pipeline
+- [ ] Agent Specialization
+  - [ ] Domain-specific training
+  - [ ] Custom personality templates
+  - [ ] Behavior fine-tuning
+
+## 🗺 Performance Optimization (Q3 2024)
+- [ ] Response Caching
+  - [ ] Intelligent cache invalidation
+  - [ ] Distributed caching support
+- [ ] Load Balancing
+  - [ ] Multiple LLM provider fallback
+  - [ ] Request rate optimization
+- [ ] Resource Management
+  - [ ] Token usage optimization
+  - [ ] Cost management features
+
+## 🗺 Enterprise Features (Q4 2024)
+- [ ] Advanced Security
+  - [ ] SSO integration
+  - [ ] End-to-end encryption
+  - [ ] Audit logging
+- [ ] Monitoring and Analytics
+  - [ ] Usage metrics dashboard
+  - [ ] Performance analytics
+  - [ ] Cost tracking
 
 ## 🤝 Contributing
 
