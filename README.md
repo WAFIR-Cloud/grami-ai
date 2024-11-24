@@ -1,7 +1,7 @@
 # GRAMI-AI: Dynamic AI Agent Framework
 
 <div align="center">
-    <img src="https://img.shields.io/badge/version-0.3.130-blue.svg" alt="Version">
+    <img src="https://img.shields.io/badge/version-0.3.132-blue.svg" alt="Version">
     <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Versions">
     <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
     <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
@@ -18,6 +18,7 @@
 - [Working with Tools](#-working-with-tools)
 - [Development Roadmap](#-development-roadmap)
 - [Communication Interfaces](#-communication-interfaces)
+- [AsyncAgent Configuration](#-asyncagent-configuration)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -39,7 +40,7 @@ GRAMI-AI is a cutting-edge, async-first AI agent framework designed to solve com
 ### Using pip
 
 ```bash
-pip install grami-ai==0.3.130
+pip install grami-ai==0.3.132
 ```
 
 ### From Source
@@ -179,6 +180,37 @@ communication_interface = await agent.setup_communication(
 - Interactive tool-based services
 - Event-driven agent communication
 
+## 🤖 AsyncAgent Configuration
+
+The `AsyncAgent` class is the core component of GRAMI-AI, providing a flexible and powerful way to create AI agents. Here's a detailed breakdown of its parameters:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `name` | str | Yes | - | Unique identifier for the agent instance |
+| `llm` | BaseLLMProvider | Yes | - | Language model provider (e.g., GeminiProvider, OpenAIProvider) |
+| `memory` | BaseMemoryProvider | No | None | Memory provider for conversation history management |
+| `system_instructions` | str | No | None | System-level instructions to guide the model's behavior |
+| `tools` | List[Callable] | No | None | List of functions the agent can use during interactions |
+| `communication_interface` | Any | No | None | Interface for agent communication (e.g., WebSocket) |
+
+### Example Usage with Parameters
+
+```python
+from grami.agent import AsyncAgent
+from grami.providers.gemini_provider import GeminiProvider
+from grami.memory.lru import LRUMemory
+
+# Create an agent with all parameters
+agent = AsyncAgent(
+    name="AssistantAI",
+    llm=GeminiProvider(api_key="YOUR_API_KEY"),
+    memory=LRUMemory(capacity=100),
+    system_instructions="You are a helpful AI assistant focused on technical tasks.",
+    tools=[calculate_area, generate_fibonacci],
+    communication_interface=None  # Will be set up later if needed
+)
+```
+
 ## 🗺 Development Roadmap
 
 ### Core Framework Design
@@ -291,7 +323,40 @@ communication_interface = await agent.setup_communication(
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read our contributing guidelines and code of conduct.
+We welcome contributions to GRAMI-AI! Here's how you can help:
+
+### Ways to Contribute
+
+1. **Bug Reports**: Open detailed issues on GitHub
+2. **Feature Requests**: Share your ideas for new features
+3. **Code Contributions**: Submit pull requests with improvements
+4. **Documentation**: Help improve our docs and examples
+5. **Testing**: Add test cases and improve coverage
+
+### Development Setup
+
+1. Fork the repository
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+   ```
+3. Install development dependencies:
+   ```bash
+   pip install -e ".[dev]"
+   ```
+4. Run tests:
+   ```bash
+   pytest
+   ```
+
+### Pull Request Guidelines
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
