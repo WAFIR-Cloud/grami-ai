@@ -1,33 +1,79 @@
 name: Publish to PyPI
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 0.3.133)'
+        required: true
+        type: string
+  release:
+    types: [published]
 
 jobs:
-  deploy:
+  validate-version:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tomli requests
+          
+      - name: Check version availability
+        run: |
+          VERSION=$(python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          echo "Current version: $VERSION"
+          
+          # Check if version exists on PyPI
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://pypi.org/pypi/grami-ai/$VERSION/json)
+          if [ $STATUS -eq 200 ]; then
+            echo "Error: Version $VERSION already exists on PyPI"
+            exit 1
+          fi
+          echo "Version $VERSION is available for publishing"
+          echo "version=$VERSION" >> $GITHUB_ENV
 
+  deploy:
+    needs: validate-version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install build twine
-
+          
       - name: Build package
+        run: python -m build
+        
+      - name: Verify package version
         run: |
-          python -m build
-
+          PKG_VERSION=$(python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          if [ "${{ github.event.inputs.version }}" != "" ] && [ "$PKG_VERSION" != "${{ github.event.inputs.version }}" ]; then
+            echo "Error: Package version ($PKG_VERSION) does not match requested version (${{ github.event.inputs.version }})"
+            exit 1
+          fi
+          
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+          
+      - name: Create Git Tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git tag v${{ env.version }}
+          git push origin v${{ env.version }}
