@@ -54,29 +54,7 @@ class RedisMemory(BaseMemoryProvider):
             key: Storage key
             value: Value to store
         """
-        redis = await self._get_redis_client()
-        
-        # Serialize the value with timestamp
-        serialized_value = json.dumps({
-            'value': value,
-            'timestamp': datetime.now(timezone.utc).isoformat()
-        })
-        
-        # Use a sorted set to maintain order and limit capacity
-        await redis.zadd(
-            f"{self.memory_key_prefix}memory_index", 
-            {key: datetime.now(timezone.utc).timestamp()}
-        )
-        
-        # Store the actual value
-        await redis.hset(
-            f"{self.memory_key_prefix}memory", 
-            key, 
-            serialized_value
-        )
-        
-        # Trim to capacity
-        await self._trim_to_capacity()
+        await self.store(key, value)
     
     async def get(self, key: str) -> Optional[Any]:
         """Retrieve a value from Redis memory.
@@ -87,20 +65,7 @@ class RedisMemory(BaseMemoryProvider):
         Returns:
             The stored value or None if not found
         """
-        redis = await self._get_redis_client()
-        
-        # Retrieve the serialized value
-        serialized_value = await redis.hget(
-            f"{self.memory_key_prefix}memory", 
-            key
-        )
-        
-        if serialized_value:
-            # Deserialize and return the value
-            memory_item = json.loads(serialized_value)
-            return memory_item['value']
-        
-        return None
+        return await self.retrieve(key)
     
     async def remove(self, key: str) -> bool:
         """Remove an item from Redis memory.
@@ -136,39 +101,24 @@ class RedisMemory(BaseMemoryProvider):
         )
     
     async def get_recent_items(self, limit: int = 10) -> List[Dict[str, Any]]:
-        """Get most recently used items from Redis memory.
+        """Get most recently used items.
         
         Args:
             limit: Maximum number of items to return
-        
-        Returns:
-            List of recent memory items
-        """
-        redis = await self._get_redis_client()
-        
-        # Get recent keys from sorted set
-        recent_keys = await redis.zrevrange(
-            f"{self.memory_key_prefix}memory_index", 
-            0, 
-            limit - 1
-        )
-        
-        # Retrieve full details for these keys
-        recent_items = []
-        for key in recent_keys:
-            serialized_value = await redis.hget(
-                f"{self.memory_key_prefix}memory", 
-                key
-            )
             
-            if serialized_value:
-                memory_item = json.loads(serialized_value)
-                recent_items.append({
-                    'key': key,
-                    **memory_item
-                })
+        Returns:
+            List of recent items with their values
+        """
+        return await self.get_recent_items(limit)
+    
+    async def add_message(self, message: Dict[str, Any]) -> None:
+        """Add a message to memory.
         
-        return recent_items
+        Args:
+            message: Message dictionary containing role and content
+        """
+        key = f"message_{datetime.now(timezone.utc).timestamp()}"
+        await self.add(key, message)
     
     async def list_contents(self) -> List[Dict[str, Any]]:
         """List all contents in memory.
@@ -247,7 +197,29 @@ class RedisMemory(BaseMemoryProvider):
             key: Storage key
             value: Value to store
         """
-        await self.add(key, value)
+        redis = await self._get_redis_client()
+        
+        # Store with timestamp
+        data = {
+            'value': value,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Store in sorted set for ordering
+        await redis.zadd(
+            f"{self.memory_key_prefix}memory_index", 
+            {key: datetime.now(timezone.utc).timestamp()}
+        )
+        
+        # Store actual data
+        await redis.hset(
+            f"{self.memory_key_prefix}memory", 
+            key, 
+            json.dumps(data)
+        )
+        
+        # Trim to capacity
+        await self._trim_to_capacity()
     
     async def retrieve(self, key: str) -> Optional[Any]:
         """Retrieve a value from Redis memory.
@@ -258,15 +230,46 @@ class RedisMemory(BaseMemoryProvider):
         Returns:
             The stored value or None if not found
         """
-        return await self.get(key)
+        redis = await self._get_redis_client()
+        
+        data = await redis.hget(
+            f"{self.memory_key_prefix}memory", 
+            key
+        )
+        
+        if data:
+            return json.loads(data)['value']
+        return None
     
-    async def delete(self, key: str) -> None:
-        """Delete a key from Redis memory.
+    async def get_recent_items(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get most recently used items.
         
         Args:
-            key: Storage key to delete
+            limit: Maximum number of items to return
+            
+        Returns:
+            List of recent items with their values
         """
-        await self.remove(key)
+        redis = await self._get_redis_client()
+        
+        # Get recent keys
+        keys = await redis.zrevrange(
+            f"{self.memory_key_prefix}memory_index",
+            0,
+            limit - 1
+        )
+        
+        # Retrieve values
+        items = []
+        for key in keys:
+            value = await self.retrieve(key)
+            if value:
+                items.append({
+                    'key': key,
+                    'value': value
+                })
+        
+        return items
     
     async def list_keys(self, pattern: Optional[str] = None) -> List[str]:
         """List all keys in memory.
@@ -305,3 +308,35 @@ class RedisMemory(BaseMemoryProvider):
             isinstance(config.get('capacity', 100), int) and
             config.get('capacity', 100) > 0
         )
+
+    async def get_messages(self) -> List[Dict[str, Any]]:
+        """Get all messages from memory in chronological order.
+        
+        Returns:
+            List of messages with role and content
+        """
+        redis = await self._get_redis_client()
+        
+        # Get recent keys in chronological order
+        keys = await redis.zrange(
+            f"{self.memory_key_prefix}memory_index",
+            0,
+            -1
+        )
+        
+        # Retrieve messages
+        messages = []
+        for key in keys:
+            value = await self.get(key)
+            if value and isinstance(value, dict) and 'role' in value and 'content' in value:
+                messages.append(value)
+        
+        return messages
+
+    async def delete(self, key: str) -> None:
+        """Delete a key from Redis memory.
+        
+        Args:
+            key: Storage key to delete
+        """
+        await self.remove(key)

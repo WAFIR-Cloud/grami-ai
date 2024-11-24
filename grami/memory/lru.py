@@ -22,6 +22,7 @@ class LRUMemory(BaseMemoryProvider):
         super().__init__(provider_id)
         self.capacity = capacity
         self.cache = OrderedDict()
+        self.messages = []
     
     async def store(self, key: str, value: Any) -> None:
         """Store a value in memory.
@@ -49,14 +50,13 @@ class LRUMemory(BaseMemoryProvider):
             key: Storage key
         
         Returns:
-            The stored value or None if not found
+            Stored value or None if not found
         """
         if key not in self.cache:
             return None
             
-        entry = self.cache[key]
         self.cache.move_to_end(key)
-        return entry['value']
+        return self.cache[key]['value']
     
     async def delete(self, key: str) -> None:
         """Delete a key from memory.
@@ -87,8 +87,9 @@ class LRUMemory(BaseMemoryProvider):
         return {key: entry['value'] for key, entry in self.cache.items()}
     
     async def clear(self) -> None:
-        """Clear all items from memory."""
+        """Clear all stored values."""
         self.cache.clear()
+        self.messages.clear()
     
     async def get_size(self) -> int:
         """Get current number of items in memory.
@@ -97,6 +98,45 @@ class LRUMemory(BaseMemoryProvider):
             Number of stored items
         """
         return len(self.cache)
+    
+    async def get_keys(self) -> List[str]:
+        """Get all stored keys.
+        
+        Returns:
+            List of stored keys
+        """
+        return list(self.cache.keys())
+    
+    async def add_message(self, message: Dict[str, str]) -> None:
+        """Add a message to the conversation history.
+        
+        Args:
+            message: Message dictionary with 'role' and 'content'
+        """
+        # Store message in the cache with timestamp
+        message_id = f"message_{len(self.messages)}"
+        await self.store(message_id, message)
+        
+        # Add message to the ordered list
+        self.messages.append(message)
+        
+        # Remove oldest message if capacity is exceeded
+        if len(self.messages) > self.capacity:
+            self.messages.pop(0)
+            # Also remove from cache
+            await self.delete(f"message_{len(self.messages) - self.capacity}")
+    
+    async def get_messages(self) -> List[Dict[str, str]]:
+        """Get all stored messages.
+        
+        Returns:
+            List of message dictionaries
+        """
+        return self.messages
+    
+    async def clear_messages(self) -> None:
+        """Clear all stored messages."""
+        self.messages.clear()
     
     async def validate_configuration(self, config: Dict[str, Any]) -> bool:
         """Validate the configuration for the provider.

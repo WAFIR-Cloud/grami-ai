@@ -1,160 +1,188 @@
-import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-
 import google.generativeai as genai
 from google.generativeai import GenerativeModel
 from google.generativeai.types import GenerationConfig
 import asyncio
 import re
+from datetime import datetime, timezone
+from typing import Dict, List, Optional, Union, Any, Callable
+import logging
+import uuid
 
 class GeminiProvider:
     """Provider for Google's Gemini API."""
 
+    # Default safety settings
+    DEFAULT_SAFETY_SETTINGS = [
+        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
+        {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
+        {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+    ]
+
     def __init__(
         self,
         api_key: str,
-        model_name: str = "gemini-pro"
+        model: str = "gemini-pro",
+        generation_config: Optional[Dict] = None,
+        safety_settings: Optional[List[Dict[str, str]]] = None,
     ):
-        """Initialize the Gemini provider.
+        """Initialize the Gemini provider with model configuration.
         
-        Args:
-            api_key: The API key for Gemini
-            model_name: The model name to use
+        :param api_key: Gemini API key
+        :param model: Model name to use (default: gemini-pro)
+        :param generation_config: Optional generation configuration for controlling model behavior
+        :param safety_settings: Optional custom safety settings to override defaults
         """
         genai.configure(api_key=api_key)
         
-        self._model = genai.GenerativeModel(
-            model_name=model_name,
-            safety_settings=[
-                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
-                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
-                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-            ],
-            generation_config=genai.types.GenerationConfig(
-                max_output_tokens=4000,
-                temperature=0.5,
-                top_p=0.95,
-                top_k=64,
-                response_mime_type="text/plain",
-            ),
+        # Use provided safety settings or defaults
+        model_safety_settings = safety_settings or self.DEFAULT_SAFETY_SETTINGS
+        
+        # Initialize model with provided configs
+        self._model = GenerativeModel(
+            model,
+            generation_config=GenerationConfig(**(generation_config or {})),
+            safety_settings=model_safety_settings
         )
-        
         self._chat = None
-        self._conversation_history = []
+        self._history = []
+        self._memory_provider = None
 
-    async def initialize_conversation(self, chat_id: Optional[str] = None) -> None:
-        """Initialize a new conversation."""
-        try:
-            self._chat = self._model.start_chat()
-            logging.info("Chat session initialized successfully")
-        except Exception as e:
-            logging.error(f"Error initializing conversation: {str(e)}")
-            raise
+    def _transform_history_for_gemini(self, history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Transform history into Gemini's format."""
+        transformed = []
+        for msg in history:
+            if msg["role"] not in ["user", "model"]:
+                continue
+            content = msg["content"] if isinstance(msg["content"], str) else msg["content"].get("text", "")
+            transformed.append({
+                "role": msg["role"],
+                "parts": [{"text": content}]
+            })
+        return transformed
 
-    async def send_message(self, message: Union[str, Dict[str, str]], context: Optional[Dict] = None) -> str:
-        """
-        Asynchronously send a message and get a response with manual function calling.
+    def _prioritize_messages(self, history: List[Dict[str, Any]], max_tokens: int = 1500, base_recent: int = 30) -> List[Dict[str, Any]]:
+        """Prioritize messages based on recency and token limits."""
+        if not history:
+            return []
+
+        # Always keep most recent messages
+        prioritized = history[-base_recent:]
         
-        :param message: User message (string or dictionary)
-        :param context: Optional context
-        :return: LLM's response as a string
-        """
-        # Ensure the model is configured with tools if available
-        if hasattr(self, '_tool_declarations'):
-            self._model = genai.GenerativeModel(
-                model_name=self._model.model_name,
-                tools=self._tool_declarations
-            )
+        # Count tokens for recent messages
+        transformed = self._transform_history_for_gemini(prioritized)
+        total_tokens = self._model.count_tokens(transformed).total_tokens
         
-        # Normalize message to dictionary format
-        if isinstance(message, str):
-            message_payload = {"role": "user", "content": message}
-        else:
-            message_payload = message
-        
-        try:
-            # Prepare conversation history if it exists
-            if hasattr(self, '_conversation_history') and self._conversation_history:
-                contents = [
-                    {'role': 'user', 'parts': [part['content']]} 
-                    for part in self._conversation_history 
-                    if part.get('role') == 'user'
-                ]
-                contents.append({'role': 'user', 'parts': [message_payload['content']]})
+        # Add older messages if space allows
+        for msg in reversed(history[:-base_recent]):
+            msg_tokens = self._model.count_tokens(self._transform_history_for_gemini([msg])).total_tokens
+            if total_tokens + msg_tokens <= max_tokens:
+                prioritized.insert(0, msg)
+                total_tokens += msg_tokens
             else:
-                contents = [{'role': 'user', 'parts': [message_payload['content']]}]
+                break
+                
+        return prioritized
+
+    def set_history(self, history: List[Dict[str, Any]]) -> None:
+        """Set the conversation history."""
+        self._history = history
+        if self._chat and history:
+            transformed = self._transform_history_for_gemini(history)
+            self._chat.history = transformed
+
+    async def send_message(
+        self,
+        message: Union[str, Dict[str, str]],
+        context: Optional[Dict] = None
+    ) -> str:
+        """Send a message and get a response."""
+        message_content = message if isinstance(message, str) else message.get('content', message.get('text', ''))
             
-            # Process function calls
-            contents, response_text = await self._process_function_calls(contents)
-            
-            # Store conversation history
-            await self._store_conversation_memory(
-                user_message=message_payload['content'], 
-                model_response=response_text
-            )
-            
+        try:
+            # Initialize chat if needed
+            if not self._chat:
+                transformed_history = self._transform_history_for_gemini(self._history)
+                self._chat = self._model.start_chat(history=transformed_history)
+            else:
+                # Update chat history
+                transformed = self._transform_history_for_gemini(self._history)
+                self._chat.history = transformed
+
+            # Store user message
+            user_message = {"role": "user", "content": message_content}
+            self._history.append(user_message)
+            if self._memory_provider:
+                await self._memory_provider.add_message(user_message)
+
+            # Send message and get response
+            response = await self._chat.send_message_async(message_content)
+            response_text = response.text
+
+            # Store model response
+            model_message = {"role": "model", "content": response_text}
+            self._history.append(model_message)
+            if self._memory_provider:
+                await self._memory_provider.add_message(model_message)
+
             return response_text
+
         except Exception as e:
-            print(f"Error sending message: {e}")
+            logging.error(f"Error in send_message: {str(e)}")
             raise
 
-    async def stream_message(self, message: Union[str, Dict[str, str]], context: Optional[Dict] = None):
-        """
-        Asynchronously stream a message response.
-        
-        :param message: User message (string or dictionary)
-        :param context: Optional context
-        :return: Streaming response object to be iterated by the caller
-        """
-        if not self._chat:
-            await self.initialize_conversation()
-        
-        # Normalize message to dictionary format
-        if isinstance(message, str):
-            message_payload = {'content': message, 'role': 'user'}
-        else:
-            message_payload = message
-        
-        # Add current message to conversation history
-        self._conversation_history.append(message_payload)
-        
+    async def stream_message(
+        self,
+        message: Union[str, Dict[str, str]],
+        context: Optional[Dict] = None
+    ):
+        """Stream a message response."""
+        message_content = message if isinstance(message, str) else message.get('content', message.get('text', ''))
+
         try:
-            # Prepare contents, handling empty conversation history
-            contents = [
-                {'role': 'user', 'parts': [part['content'] for part in self._conversation_history if part.get('role') == 'user']},
-                {'role': 'model', 'parts': [part['content'] for part in self._conversation_history if part.get('role') == 'model']}
-            ]
-            
-            # Remove empty lists to prevent API errors
-            contents = [content for content in contents if content['parts']]
-            
-            # Add current message
-            contents.append({'role': 'user', 'parts': [message_payload['content']]})
-            
-            # Process function calls
-            contents, response_text = await self._process_function_calls(contents, is_streaming=True)
-            
-            # If response_text is a string, convert it to a list of tokens
-            if isinstance(response_text, str):
-                response_tokens = [response_text]
+            # Initialize chat if needed
+            if not self._chat:
+                transformed_history = self._transform_history_for_gemini(self._history)
+                self._chat = self._model.start_chat(history=transformed_history)
             else:
-                response_tokens = response_text
-            
-            # Stream the tokens
-            for token in response_tokens:
-                yield token
-            
-            # Store conversation history
-            await self._store_conversation_memory(
-                user_message=message_payload['content'], 
-                model_response=response_text if isinstance(response_text, str) else ''.join(response_text)
-            )
+                # Update chat history
+                transformed = self._transform_history_for_gemini(self._history)
+                self._chat.history = transformed
+
+            # Store user message
+            user_message = {"role": "user", "content": message_content}
+            self._history.append(user_message)
+            if self._memory_provider:
+                await self._memory_provider.add_message(user_message)
+
+            # Send message with streaming enabled
+            response = await self._chat.send_message_async(message_content, stream=True)
+            full_response = []
+
+            async for chunk in response:
+                chunk_text = chunk.text
+                full_response.append(chunk_text)
+                yield chunk_text
+
+            # Store complete response
+            complete_response = "".join(full_response)
+            model_message = {"role": "model", "content": complete_response}
+            self._history.append(model_message)
+            if self._memory_provider:
+                await self._memory_provider.add_message(model_message)
+
         except Exception as e:
-            logging.error(f"Error preparing streaming message: {e}")
+            logging.error(f"Error in stream_message: {str(e)}")
             raise
 
-    async def _process_function_calls(self, contents: List[Dict], is_streaming: bool = False) -> Tuple[List[Dict], str]:
+    def get_history(self) -> List[Dict[str, Any]]:
+        """Get the current conversation history.
+        
+        :return: List of message dictionaries
+        """
+        return self._history.copy()
+
+    async def _process_function_calls(self, contents: List[Dict], is_streaming: bool = False) -> tuple:
         """
         Process function calls in the model's response.
         
@@ -213,39 +241,12 @@ class GeminiProvider:
         
         return contents, final_response.text
 
-    async def _store_conversation_memory(self, user_message: str, model_response: str) -> None:
-        """
-        Store a conversation turn in the memory provider.
-        
-        :param user_message: The user's input message
-        :param model_response: The model's response
-        """
-        if not hasattr(self, '_memory_provider') or not self._memory_provider:
-            return
-        
-        try:
-            import uuid
-            from datetime import datetime
-            
-            current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            unique_key = f"{current_timestamp}_{str(uuid.uuid4())[:8]}"
-            
-            memory_entry = {
-                "type": "conversation_turn",
-                "user_message": {
-                    "content": user_message,
-                    "role": "user"
-                },
-                "model_response": {
-                    "content": model_response,
-                    "role": "model"
-                },
-                "timestamp": current_timestamp
-            }
-            
-            await self._memory_provider.store(unique_key, memory_entry)
-        except Exception as memory_error:
-            logging.error(f"Failed to store memory: {memory_error}")
+    def validate_configuration(self, **kwargs) -> None:
+        """Validate the configuration parameters."""
+        if not kwargs.get("api_key"):
+            raise ValueError("API key is required")
+        if not kwargs.get("model_name"):
+            raise ValueError("Model name is required")
 
     def set_memory_provider(self, memory_provider):
         """
@@ -254,6 +255,15 @@ class GeminiProvider:
         :param memory_provider: Memory provider to use
         """
         self._memory_provider = memory_provider
+        if memory_provider:
+            # Initialize history from memory provider
+            self._history = memory_provider.messages.copy()
+            
+            # Reinitialize chat with memory if needed
+            if self._chat and self._history:
+                prioritized = self._prioritize_messages(self._history)
+                transformed = self._transform_history_for_gemini(prioritized)
+                self._chat.history = transformed
 
     def register_tools(self, tools: List[Callable]) -> None:
         """
@@ -289,31 +299,3 @@ class GeminiProvider:
             )
         
         logging.info(f"Registered {len(tools)} tools with GeminiProvider")
-
-    def get_conversation_history(self) -> List[Dict]:
-        """
-        Retrieve the current conversation history.
-        
-        :return: List of conversation turns
-        """
-        if hasattr(self, '_chat'):
-            return [
-                {
-                    'role': content.role, 
-                    'parts': [
-                        {'text': part.text} if part.text else 
-                        {'function_call': part.function_call} if part.function_call else 
-                        {'function_response': part.function_response}
-                        for part in content.parts
-                    ]
-                } 
-                for content in self._chat.history
-            ]
-        return []
-
-    def validate_configuration(self, **kwargs) -> None:
-        """Validate the configuration parameters."""
-        if not kwargs.get("api_key"):
-            raise ValueError("API key is required")
-        if not kwargs.get("model_name"):
-            raise ValueError("Model name is required")

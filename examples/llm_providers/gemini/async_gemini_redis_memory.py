@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 from grami.memory import RedisMemory
 from grami.providers.gemini_provider import GeminiProvider
-from grami.agent import AsyncAgent
+from grami.agents import AsyncAgent
 
 # Load environment variables
 load_dotenv()
