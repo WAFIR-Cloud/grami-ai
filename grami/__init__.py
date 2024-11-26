@@ -8,7 +8,7 @@ asynchronous AI agents that can interact with various LLM providers.
 import warnings
 from .agents import AsyncAgent, BaseAgent
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 __all__ = [
     'AsyncAgent',
