@@ -7,8 +7,9 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Union, Any, Callable
 import logging
 import uuid
+from ..core.base import BaseLLMProvider
 
-class GeminiProvider:
+class GeminiProvider(BaseLLMProvider):
     """Provider for Google's Gemini API."""
 
     # Default safety settings
