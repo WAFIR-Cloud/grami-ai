@@ -203,6 +203,19 @@ class GeminiProvider(BaseLLMProvider):
             logging.error(f"Error in stream_message: {str(e)}")
             raise
 
+    async def initialize_conversation(self, system_instructions: str = None) -> None:
+        """Initialize a new conversation with optional system instructions."""
+        self._chat = self._model.start_chat()
+        self._history = []
+        
+        if system_instructions:
+            # Add system instructions as the first message
+            self._history.append({
+                "role": "system",
+                "content": system_instructions,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
+
     def get_history(self) -> List[Dict[str, Any]]:
         """Get the current conversation history.
         
