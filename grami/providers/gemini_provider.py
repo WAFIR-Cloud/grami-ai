@@ -48,6 +48,47 @@ class GeminiProvider(BaseLLMProvider):
         self._chat = None
         self._history = []
         self._memory_provider = None
+        self._tools = []
+
+    def set_tools(self, tools: List[Callable]) -> None:
+        """Set the available tools for the provider.
+        
+        :param tools: List of tool functions
+        """
+        self._tools = tools
+
+    def _format_tools_for_prompt(self) -> str:
+        """Format tools into a prompt that Gemini can understand."""
+        if not self._tools:
+            return ""
+            
+        tools_prompt = "\nAvailable tools:\n"
+        for tool in self._tools:
+            tools_prompt += f"- {tool.__name__}: {tool.__doc__ or 'No description available'}\n"
+        tools_prompt += "\nTo use a tool, respond with: [TOOL] tool_name [/TOOL]\n"
+        return tools_prompt
+
+    def _extract_tool_call(self, response: str) -> Optional[tuple[str, List[Any]]]:
+        """Extract tool name and arguments from response."""
+        tool_pattern = r'\[TOOL\]\s*(\w+)\s*\[/TOOL\]'
+        match = re.search(tool_pattern, response)
+        if match:
+            tool_name = match.group(1)
+            for tool in self._tools:
+                if tool.__name__ == tool_name:
+                    return tool_name, []
+        return None
+
+    def _handle_tool_call(self, tool_name: str, args: List[Any]) -> str:
+        """Execute the tool and return its result."""
+        for tool in self._tools:
+            if tool.__name__ == tool_name:
+                try:
+                    result = tool(*args)
+                    return f"Tool {tool_name} returned: {result}"
+                except Exception as e:
+                    return f"Tool {tool_name} failed with error: {str(e)}"
+        return f"Tool {tool_name} not found"
 
     def _transform_history_for_gemini(self, history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Transform history into Gemini's format."""
@@ -99,6 +140,10 @@ class GeminiProvider(BaseLLMProvider):
     ) -> str:
         """Send a message and get a response."""
         message_content = message if isinstance(message, str) else message.get('content', message.get('text', ''))
+        
+        # Add tools to the message if available
+        if self._tools:
+            message_content = message_content + self._format_tools_for_prompt()
             
         try:
             # Initialize chat if needed
@@ -143,6 +188,13 @@ class GeminiProvider(BaseLLMProvider):
                 if last_error:
                     raise last_error
                 raise Exception("Failed to get a valid response after multiple attempts")
+
+            # Check for tool calls in the response
+            tool_call = self._extract_tool_call(response_text)
+            if tool_call:
+                tool_name, args = tool_call
+                tool_result = self._handle_tool_call(tool_name, args)
+                response_text = tool_result
 
             # Store model response
             model_message = {"role": "model", "content": response_text}
