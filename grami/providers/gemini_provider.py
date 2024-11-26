@@ -349,6 +349,16 @@ class GeminiProvider(BaseLLMProvider):
         """
         self._memory_provider = memory_provider
 
+    @property
+    def tools(self) -> List[Callable]:
+        """Get the registered tools."""
+        return list(self._tools.values()) if isinstance(self._tools, dict) else self._tools
+
+    @tools.setter
+    def tools(self, tools: List[Callable]) -> None:
+        """Set the tools and register them with the model."""
+        self.register_tools(tools)
+
     def register_tools(self, tools: List[Callable]) -> None:
         """
         Register tools with the Gemini provider using native function calling.
