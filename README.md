@@ -1,18 +1,58 @@
-# GRAMI-AI Framework
+# GRAMI-AI: Dynamic AI Agent Framework
 
-A dynamic and flexible AI agent framework for building intelligent, multi-modal AI agents. GRAMI-AI provides a simple yet powerful interface for creating AI agents that can interact with various LLM providers, maintain conversation history, and handle both streaming and non-streaming responses.
+<div align="center">
+    <img src="https://img.shields.io/badge/version-0.4.0-blue.svg" alt="Version">
+    <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Versions">
+    <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
+    <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
+</div>
 
-## 🚀 Features
+## 📋 Table of Contents
 
-- 🤖 Multiple LLM Provider Support (Gemini, OpenAI, Anthropic)
-- 📝 Streaming and Non-streaming Response Handling
-- 💾 Built-in Memory Management (LRU Cache)
-- 🔄 Asynchronous Operation Support
-- 🛠️ Configurable Generation Parameters
-- 🔍 Error Handling and Recovery
-- 📦 Easy Integration and Setup
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Provider Examples](#-provider-examples)
+- [Memory Management](#-memory-management)
+- [Streaming Capabilities](#-streaming-capabilities)
+- [Development Roadmap](#-development-roadmap)
+- [TODO List](#-todo-list)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-## 📦 Installation
+## 🌟 Overview
+
+GRAMI-AI is a cutting-edge, async-first AI agent framework designed for building sophisticated AI applications. With support for multiple LLM providers, advanced memory management, and streaming capabilities, GRAMI-AI enables developers to create powerful, context-aware AI systems.
+
+### Why GRAMI-AI?
+
+- **Async-First**: Built for high-performance asynchronous operations
+- **Provider Agnostic**: Support for Gemini, OpenAI, Anthropic, and Ollama
+- **Advanced Memory**: LRU and Redis-based memory management
+- **Streaming Support**: Efficient token-by-token streaming responses
+- **Enterprise Ready**: Production-grade security and scalability
+
+## 🚀 Key Features
+
+### LLM Providers
+- Gemini (Google's latest LLM)
+- OpenAI (GPT models)
+- Anthropic (Claude)
+- Ollama (Local models)
+
+### Memory Management
+- LRU Memory (In-memory caching)
+- Redis Memory (Distributed caching)
+- Custom memory providers
+
+### Communication
+- Synchronous messaging
+- Asynchronous streaming
+- WebSocket support
+- Custom interfaces
+
+## 💻 Installation
 
 ```bash
 pip install grami-ai
@@ -84,60 +124,202 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-## 🛠️ Configuration Options
+## 📚 Provider Examples
 
-### Generation Configuration
-
-You can customize the behavior of the language model by adjusting the generation configuration:
+### Gemini Provider
 
 ```python
-generation_config = {
-    "temperature": 0.9,      # Controls response creativity (0.0 to 1.0)
-    "top_p": 0.9,           # Nucleus sampling parameter
-    "top_k": 40,            # Top-k sampling parameter
-    "max_output_tokens": 1000,  # Maximum response length
-    "candidate_count": 1     # Number of response candidates
-}
-```
+from grami.providers.gemini_provider import GeminiProvider
+from grami.memory.lru import LRUMemory
 
-### Memory Configuration
+# Initialize with memory
+provider = GeminiProvider(
+    api_key="YOUR_API_KEY",
+    model="gemini-pro",  # Optional, defaults to gemini-pro
+    generation_config={   # Optional
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "top_k": 40
+    }
+)
 
-Configure the memory capacity to control how many messages are retained:
+# Add memory provider
+memory = LRUMemory(capacity=100)
+provider.set_memory_provider(memory)
 
-```python
-memory = LRUMemory(capacity=5)  # Stores last 5 messages
-```
+# Regular message
+response = await provider.send_message("What is AI?")
 
-## 🔄 Streaming vs Non-streaming
-
-GRAMI-AI supports both streaming and non-streaming responses:
-
-```python
 # Streaming response
-async for chunk in agent.stream_message("Tell me a story"):
+async for chunk in provider.stream_message("Tell me a story"):
     print(chunk, end="", flush=True)
-
-# Non-streaming response
-response = await agent.send_message("What's 2+2?")
 ```
 
-## 🚨 Error Handling
+## 🧠 Memory Management
 
-GRAMI-AI includes built-in error handling for common issues:
+### LRU Memory
 
-- Automatic retry for RECITATION errors
-- Connection error handling
-- Invalid API key detection
-- Rate limit handling
+```python
+from grami.memory.lru import LRUMemory
 
-## 📚 Examples
+# Initialize with capacity
+memory = LRUMemory(capacity=100)
 
-Check out more examples in the [examples](./examples) directory:
+# Add to agent
+agent = AsyncAgent(
+    name="MemoryAgent",
+    llm=provider,
+    memory=memory
+)
+```
 
-- Basic agent usage
-- Custom provider implementation
-- Memory management
-- Advanced configurations
+### Redis Memory
+
+```python
+from grami.memory.redis import RedisMemory
+
+# Initialize Redis memory
+memory = RedisMemory(
+    host="localhost",
+    port=6379,
+    capacity=1000
+)
+
+# Add to provider
+provider.set_memory_provider(memory)
+```
+
+## 🌊 Streaming Capabilities
+
+### Basic Streaming
+
+```python
+async def stream_example():
+    async for chunk in provider.stream_message("Generate a story"):
+        print(chunk, end="", flush=True)
+```
+
+### Streaming with Memory
+
+```python
+async def stream_with_memory():
+    # First message
+    response = await provider.send_message("My name is Alice")
+    
+    # Stream follow-up (will remember context)
+    async for chunk in provider.stream_message("What's my name?"):
+        print(chunk, end="", flush=True)
+```
+
+## 🗺 Development Roadmap
+
+### Core Framework Design
+- [x] Implement AsyncAgent base class with dynamic configuration
+- [x] Create flexible system instruction definition mechanism
+- [x] Design abstract LLM provider interface
+- [ ] Develop dynamic role and persona assignment system
+- [x] Comprehensive async example configurations
+  - [x] Memory with streaming
+  - [x] Memory without streaming
+  - [x] No memory with streaming
+  - [x] No memory without streaming
+- [ ] Implement multi-modal agent capabilities (text, image, video)
+
+### LLM Provider Abstraction
+- [x] Unified interface for diverse LLM providers
+- [x] Google Gemini integration
+  - [x] Basic message sending
+  - [x] Streaming support
+  - [x] Memory integration
+- [ ] OpenAI ChatGPT integration
+  - [x] Basic message sending
+  - [x] Streaming implementation
+  - [ ] Memory support
+- [ ] Anthropic Claude integration
+- [ ] Ollama local LLM support
+- [ ] Standardize function/tool calling across providers
+- [ ] Dynamic prompt engineering support
+- [x] Provider-specific configuration handling
+
+### Communication Interfaces
+- [x] WebSocket real-time communication
+- [ ] REST API endpoint design
+- [ ] Kafka inter-agent communication
+- [ ] gRPC support
+- [x] Event-driven agent notification system
+- [ ] Secure communication protocols
+
+### Memory and State Management
+- [x] Pluggable memory providers
+- [x] In-memory state storage (LRU)
+- [x] Redis distributed memory
+- [ ] DynamoDB scalable storage
+- [ ] S3 content storage
+- [x] Conversation and task history tracking
+- [ ] Global state management for agent crews
+- [x] Persistent task and interaction logs
+- [ ] Advanced memory indexing
+- [ ] Memory compression techniques
+
+### Tool and Function Ecosystem
+- [x] Extensible tool integration framework
+- [ ] Default utility tools
+  - [ ] Kafka message publisher
+  - [ ] Web search utility
+  - [ ] Content analysis tool
+- [x] Provider-specific function calling support
+- [ ] Community tool marketplace
+- [x] Easy custom tool development
+
+### Agent Crew Collaboration
+- [ ] Inter-agent communication protocol
+- [ ] Workflow and task delegation mechanisms
+- [ ] Approval and review workflows
+- [ ] Notification and escalation systems
+- [ ] Dynamic team composition
+- [ ] Shared context and memory management
+
+### Use Case Implementations
+- [ ] Digital Agency workflow template
+  - [ ] Growth Manager agent
+  - [ ] Content Creator agent
+  - [ ] Trend Researcher agent
+  - [ ] Media Creation agent
+- [ ] Customer interaction management
+- [ ] Approval and revision cycles
+
+### Security and Compliance
+- [x] Secure credential management
+- [ ] Role-based access control
+- [x] Audit logging
+- [ ] Compliance with data protection regulations
+
+### Performance and Scalability
+- [x] Async-first design
+- [x] Horizontal scaling support
+- [ ] Performance benchmarking
+- [x] Resource optimization
+
+### Testing and Quality
+- [x] Comprehensive unit testing
+- [x] Integration testing for agent interactions
+- [x] Mocking frameworks for LLM providers
+- [x] Continuous integration setup
+
+### Documentation and Community
+- [x] Detailed API documentation
+- [x] Comprehensive developer guides
+- [x] Example use case implementations
+- [x] Contribution guidelines
+- [ ] Community tool submission process
+- [ ] Regular maintenance and updates
+
+### Future Roadmap
+- [ ] Payment integration solutions
+- [ ] Advanced agent collaboration patterns
+- [ ] Specialized industry-specific agents
+- [ ] Enhanced security features
+- [ ] Extended provider support
 
 ## 📝 TODO List
 
