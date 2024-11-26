@@ -1,79 +1,82 @@
 name: Publish to PyPI
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags
+  workflow_dispatch:  # Allow manual triggering
     inputs:
       version:
         description: 'Version to publish (e.g., 0.3.133)'
-        required: true
+        required: false
         type: string
-  release:
-    types: [published]
 
 jobs:
-  validate-version:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install tomli requests
+          pip install build twine
           
-      - name: Check version availability
+      - name: Get version from tag or input
+        id: get_version
         run: |
-          VERSION=$(python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          echo "Current version: $VERSION"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # Remove 'v' prefix from tag
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           
-          # Check if version exists on PyPI
+      - name: Update version in files
+        run: |
+          # Update pyproject.toml
+          sed -i "s/version = \".*\"/version = \"$VERSION\"/" pyproject.toml
+          
+          # Update __init__.py
+          sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" grami/__init__.py
+          
+      - name: Build package
+        run: python -m build
+        
+      - name: Check if version exists on PyPI
+        run: |
+          VERSION=${{ env.VERSION }}
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://pypi.org/pypi/grami-ai/$VERSION/json)
           if [ $STATUS -eq 200 ]; then
             echo "Error: Version $VERSION already exists on PyPI"
             exit 1
           fi
           echo "Version $VERSION is available for publishing"
-          echo "version=$VERSION" >> $GITHUB_ENV
-
-  deploy:
-    needs: validate-version
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-          
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install build twine
-          
-      - name: Build package
-        run: python -m build
-        
-      - name: Verify package version
-        run: |
-          PKG_VERSION=$(python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          if [ "${{ github.event.inputs.version }}" != "" ] && [ "$PKG_VERSION" != "${{ github.event.inputs.version }}" ]; then
-            echo "Error: Package version ($PKG_VERSION) does not match requested version (${{ github.event.inputs.version }})"
-            exit 1
-          fi
           
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          
-      - name: Create Git Tag
-        if: github.event_name == 'workflow_dispatch'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          git tag v${{ env.version }}
-          git push origin v${{ env.version }}
+          twine check dist/*
+          twine upload dist/*
+          
+      - name: Create Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
