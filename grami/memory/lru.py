@@ -33,15 +33,12 @@ class LRUMemory(BaseMemoryProvider):
         """
         # Update cache
         if key in self.cache:
-            self.cache.move_to_end(key)
-        else:
-            if len(self.cache) >= self.capacity:
-                self.cache.popitem(last=False)
-        
+            self.cache.pop(key)
         self.cache[key] = {
             'value': value,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
+        self.cache.move_to_end(key)
     
     async def retrieve(self, key: str) -> Optional[Any]:
         """Retrieve a value from memory.
@@ -107,24 +104,30 @@ class LRUMemory(BaseMemoryProvider):
         """
         return list(self.cache.keys())
     
-    async def add_message(self, message: Dict[str, str]) -> None:
+    async def add_message(self, role: str, content: str) -> None:
         """Add a message to the conversation history.
         
         Args:
-            message: Message dictionary with 'role' and 'content'
+            role: Role of the message sender (e.g., "user", "assistant")
+            content: Content of the message
         """
-        # Store message in the cache with timestamp
-        message_id = f"message_{len(self.messages)}"
-        await self.store(message_id, message)
+        # Create message object
+        message = {
+            "role": role,
+            "content": content
+        }
         
-        # Add message to the ordered list
-        self.messages.append(message)
+        # Generate a unique key for the message
+        key = f"message_{len(self.messages)}"
         
-        # Remove oldest message if capacity is exceeded
-        if len(self.messages) > self.capacity:
-            self.messages.pop(0)
-            # Also remove from cache
+        # If we're at capacity, remove the least recently used item
+        if len(self.messages) >= self.capacity:
             await self.delete(f"message_{len(self.messages) - self.capacity}")
+            self.messages.pop(0)
+        
+        # Add new message
+        await self.store(key, message)
+        self.messages.append(message)
     
     async def get_messages(self) -> List[Dict[str, str]]:
         """Get all stored messages.

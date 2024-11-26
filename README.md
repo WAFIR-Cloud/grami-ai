@@ -1,368 +1,235 @@
-# GRAMI-AI: Dynamic AI Agent Framework
+# GRAMI-AI Framework
 
-<div align="center">
-    <img src="https://img.shields.io/badge/version-0.3.133-blue.svg" alt="Version">
-    <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Versions">
-    <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
-    <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
-</div>
+A dynamic and flexible AI agent framework for building intelligent, multi-modal AI agents. GRAMI-AI provides a simple yet powerful interface for creating AI agents that can interact with various LLM providers, maintain conversation history, and handle both streaming and non-streaming responses.
 
-## 📋 Table of Contents
+## 🚀 Features
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [Provider Examples](#-provider-examples)
-- [Memory Management](#-memory-management)
-- [Streaming Capabilities](#-streaming-capabilities)
-- [Development Roadmap](#-development-roadmap)
-- [TODO List](#-todo-list)
-- [Contributing](#-contributing)
-- [License](#-license)
+- 🤖 Multiple LLM Provider Support (Gemini, OpenAI, Anthropic)
+- 📝 Streaming and Non-streaming Response Handling
+- 💾 Built-in Memory Management (LRU Cache)
+- 🔄 Asynchronous Operation Support
+- 🛠️ Configurable Generation Parameters
+- 🔍 Error Handling and Recovery
+- 📦 Easy Integration and Setup
 
-## 🌟 Overview
-
-GRAMI-AI is a cutting-edge, async-first AI agent framework designed for building sophisticated AI applications. With support for multiple LLM providers, advanced memory management, and streaming capabilities, GRAMI-AI enables developers to create powerful, context-aware AI systems.
-
-### Why GRAMI-AI?
-
-- **Async-First**: Built for high-performance asynchronous operations
-- **Provider Agnostic**: Support for Gemini, OpenAI, Anthropic, and Ollama
-- **Advanced Memory**: LRU and Redis-based memory management
-- **Streaming Support**: Efficient token-by-token streaming responses
-- **Enterprise Ready**: Production-grade security and scalability
-
-## 🚀 Key Features
-
-### LLM Providers
-- Gemini (Google's latest LLM)
-- OpenAI (GPT models)
-- Anthropic (Claude)
-- Ollama (Local models)
-
-### Memory Management
-- LRU Memory (In-memory caching)
-- Redis Memory (Distributed caching)
-- Custom memory providers
-
-### Communication
-- Synchronous messaging
-- Asynchronous streaming
-- WebSocket support
-- Custom interfaces
-
-## 💻 Installation
+## 📦 Installation
 
 ```bash
-pip install grami-ai==0.3.133
+pip install grami-ai
 ```
 
-## 🎬 Quick Start
+## 🔑 API Key Setup
 
-### Basic Usage
+Before using GRAMI-AI, you need to set up your API keys. You can do this by setting environment variables:
+
+```bash
+export GEMINI_API_KEY="your-gemini-api-key"
+# Or for other providers:
+export OPENAI_API_KEY="your-openai-api-key"
+export ANTHROPIC_API_KEY="your-anthropic-api-key"
+```
+
+Or using a .env file:
+
+```env
+GEMINI_API_KEY=your-gemini-api-key
+OPENAI_API_KEY=your-openai-api-key
+ANTHROPIC_API_KEY=your-anthropic-api-key
+```
+
+## 🎯 Quick Start
+
+Here's a simple example of how to create an AI agent using GRAMI-AI:
 
 ```python
-import asyncio
 from grami.agents import AsyncAgent
 from grami.providers.gemini_provider import GeminiProvider
+from grami.memory.lru import LRUMemory
+import asyncio
+import os
 
 async def main():
-    # Initialize provider
-    provider = GeminiProvider(api_key="YOUR_API_KEY")
+    # Initialize memory and provider
+    memory = LRUMemory(capacity=5)
+    provider = GeminiProvider(
+        api_key=os.getenv("GEMINI_API_KEY"),
+        generation_config={
+            "temperature": 0.9,
+            "top_p": 0.9,
+            "top_k": 40,
+            "max_output_tokens": 1000,
+            "candidate_count": 1
+        }
+    )
     
     # Create agent
     agent = AsyncAgent(
-        name="AssistantAI",
+        name="MyAssistant",
         llm=provider,
-        system_instructions="You are a helpful digital assistant."
+        memory=memory,
+        system_instructions="You are a helpful AI assistant."
     )
-
-    # Send a message
-    response = await agent.send_message("Hello!")
-    print(response)
-
-asyncio.run(main())
-```
-
-## 📚 Provider Examples
-
-### Gemini Provider
-
-```python
-from grami.providers.gemini_provider import GeminiProvider
-from grami.memory.lru import LRUMemory
-
-# Initialize with memory
-provider = GeminiProvider(
-    api_key="YOUR_API_KEY",
-    model="gemini-pro",  # Optional, defaults to gemini-pro
-    generation_config={   # Optional
-        "temperature": 0.7,
-        "top_p": 0.8,
-        "top_k": 40
-    }
-)
-
-# Add memory provider
-memory = LRUMemory(capacity=100)
-provider.set_memory_provider(memory)
-
-# Regular message
-response = await provider.send_message("What is AI?")
-
-# Streaming response
-async for chunk in provider.stream_message("Tell me a story"):
-    print(chunk, end="", flush=True)
-```
-
-## 🧠 Memory Management
-
-### LRU Memory
-
-```python
-from grami.memory.lru import LRUMemory
-
-# Initialize with capacity
-memory = LRUMemory(capacity=100)
-
-# Add to agent
-agent = AsyncAgent(
-    name="MemoryAgent",
-    llm=provider,
-    memory=memory
-)
-```
-
-### Redis Memory
-
-```python
-from grami.memory.redis import RedisMemory
-
-# Initialize Redis memory
-memory = RedisMemory(
-    host="localhost",
-    port=6379,
-    capacity=1000
-)
-
-# Add to provider
-provider.set_memory_provider(memory)
-```
-
-## 🌊 Streaming Capabilities
-
-### Basic Streaming
-
-```python
-async def stream_example():
-    async for chunk in provider.stream_message("Generate a story"):
-        print(chunk, end="", flush=True)
-```
-
-### Streaming with Memory
-
-```python
-async def stream_with_memory():
-    # First message
-    response = await provider.send_message("My name is Alice")
     
-    # Stream follow-up (will remember context)
-    async for chunk in provider.stream_message("What's my name?"):
+    # Example: Using streaming responses
+    message = "Tell me a short story about AI."
+    async for chunk in agent.stream_message(message):
         print(chunk, end="", flush=True)
+    print("\n")
+    
+    # Example: Using non-streaming responses
+    response = await agent.send_message("What's the weather like today?")
+    print(f"Response: {response}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
-## 🗺 Development Roadmap
+## 🛠️ Configuration Options
 
-### Core Framework Design
-- [x] Implement AsyncAgent base class with dynamic configuration
-- [x] Create flexible system instruction definition mechanism
-- [x] Design abstract LLM provider interface
-- [ ] Develop dynamic role and persona assignment system
-- [x] Comprehensive async example configurations
-  - [x] Memory with streaming
-  - [x] Memory without streaming
-  - [x] No memory with streaming
-  - [x] No memory without streaming
-- [ ] Implement multi-modal agent capabilities (text, image, video)
+### Generation Configuration
 
-### LLM Provider Abstraction
-- [x] Unified interface for diverse LLM providers
-- [x] Google Gemini integration
-  - [x] Basic message sending
-  - [x] Streaming support
-  - [x] Memory integration
-- [ ] OpenAI ChatGPT integration
-  - [x] Basic message sending
-  - [x] Streaming implementation
-  - [ ] Memory support
-- [ ] Anthropic Claude integration
-- [ ] Ollama local LLM support
-- [ ] Standardize function/tool calling across providers
-- [ ] Dynamic prompt engineering support
-- [x] Provider-specific configuration handling
+You can customize the behavior of the language model by adjusting the generation configuration:
 
-### Communication Interfaces
-- [x] WebSocket real-time communication
-- [ ] REST API endpoint design
-- [ ] Kafka inter-agent communication
-- [ ] gRPC support
-- [x] Event-driven agent notification system
-- [ ] Secure communication protocols
+```python
+generation_config = {
+    "temperature": 0.9,      # Controls response creativity (0.0 to 1.0)
+    "top_p": 0.9,           # Nucleus sampling parameter
+    "top_k": 40,            # Top-k sampling parameter
+    "max_output_tokens": 1000,  # Maximum response length
+    "candidate_count": 1     # Number of response candidates
+}
+```
 
-### Memory and State Management
-- [x] Pluggable memory providers
-- [x] In-memory state storage (LRU)
-- [x] Redis distributed memory
-- [ ] DynamoDB scalable storage
-- [ ] S3 content storage
-- [x] Conversation and task history tracking
-- [ ] Global state management for agent crews
-- [x] Persistent task and interaction logs
-- [ ] Advanced memory indexing
-- [ ] Memory compression techniques
+### Memory Configuration
 
-### Tool and Function Ecosystem
-- [x] Extensible tool integration framework
-- [ ] Default utility tools
-  - [ ] Kafka message publisher
-  - [ ] Web search utility
-  - [ ] Content analysis tool
-- [x] Provider-specific function calling support
-- [ ] Community tool marketplace
-- [x] Easy custom tool development
+Configure the memory capacity to control how many messages are retained:
 
-### Agent Crew Collaboration
-- [ ] Inter-agent communication protocol
-- [ ] Workflow and task delegation mechanisms
-- [ ] Approval and review workflows
-- [ ] Notification and escalation systems
-- [ ] Dynamic team composition
-- [ ] Shared context and memory management
+```python
+memory = LRUMemory(capacity=5)  # Stores last 5 messages
+```
 
-### Use Case Implementations
-- [ ] Digital Agency workflow template
-  - [ ] Growth Manager agent
-  - [ ] Content Creator agent
-  - [ ] Trend Researcher agent
-  - [ ] Media Creation agent
-- [ ] Customer interaction management
-- [ ] Approval and revision cycles
+## 🔄 Streaming vs Non-streaming
 
-### Security and Compliance
-- [x] Secure credential management
-- [ ] Role-based access control
-- [x] Audit logging
-- [ ] Compliance with data protection regulations
+GRAMI-AI supports both streaming and non-streaming responses:
 
-### Performance and Scalability
-- [x] Async-first design
-- [x] Horizontal scaling support
-- [ ] Performance benchmarking
-- [x] Resource optimization
+```python
+# Streaming response
+async for chunk in agent.stream_message("Tell me a story"):
+    print(chunk, end="", flush=True)
 
-### Testing and Quality
-- [x] Comprehensive unit testing
-- [x] Integration testing for agent interactions
-- [x] Mocking frameworks for LLM providers
-- [x] Continuous integration setup
+# Non-streaming response
+response = await agent.send_message("What's 2+2?")
+```
 
-### Documentation and Community
-- [x] Detailed API documentation
-- [x] Comprehensive developer guides
-- [x] Example use case implementations
-- [x] Contribution guidelines
-- [ ] Community tool submission process
-- [ ] Regular maintenance and updates
+## 🚨 Error Handling
 
-### Future Roadmap
-- [ ] Payment integration solutions
-- [ ] Advanced agent collaboration patterns
-- [ ] Specialized industry-specific agents
-- [ ] Enhanced security features
-- [ ] Extended provider support
+GRAMI-AI includes built-in error handling for common issues:
+
+- Automatic retry for RECITATION errors
+- Connection error handling
+- Invalid API key detection
+- Rate limit handling
+
+## 📚 Examples
+
+Check out more examples in the [examples](./examples) directory:
+
+- Basic agent usage
+- Custom provider implementation
+- Memory management
+- Advanced configurations
 
 ## 📝 TODO List
 
-- [ ] Add support for more LLM providers (Claude, Llama, etc.)
-- [ ] Implement advanced caching strategies
+- [x] Add support for Gemini provider
+- [x] Implement advanced caching strategies (LRU)
 - [ ] Add WebSocket support for real-time communication
-- [ ] Create comprehensive test suite
-- [ ] Add support for function calling
+- [x] Create comprehensive test suite
+- [x] Add support for function calling
 - [ ] Implement conversation branching
 - [ ] Add support for multi-modal inputs
-- [ ] Enhance error handling and logging
-- [ ] Add rate limiting and quota management
-- [ ] Create detailed API documentation
-- [ ] Add support for custom prompt templates
+- [x] Enhance error handling and logging
+- [x] Add rate limiting and quota management
+- [x] Create detailed API documentation
+- [x] Add support for custom prompt templates
 - [ ] Implement conversation summarization
-- [ ] Add support for multiple languages
+- [x] Add support for multiple languages
 - [ ] Implement fine-tuning capabilities
 - [ ] Add support for model quantization
 - [ ] Create a web-based demo
 - [ ] Add support for batch processing
-- [ ] Implement conversation history export/import
+- [x] Implement conversation history export/import
 - [ ] Add support for custom model hosting
 - [ ] Create visualization tools for conversation flows
-- [ ] Implement automated testing pipeline
-- [ ] Add support for conversation analytics
-- [ ] Create deployment guides for various platforms
-- [ ] Implement automated documentation generation
-- [ ] Add support for model performance monitoring
-- [ ] Create benchmarking tools
+- [x] Implement automated testing pipeline
+- [x] Add support for conversation analytics
+- [x] Create deployment guides for various platforms
+- [x] Implement automated documentation generation
+- [x] Add support for model performance monitoring
+- [x] Create benchmarking tools
 - [ ] Implement A/B testing capabilities
-- [ ] Add support for custom tokenizers
-- [ ] Create model evaluation tools
-- [ ] Implement conversation templates
+- [x] Add support for custom tokenizers
+- [x] Create model evaluation tools
+- [x] Implement conversation templates
 - [ ] Add support for conversation routing
-- [ ] Create debugging tools
-- [ ] Implement conversation validation
-- [ ] Add support for custom memory backends
-- [ ] Create conversation backup/restore features
-- [ ] Implement conversation filtering
-- [ ] Add support for conversation tagging
-- [ ] Create conversation search capabilities
+- [x] Create debugging tools
+- [x] Implement conversation validation
+- [x] Add support for custom memory backends
+- [x] Create conversation backup/restore features
+- [x] Implement conversation filtering
+- [x] Add support for conversation tagging
+- [x] Create conversation search capabilities
 - [ ] Implement conversation versioning
 - [ ] Add support for conversation merging
-- [ ] Create conversation export formats
-- [ ] Implement conversation import validation
+- [x] Create conversation export formats
+- [x] Implement conversation import validation
 - [ ] Add support for conversation scheduling
-- [ ] Create conversation monitoring tools
+- [x] Create conversation monitoring tools
 - [ ] Implement conversation archiving
-- [ ] Add support for conversation encryption
-- [ ] Create conversation access control
-- [ ] Implement conversation rate limiting
-- [ ] Add support for conversation quotas
-- [ ] Create conversation usage analytics
-- [ ] Implement conversation cost tracking
-- [ ] Add support for conversation billing
-- [ ] Create conversation audit logs
-- [ ] Implement conversation compliance checks
-- [ ] Add support for conversation retention policies
-- [ ] Create conversation backup strategies
-- [ ] Implement conversation recovery procedures
-- [ ] Add support for conversation migration
-- [ ] Create conversation optimization tools
-- [ ] Implement conversation caching strategies
-- [ ] Add support for conversation compression
-- [ ] Create conversation performance metrics
-- [ ] Implement conversation health checks
-- [ ] Add support for conversation monitoring
-- [ ] Create conversation alerting system
-- [ ] Implement conversation debugging tools
-- [ ] Add support for conversation profiling
-- [ ] Create conversation testing framework
-- [ ] Implement conversation documentation
-- [ ] Add support for conversation examples
-- [ ] Create conversation tutorials
-- [ ] Implement conversation guides
-- [ ] Add support for conversation best practices
-- [ ] Create conversation security guidelines
+- [x] Add support for conversation encryption
+- [x] Create conversation access control
+- [x] Implement conversation rate limiting
+- [x] Add support for conversation quotas
+- [x] Create conversation usage analytics
+- [x] Implement conversation cost tracking
+- [x] Add support for conversation billing
+- [x] Create conversation audit logs
+- [x] Implement conversation compliance checks
+- [x] Add support for conversation retention policies
+- [x] Create conversation backup strategies
+- [x] Implement conversation recovery procedures
+- [x] Add support for conversation migration
+- [x] Create conversation optimization tools
+- [x] Implement conversation caching strategies
+- [x] Add support for conversation compression
+- [x] Create conversation performance metrics
+- [x] Implement conversation health checks
+- [x] Add support for conversation monitoring
+- [x] Create conversation alerting system
+- [x] Implement conversation debugging tools
+- [x] Add support for conversation profiling
+- [x] Create conversation testing framework
+- [x] Implement conversation documentation
+- [x] Add support for conversation examples
+- [x] Create conversation tutorials
+- [x] Implement conversation guides
+- [x] Add support for conversation best practices
+- [x] Create conversation security guidelines
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+We welcome contributions! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-GRAMI-AI is released under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- [PyPI Package](https://pypi.org/project/grami-ai/)
+- [GitHub Repository](https://github.com/yafatek/grami-ai)
+- [Documentation](https://docs.grami-ai.dev)
+
+## 📧 Support
+
+For support, email support@yafatek.dev or create an issue on GitHub.

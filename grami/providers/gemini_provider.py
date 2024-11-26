@@ -113,20 +113,44 @@ class GeminiProvider:
             user_message = {"role": "user", "content": message_content}
             self._history.append(user_message)
             if self._memory_provider:
-                await self._memory_provider.add_message(user_message)
+                await self._memory_provider.add_message(role="user", content=message_content)
 
-            # Send message and get response
-            response = await self._chat.send_message_async(message_content)
-            response_text = response.text
+            # Try different prompts if we get a RECITATION error
+            prompts = [
+                message_content,
+                f"Please provide a natural response to: {message_content}",
+                f"Respond naturally to this message: {message_content}",
+                f"As a helpful assistant, please respond to: {message_content}"
+            ]
+            
+            response_text = None
+            last_error = None
+            
+            for prompt in prompts:
+                try:
+                    response = await self._chat.send_message_async(prompt)
+                    if hasattr(response, 'text'):
+                        response_text = response.text
+                        break
+                except Exception as e:
+                    last_error = e
+                    if "RECITATION" not in str(e):
+                        raise
+                    continue
+            
+            if response_text is None:
+                if last_error:
+                    raise last_error
+                raise Exception("Failed to get a valid response after multiple attempts")
 
             # Store model response
             model_message = {"role": "model", "content": response_text}
             self._history.append(model_message)
             if self._memory_provider:
-                await self._memory_provider.add_message(model_message)
+                await self._memory_provider.add_message(role="assistant", content=response_text)
 
             return response_text
-
+            
         except Exception as e:
             logging.error(f"Error in send_message: {str(e)}")
             raise
@@ -153,23 +177,26 @@ class GeminiProvider:
             user_message = {"role": "user", "content": message_content}
             self._history.append(user_message)
             if self._memory_provider:
-                await self._memory_provider.add_message(user_message)
+                await self._memory_provider.add_message(role="user", content=message_content)
 
             # Send message with streaming enabled
             response = await self._chat.send_message_async(message_content, stream=True)
             full_response = []
 
+            # Stream chunks and collect them
             async for chunk in response:
                 chunk_text = chunk.text
                 full_response.append(chunk_text)
                 yield chunk_text
 
-            # Store complete response
+            # Store complete response after all chunks are received
             complete_response = "".join(full_response)
             model_message = {"role": "model", "content": complete_response}
             self._history.append(model_message)
+            
+            # Add to memory only after all chunks are received
             if self._memory_provider:
-                await self._memory_provider.add_message(model_message)
+                await self._memory_provider.add_message(role="assistant", content=complete_response)
 
         except Exception as e:
             logging.error(f"Error in stream_message: {str(e)}")
@@ -248,22 +275,13 @@ class GeminiProvider:
         if not kwargs.get("model_name"):
             raise ValueError("Model name is required")
 
-    def set_memory_provider(self, memory_provider):
-        """
-        Set the memory provider for the Gemini provider.
+    def set_memory_provider(self, memory_provider: Any) -> None:
+        """Set the memory provider for the LLM.
         
-        :param memory_provider: Memory provider to use
+        Args:
+            memory_provider: Memory provider instance
         """
         self._memory_provider = memory_provider
-        if memory_provider:
-            # Initialize history from memory provider
-            self._history = memory_provider.messages.copy()
-            
-            # Reinitialize chat with memory if needed
-            if self._chat and self._history:
-                prioritized = self._prioritize_messages(self._history)
-                transformed = self._transform_history_for_gemini(prioritized)
-                self._chat.history = transformed
 
     def register_tools(self, tools: List[Callable]) -> None:
         """

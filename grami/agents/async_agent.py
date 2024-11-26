@@ -23,6 +23,41 @@ class AsyncAgent(BaseAgent):
     support for message handling, streaming responses, and memory management.
     """
     
+    def __init__(
+        self,
+        name: str,
+        llm: BaseLLMProvider,
+        memory: Optional[Any] = None,
+        system_instructions: Optional[str] = None,
+        tools: Optional[List[Callable]] = None,
+        communication_interface: Optional[Any] = None,
+        config: Optional[Dict[str, Any]] = None
+    ):
+        """Initialize the AsyncAgent.
+        
+        Args:
+            name: Name of the agent
+            llm: Language model provider
+            memory: Optional memory provider
+            system_instructions: Optional system instructions
+            tools: Optional list of tools
+            communication_interface: Optional communication interface
+            config: Optional configuration dictionary
+        """
+        super().__init__(
+            name=name,
+            llm=llm,
+            memory=memory,
+            system_instructions=system_instructions,
+            tools=tools,
+            communication_interface=communication_interface,
+            config=config
+        )
+        
+        # Initialize provider with memory if available
+        if memory and hasattr(self.llm, 'set_memory_provider'):
+            self.llm.set_memory_provider(memory)
+    
     async def send_message(
         self,
         message: Union[str, Dict[str, str]],
@@ -47,7 +82,7 @@ class AsyncAgent(BaseAgent):
             
             # Add message to memory if available
             if self.memory:
-                await self.memory.add_message(message_payload)
+                await self.memory.add_message(role="user", content=message_payload["content"])
             
             # Send message with context
             response = await self.llm.send_message(
@@ -57,10 +92,7 @@ class AsyncAgent(BaseAgent):
             
             # Store response in memory if available
             if self.memory:
-                await self.memory.add_message({
-                    "role": "model",
-                    "content": response
-                })
+                await self.memory.add_message(role="assistant", content=response)
             
             return response
             
@@ -94,12 +126,10 @@ class AsyncAgent(BaseAgent):
             
             # Add message to memory if available
             if self.memory:
-                await self.memory.add_message(message_payload)
-            
-            # Initialize response storage for memory
-            response_chunks = []
+                await self.memory.add_message(role="user", content=message_payload["content"])
             
             # Stream response
+            response_chunks = []
             async for chunk in self.llm.stream_message(
                 message_payload,
                 **(context or {}),
@@ -110,10 +140,8 @@ class AsyncAgent(BaseAgent):
             
             # Store complete response in memory if available
             if self.memory:
-                await self.memory.add_message({
-                    "role": "model",
-                    "content": "".join(response_chunks)
-                })
+                complete_response = "".join(response_chunks)
+                await self.memory.add_message(role="assistant", content=complete_response)
                 
         except Exception as e:
             self.logger.error(f"Error in stream_message: {str(e)}")
