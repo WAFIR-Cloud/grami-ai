@@ -2,5 +2,11 @@
   "name": "GRAMI AI",
   "symbol": "GRAMI",
   "description": "Your Social Media Success  growth AI Agent",
-  "image": "https://raw.githubusercontent.com/WAFIR-Cloud/grami-ai/e1ef19bdbb86c33876b08e329768ba9f8814df0a/images/logo/logo_colored_transaparent.png"
+  "image": "https://raw.githubusercontent.com/WAFIR-Cloud/grami-ai/e1ef19bdbb86c33876b08e329768ba9f8814df0a/images/logo/logo_colored_transaparent.png",
+   "additionalMetadata": [
+    [
+      "description",
+      "Meet Your Future Digital Marketing Agency Powered By AI"
+    ]
+  ]
 }
