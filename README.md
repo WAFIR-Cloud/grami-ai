@@ -7,6 +7,8 @@
     <img src="https://img.shields.io/github/stars/YAFATEK/grami-ai?style=social" alt="GitHub Stars">
 </div>
 
+## GRAMI Token
+[Buy Now](https://raydium.io/swap/?inputMint=sol&outputMint=mntGvijsPbeJdKoCjPjUh6xif9HLmv7xfKNk8CbgjeX)
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
